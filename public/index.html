@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="index.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="index.js"></script>
+
+
+<script type="text/javascript"> //<script type="text/javascript">
+
+</script>
+
+
+<title>Control Pool Pump</title>
+</head>
+
+<link rel="stylesheet" type="text/css" href="mystyle.css">
+<body onload="">
+
+
+<!--menu bar-->
+	<!-- <ul id="menu_bar" >
+		<li class="" id=""><button onclick="pumpOff()" > pumpOff </button></li>
+		<li class="" id=""><button onclick="speed1()" > Pump Speed 1:Spa </button></li>
+		<li class="" id=""><button onclick="speed2()" > Pump Speed 2: Waterfall </button></li>
+		<li class="" id=""><button onclick="speed3()" > Pump Speed 3: Slow </button></li>
+		<li class="" id=""><button onclick="speed4()" >Pump Speed 4 :solar </button></li>
+	</ul>  -->
+
+	<!-- //https://www.w3schools.com/bootstrap/bootstrap_tabs_pills.asp -->
+	<!-- <ul class="nav nav-tabs">
+			<li class="active"><a href="#">Home</a></li>
+			<li><a href="#">Menu 1</a></li>
+			<li><a href="#">Menu 2</a></li>
+			<li><a href="#">Menu 3</a></li>
+		</ul> -->
+
+	<div class="row">
+
+	<div class='center '> <!-- top -->
+			<div>Pump Info</div>
+			<div>Power: <b><span id="pumpState">--</span></b> <span>Timer: 	<b><span id="PumpTimers">--</span></b>  </span></div>
+			<div></div>
+			<div>RPM: 		<b><span id="pumpRPM">--</span></b> <span> Watts: 	<b><span id="pumpWatt">--</span></b> </span></div>
+
+			<div>Destination: 		<b><span id="pumpDestination">--</span></b> <span> Source: 	<b><span id="pumpSource">--</span></b> </span></div>
+			<div>action: 		<b><span id="pumpAction">--</span></b> <span> length: 	<b><span id="pumpLength">--</span></b> </span></div>
+			<div>driveState: 		<b><span id="pumpDriveState">--</span></b> <span> ppc: 	<b><span id="pumpPpc">--</span></b> </span></div>
+	
+			<div></div>
+		
+		</div>
+
+		<div id= "blankBoxAtTop"></div>
+
+
+
+
+<div class="row">
+	<div class='col-sm-2 center'>
+		<div>Power</div>
+		<button class="btn" id="powerOn"> Power On </button>
+		<button class="btn" id="powerOff"> Power Off </button>
+		<button class="btn" id="powerToggle"> Toggle Off/On </button>
+	</div>
+	<div class='col-sm-2 center'>
+		<div>External Controls</div>
+		<!-- <button class="btn" id="speed1" > 1:Spa </button> -->
+		<button class="btn" id="speed2" > 2:Waterfall </button>
+		<button class="btn" id="speed3" > 3:Slow </button>
+		<button class="btn" id="speed4" > 4:solar </button>
+		<button class="btn speedOff" id='speedOff'> Stop Pump </button>
+	</div>
+
+
+	<div class='col-sm-2 center' >
+		<!-- <div> -->
+			<!-- <label for="sel1">Program Number:</label> -->
+			<!-- <select class="form-control" id="sel1">
+				<option default>1</option>
+				<option>2</option>
+				<option>3</option>
+				<option>4</option>
+			</select>
+		</div>  -->
+		<!-- <button class="btn">Pump Program</button> -->
+		<!-- <br><br> -->
+		<div>
+			<label for="speedInput">Speed in RPM & <br> Save Prog 1:</label>
+			<!-- <input id= "speedInput" type="number" class="form-control" >  -->
+			<select  id= "speedInput" class="form-control">
+				<option>900</option>
+				<option>1000</option>
+				<option>1100</option>
+				<option>1200</option>
+				<option>1300</option>
+				<option>1400</option>
+				<option selected>1500</option>
+				<option>1600</option>
+				<option>1700</option>
+				<option>1800</option>
+				<option>1900</option>
+				<option>2000</option>
+				<option>2100</option>
+				<option>2200</option>
+				<option>2300</option>
+				<option>2400</option>
+				<option>2500</option>
+				<option>2600</option>
+				<option>2700</option>
+				<option>2800</option>
+				<option>2900</option>				
+				<option>3000</option>
+				<option>3100</option>
+				<option>3200</option>
+			</select>
+		</div>			
+		<button id="runPumpAtSpeed" class="btn">Run Speed</button>
+
+		<button id='speedOff_runPumpSpeed' class="btn speedOff" > Stop Pump </button>
+	</div>
+
+
+	<div class='col-sm-2 center'>
+		Timer
+		<!-- <div>
+			<label for="usr">Speed in 100 RPM:</label>
+			<input type="number" class="form-control" id="usr" > 
+		</div> -->
+		<div><label for="timerInMin">Timer in Minutes: </label>
+			<input id="timerInMin" type="number" class="form-control" value= "50"> 
+		</div>
+		<br>
+		<button id='setPumpTimer' class="btn"> Start Timer</button>
+		<button id='speedOff_timer' class="btn speedOff"> Stop Pump </button>
+	</div>
+
+
+	<!-- <div class='col-sm-2 center'>
+		Save Program
+		<div>
+			<label for="sel1">Program Number:</label>
+			<select class="form-control" id="sel1">
+				<option default>1</option>
+				<option>2</option>
+				<option>3</option>
+				<option>4</option>
+			</select>
+		</div> 
+		<div>
+		<label for="usr">Speed in 100 RPM:</label>
+			<input type="number" class="form-control" id="usr" > 
+		</div>
+		<div><label for="usr">Timer: </label>
+			<input type="number" class="form-control" id="usr" > 
+		</div>
+		<br>
+		<button class="btn">Save</button>
+	</div> -->
+
+</div>
+
+
+<div class='col-sm-2 center'>
+		<div>Testing</div>
+		<button class="btn" id="test"> Run Pump @ 1000 </button>
+		<button class="btn" id="pumpStatus"> get Pump Status </button>
+		<button class="btn" id="pumpStatusForce"> Force Status </button>
+		<button class="btn" id="toggleStatusUpdates"> Toggle Status </button>
+		
+		<button class="btn" id="pumpControlSetToLocal"> Local Control </button>
+		<button class="btn" id="pumpControlSetToRemote"> Remote Control </button>
+		<!-- <button class="btn" id="pumpControlSetToggle"> Toggle Status </button> -->
+
+
+	</div>
+
+</body>
+</html> 
+
+<!-- 
+
+	<div class='col-sm-2'>
+			Save Program
+				<div>
+						<div><label for="usr">Program Number: </label>
+							<input type="number" class="form-control" id="usr" > 
+						</div>
+					<label for="usr">Speed in 100 RPM:</label>
+						<input type="number" class="form-control" id="usr" > 
+					</div>
+
+					<div><label for="usr">Timer: </label>
+						<input type="number" class="form-control" id="usr" > 
+					</div>
+			
+					<button class="btn" onclick="pumpOff()" >Run Speed Indefinitly</button>
+					<button class="btn" onclick="speed1()" >Pump Program Indefinitly</button>
+				
+					<button class="btn" onclick="speed2()" > Save Speed as Program</button>
+					
+					<button class="btn" onclick="speed3()" > Save Speed as <br> Program & Run</button>
+					<button class="btn" onclick="speed4()" >Stop Pump </button>
+			</div>
+			
+ -->
+
+ <!-- 
+	 <div class="col-sm-2 form-group">
+			<label for="sel1">Select list:</label>
+			<select class="form-control" id="sel1">
+				<option>0</option>
+				<option>1</option>
+				<option>2</option>
+				<option>3</option>
+				<option>4</option>
+				<option>5</option>
+				<option>6</option>
+				<option>7</option>
+				<option>8</option>
+				<option>9</option>
+				<option>10</option>
+			</select>
+		</div> 
+	 -->
