@@ -1,6 +1,14 @@
 var io = require ("socket.io")
-
-
+const { addToQueue } = require ('./queue')
+const { 
+  manualPumpControl,
+  pumpControlPanelState,
+  pumpPower, 
+  runIntellicomPumpSpeed,
+  runPumpAtSpeed,
+  setPumpTimer,
+} = require ('./commands')
+const {server} = require ('../server');
 var pushPumpInfoToWebPages;
 
 io.listen(server).on('connection', function (socket) {// WebSocket Connection

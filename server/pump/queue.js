@@ -1,7 +1,8 @@
-
-
+const { acknowledgment } = require ('./helperFunctions');
+const { port } = require('./../serialPort');
+var { queueMessagesToSend, queueLoopMain_InUse } = require('../variables');
 ///////////////// main functions///////////////////////
-function queueLoopMain(stopFunction=false){
+var queueLoopMain = exports.queueLoopMain = function (stopFunction=false){
   //main code loop,
   //checks the queue, then sends the message on the queue
   //eventually will incouperate timers
@@ -69,14 +70,14 @@ function queueLoopMain(stopFunction=false){
 
 
 
-function addStatusToQueue (){
+var addStatusToQueue = exports.addStatusToQueue = function (){
   sendCommand(pumpToRemote);
   sendCommand(pumpGetStatus);
   sendCommand(pumpToLocal);
 }
 
 
-function addToQueue (packet){
+var addToQueue = exports.addToQueue = function (packet){
   //add a pcket to the queue
   //if queue is empty, adds packets to set pump to remote in beginning, and set pump to local at end of queue
   //this way the pump should only be set to remote when sending information
@@ -94,7 +95,7 @@ function addToQueue (packet){
 }
 
 
-function sendCommand (message, name='unknown'){ //sendCommandViaArrayOfBytes
+var sendCommand = exports.sendCommand = function (message, name='unknown'){ //sendCommandViaArrayOfBytes
   var packet;
   var byteArray;
   if (message===undefined) {return}

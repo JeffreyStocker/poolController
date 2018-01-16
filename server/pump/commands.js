@@ -1,4 +1,9 @@
-function runIntellicomPumpSpeed (speed=0, interval=10000){
+var msg = require (__dirname + '\\..\\messages');
+var { queueLoopMain, addToQueue } = require (__dirname + '\\queue');
+var { exteralTimer } = require ('../variables');
+
+
+var runIntellicomPumpSpeed = exports.runIntellicomPumpSpeed = function (speed=0, interval=10000){
   var externalVariable = {0: pump_Off, 1:pumpExternal_Speed1, 2:pumpExternal_Speed2 , 3:pumpExternal_Speed3,  4:pumpExternal_Speed4}
   addToQueue(externalVariable[speed])
   if (!speed===0) {
@@ -10,18 +15,18 @@ function runIntellicomPumpSpeed (speed=0, interval=10000){
 }
 
 
-function pumpControlPanelState (powerState){
+var pumpControlPanelState = exports.pumpControlPanelState = function (powerState){
   if (powerState==="toggle"){
     clearInterval(exteralTimer)
-    addToQueue(pumpToRemote)
-    addToQueue(pumpToLocal)
+    addToQueue(msg.pumpToRemote)
+    addToQueue(msg.pumpToLocal)
   }
   else if (powerState==="remote"){
-    addToQueue(pumpToRemote)
+    addToQueue(msg.pumpToRemote)
   }
   else if (powerState==="local"){
     clearInterval(exteralTimer)
-    addToQueue(pumpToLocal)
+    addToQueue(msg.pumpToLocal)
   }
   else {
     return "Error: In order to change the pump Power state, you need to enter true/false or on/off"
@@ -29,18 +34,18 @@ function pumpControlPanelState (powerState){
 }
 
 
-function pumpPower (powerState){
+var pumpPower = exports.pumpPower = function (powerState){
   if (powerState==="toggle"){
     clearInterval(exteralTimer)
-    addToQueue(pump_PowerOff)
-    addToQueue(pump_PowerOn)
+    addToQueue(msg.pump_PowerOff)
+    addToQueue(msg.pump_PowerOn)
   }
   else if (powerState==="on"){
-    addToQueue(pump_PowerOn)
+    addToQueue(msg.pump_PowerOn)
   }
   else if (powerState==="off"){
     clearInterval(exteralTimer)
-    addToQueue(pump_PowerOff)
+    addToQueue(msg.pump_PowerOff)
   }
   else {
     return "Error: In order to change the pump Power state, you need to enter true/false or on/off"
@@ -48,7 +53,7 @@ function pumpPower (powerState){
 }
 
 
-function runPumpAtSpeed(rpm){
+ var runPumpAtSpeed = exports.runPumpAtSpeed= function(rpm){
   // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
   var packet={}
   var destination = 96      //96 pump 1
@@ -69,7 +74,7 @@ function runPumpAtSpeed(rpm){
   addToQueue (packet)
 }
 
-function setPumpTimer (min){
+var setPumpTimer = exports.setPumpTimer = function (min){
   // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
   console.log("time: " , min);
   var packet={}
@@ -101,7 +106,7 @@ function setPumpTimer (min){
 
 
 
-function manualPumpControl (rpm, time=1, action= 1, command=3, subcommand = 33, destination = 96, source = 16) {
+var manualPumpControl = exports.manualPumpControl = function (rpm, time=1, action= 1, command=3, subcommand = 33, destination = 96, source = 16) {
   // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
   console.log("time: " , time);
   var packet={}

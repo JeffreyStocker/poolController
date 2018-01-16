@@ -1,13 +1,21 @@
-var os = require('os');  //to get os version so i can install some testings
-var SerialPort = require('serialport');
+const os = require('os');  //to get os version so i can install some testings
+console.log (__dirname)
+const {
+  convertToDecArray, 
+  parsePumpStatus
+  } = require('./pump/helperFunctions.js');
 
+const { pushPumpInfoToWebPages } = require ('./pump/sockets');
+var init = exports.init = function () {
+
+}
 //////// server, serial Port Functions //////////////////////
 if (os.platform()==="win32"){
   const SerialPort = require('serialport/test');
   const MockBinding = SerialPort.Binding;
   const portPath = 'COM_ANYTHING';
   MockBinding.createPort(portPath, { echo: false, record: false });
-  port = new SerialPort(portPath);
+  port = exports.port = new SerialPort(portPath);
 
   port.on('open', () => {
     // To pretend to receive data (only works on open ports)

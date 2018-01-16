@@ -1,4 +1,7 @@
-var { addToQueue } = require ('./server/server');
+var { statusRequestUpdateInverval,  } = require ('./server/variables');
+var { timeBetweenQueueSending} = require ('./server/server');
+var { pumpGetStatus } = require ('./server/messages');
+var { queueLoopMain, addToQueue } = require ('./server/pump/queue');
 
 
 //start main program

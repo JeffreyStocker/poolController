@@ -164,7 +164,7 @@ function parsePumpStatus (data){
     source:       data[3],
     action:       data[4],
     length:       data[5],
-    state:         data[6], //4= off, 10 = on //power i think
+    state:        data[6], //4= off, 10 = on //power i think
     driveState:   data[7],
     ppc:          data[8],
     wattHighBit:  data[9],
@@ -211,18 +211,18 @@ function convertToDecArray (bufferArray){
   return stripMessageOfHeaderAndChecksum(output)
 }
 
-module.exports.convertToDecArray = convertToDecArray;
-module.exports.flipSourceAndDestinationFromStrippedMessage = flipSourceAndDestinationFromStrippedMessage;
-module.exports.parsePumpStatus = parsePumpStatus;
-module.exports.returnHighAndLowBitOfChecksum = returnHighAndLowBitOfChecksum;
-module.exports.preparePacketForSending = preparePacketForSending;
-module.exports.addOnHeaderToPacket = addOnHeaderToPacket;
-module.exports.appendCheckSum = appendCheckSum;
-module.exports.combineHighPlusLowBit = combineHighPlusLowBit;
-module.exports.returnLowBit = returnLowBit;
-module.exports.returnHighBit = returnHighBit;
-module.exports.sumOfBytes = sumOfBytes;
-module.exports.stripMessageOfHeaderAndChecksum = stripMessageOfHeaderAndChecksum;
-module.exports.hasHeader = hasHeader;
-module.exports.convertHexArrayToByteArray = convertHexArrayToByteArray;
 module.exports.acknowledgment = acknowledgment;
+module.exports.appendCheckSum = appendCheckSum;
+module.exports.addOnHeaderToPacket = addOnHeaderToPacket;
+module.exports.combineHighPlusLowBit = combineHighPlusLowBit;
+module.exports.convertToDecArray = convertToDecArray;
+module.exports.convertHexArrayToByteArray = convertHexArrayToByteArray;
+module.exports.flipSourceAndDestinationFromStrippedMessage = flipSourceAndDestinationFromStrippedMessage;
+module.exports.hasHeader = hasHeader;
+module.exports.preparePacketForSending = preparePacketForSending;
+module.exports.returnLowBit = returnLowBit;
+module.exports.returnHighAndLowBitOfChecksum = returnHighAndLowBitOfChecksum;
+module.exports.returnHighBit = returnHighBit;
+module.exports.parsePumpStatus = parsePumpStatus;
+module.exports.stripMessageOfHeaderAndChecksum = stripMessageOfHeaderAndChecksum;
+module.exports.sumOfBytes = sumOfBytes;

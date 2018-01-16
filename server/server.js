@@ -6,18 +6,8 @@ var app = express();
 // var events = require('events');
 // var pumpFunctions= require ('./pumpFunction.js')
 
-var showPumpStatusInConsole=false;
-var messagesReceived=[];
-var queueMessagesToSend=[];
-var queueLoopMain_InUse=false;
 
-
-var exteralTimer;
-var port;
-var pumpData;
-var statusRequestUpdateInverval = 500 ; //controls how often pump status are sent
-var timeBetweenQueueSending = 250;  //intervel beteen when the queue sends off another message
-
+var port = 8080;
 
 // var server = http.createServer(function (req, res) {
 //   var urlPath = url.parse(req.url, true);
@@ -48,7 +38,7 @@ var timeBetweenQueueSending = 250;  //intervel beteen when the queue sends off a
 app.use(express.static('../public'));
 
 var server = app.listen(port, () => console.log('Server Listening on port: ', port) );
-
+exports.server = server;
 
 
 
