@@ -1,64 +1,53 @@
-var http = require('http');
-var url = require('url');
-var fs = require('fs');
+// var http = require('http');
+// var url = require('url');
+// var fs = require('fs');
 var express = require ('express');
 var app = express();
+var io = require ('socket.io');
+var loggerSystem = require(process.env.NODE_PATH + '/server/logs/winston').loggers.system;
 // var events = require('events');
 // var pumpFunctions= require ('./pumpFunction.js')
 
+var port = process.env.PORT = 8181;
 
-var port = 8080;
+app.use(express.static('public'));
 
-// var server = http.createServer(function (req, res) {
-//   var urlPath = url.parse(req.url, true);
+var server = require('http').createServer(app);
 
-//   //if the folder is blank, direct it to the index.html of that folder
-//   if (urlPath.pathname[urlPath.pathname.length-1] === "/") {urlPath.pathname+='index.html'}
+exports.socketServer = io(server, {
+  logger: {
+    debug: loggerSystem.debug,
+    info: loggerSystem.info,
+    error: loggerSystem.error,
+    warn: loggerSystem.warn
+  }
+});
 
-
-//   //directs the files to look in public/www for the html files rather than the base folder
-//   //use '.' urlPath.pathname to direct to the base folder
-//   // var mainDirectory= "./public/www/"
-//   var mainDirectory= "./"
-//   var filename = mainDirectory + urlPath.pathname;
-
-//   fs.readFile(filename, function(err, data) {
-//     if (err) {
-//       res.writeHead(404, {'Content-Type': 'text/html'});
-//       return res.end("404 Not Found");
-//     }
-//     // res.writeHead(200, {'Content-Type': 'text/html'}); //comment this out and it lets the web browser decide on type
-//     res.write(data);
-//     return res.end();
-//   });
-// }).listen(8181,function() {
-//     console.log('Listening at: http://localhost:8181');
-// });
-
-app.use(express.static('../public'));
-
-var server = app.listen(port, () => console.log('Server Listening on port: ', port) );
 exports.server = server;
 
+server.listen(port, () => {
+  loggerSystem.info('Server Listening on port: ', port);
+  // console.log('Server Listening on port: ', port)
+});
 
 
- //sends command from shift
-  //need to figure out how to look for a specific sequence
-  // packetToLookFor
-  // var messagesRecieved=[]
-  // var queueMessagesToSend=[]
-  // port.resume()
+//sends command from shift
+//need to figure out how to look for a specific sequence
+// packetToLookFor
+// var messagesRecieved=[]
+// var queueMessagesToSend=[]
+// port.resume()
 
-  // console.log("queueMessagesToSend.length: " , queueMessagesToSend.length);
-  // if (queueMessagesToSend.length===1) {setTimeout(function (){
-  //   addStatusToQueue (pump)
-  // }), 1000}
+// console.log('queueMessagesToSend.length: ' , queueMessagesToSend.length);
+// if (queueMessagesToSend.length===1) {setTimeout(function (){
+//   addStatusToQueue (pump)
+// }), 1000}
 
 //////////////////initial code to start the main sequence
 
 
 
-  // function exitSendCommand(){
+// function exitSendCommand(){
 //   // sendCommand(pumpToLocal)  //return pump to local command
 //   port.write(pumpToLocal.packet, function(err) {
 //     if (err) {
@@ -66,7 +55,7 @@ exports.server = server;
 //     }
 //     console.log('Sent Command: ', pumpToLocal.name, ': ', pumpToLocal.packet);
 //   });
-//   console.log ("Pump Set to local")
+//   console.log ('Pump Set to local')
 // }
 
 
