@@ -1,0 +1,40 @@
+{
+  "system": {
+    "web": {
+      "port": 8181
+    },
+    "queue": {
+      "statusRequestUpdateInverval": 500,
+      "numberOfRetriesForMissingMessages": 3
+    },
+    "logs": {},
+    "communications": {
+      "rs485": {
+        "port": "/dev/ttyUSB0"
+      },
+      "GPIO": {}
+    }
+  },
+  "equipment": {
+    "pumps": {
+      "1": {
+        "enabled": true,
+        "name": "pump 1",
+        "communications": {
+          "type": "rs485",
+          "address": 96
+        }
+      }
+    },
+    "controllers": {
+      "intellicom": {
+        "enabled": true,
+        "name": ""
+      },
+      "intellitouch": {
+        "enabled": false,
+        "name": ""
+      }
+    }
+  }
+}
