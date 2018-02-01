@@ -3,6 +3,7 @@ config/development.json
 config/production.json
 config/staging.json
 config/test.json
+mochawesome-report
 
 # OS X
 .DS_Store
