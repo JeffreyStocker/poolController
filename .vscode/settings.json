@@ -1,0 +1,80 @@
+{
+  "launch": {
+  "version": "0.2.0",
+  "configurations": [
+          {
+              "type": "node",
+              "request": "launch",
+              "name": "Launch Current Window",
+              "program": "${file}",
+              "cwd": "${workspaceFolder}",
+              "runtimeArgs": [
+                "--max-old-space-size=4096"
+              ],
+              "outputCapture": "std"
+            },
+            {
+              "type": "node",
+              "request": "launch",
+              "name": "Launch App.js",
+              "program": "${workspaceFolder}/index.js",
+              "outputCapture": "std"
+            },
+            {
+              "type": "node",
+              "request": "launch",
+              "name": "Launch via NPM",
+              "runtimeExecutable": "npm",
+              "runtimeArgs": [
+                "run-script",
+                "debug",
+                "--max-old-space-size=4096"
+              ],
+              "port": 9229,
+              "outputCapture": "std"
+          },
+          {
+              "type": "node",
+              "request": "launch",
+              "name": "Launch via NPM Start",
+              "runtimeExecutable": "npm",
+              "runtimeArgs": [
+                "run-script",
+                "start",
+                "--max-old-space-size=4096"
+              ],
+              "port": 9229,
+              "outputCapture": "std"
+          }
+  ]
+},
+"debug.inlineValues": true,
+"window.zoomLevel": 0,
+"workbench.statusBar.visible": true,
+"window.restoreWindows": "all",
+"window.menuBarVisibility": "default",
+
+"editor.tabSize": 2,
+"editor.insertSpaces": true,
+"editor.minimap.enabled": false,
+//zen mode
+"zenMode.hideTabs": false,
+"zenMode.hideActivityBar": true,
+"zenMode.fullScreen": false,
+
+"terminal.integrated.shell.windows": "C:\\windows\\Sysnative\\WindowsPowerShell\\v1.0\\powershell.exe",
+"editor.renderWhitespace": "none",
+"editor.renderControlCharacters": false,
+"workbench.activityBar.visible": true,
+"workbench.startupEditor": "welcomePage",
+// "workbench.panel.location": "bottom",
+"editor.mouseWheelZoom": true,
+"editor.wrappingIndent": "none",
+"editor.trimAutoWhitespace": true,
+"files.trimTrailingWhitespace": true,
+//eslint
+"eslint.alwaysShowStatus": true,
+"git.autofetch": true,
+"mocha.files.glob": "spec/**/*.js",
+"files.defaultLanguage": "javascript",
+}
