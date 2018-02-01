@@ -8,8 +8,9 @@
 <link rel="stylesheet" type="text/css" href="index.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script> -->
 <!-- <script src="/socket.io/socket.io.js"></script> -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 <script src="index.js"></script>
 
 
@@ -21,7 +22,6 @@
 <title>Control Pool Pump</title>
 </head>
 
-<link rel="stylesheet" type="text/css" href="mystyle.css">
 <body onload="">
 
 
@@ -54,8 +54,7 @@
 			<div>action: 		<b><span id="pumpAction">--</span></b> <span> length: 	<b><span id="pumpLength">--</span></b> </span></div>
 			<div>driveState: 		<b><span id="pumpDriveState">--</span></b> <span> ppc: 	<b><span id="pumpPpc">--</span></b> </span></div>
 
-			<div></div>
-
+			<div id="message">&nbsp;</div>
 		</div>
 
 		<div id= "blankBoxAtTop"></div>
@@ -168,18 +167,25 @@
 </div>
 
 
+
 <div class='col-sm-2 center'>
 		<div>Testing</div>
 		<button class="btn" id="test"> Run Pump @ 1000 </button>
 		<button class="btn" id="pumpStatus"> get Pump Status </button>
-		<button class="btn" id="pumpStatusForce"> Force Status </button>
+		<!-- <button class="btn" id="pumpStatusForce"> Force Status </button> -->
 		<button class="btn" id="toggleStatusUpdates"> Toggle Status </button>
-
 		<button class="btn" id="pumpControlSetToLocal"> Local Control </button>
 		<button class="btn" id="pumpControlSetToRemote"> Remote Control </button>
 		<!-- <button class="btn" id="pumpControlSetToggle"> Toggle Status </button> -->
+	</div>
 
-
+	<div class='col-sm-2 center'>
+		<div>Pump Controls</div>
+		<button class="btn" id="powerOn"> Power On </button>
+		<button class="btn" id="powerOff"> Power Off </button>
+		<button class="btn" id="powerToggle"> Toggle Off/On </button>
+		<button class="btn" id="pumpControlSetToLocal"> Local Control </button>
+		<button class="btn" id="pumpControlSetToRemote"> Remote Control </button>
 	</div>
 
 </body>

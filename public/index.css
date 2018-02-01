@@ -10,12 +10,12 @@
 }
 
 
-li { 
+li {
 
 	float: left;
 }
 
-li a { 
+li a {
 	display: block;
 	color: white;
 	text-align: center;
@@ -23,7 +23,7 @@ li a {
 	text-decoration: none;
 }
 
-li div { 
+li div {
 	display: block;
 	color: white;
 	text-align: center;
@@ -38,10 +38,12 @@ li a:hover {
 }
  */
  *, *:before, *:after {
-  -webkit-box-sizing: border-box; 
-  -moz-box-sizing: border-box; 
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+
+
 
 
 button {
@@ -61,7 +63,9 @@ button:hover{
 }
 
 
-.table {display:table;}
+.table {
+	display:table;
+}
 
 
 .center {
@@ -71,15 +75,16 @@ button:hover{
 }
 
 .row {
-	width:100%
+	width:100%;
+	margin-right: 0px;
+	margin-left: 0px;
 }
 
 .col-sm-2{
 	/* width: 19%; */
 	padding: 10px;
-	margin: 5px; 
+	margin: 5px;
 	border: 2px solid black;
-	/* border: 10px; */
 }
 
 
@@ -104,5 +109,5 @@ button:hover{
 }
 
 #blankBoxAtTop {
-	height: 60px;
+	height: 0px;
 }

@@ -1,10 +1,8 @@
-
-
 // var socket=io('http://localhost:8181');
-var socket = io.connect();
+var socket;
 
 
-  
+
 
 // function pumpOff (){
 // 	socket.emit('pump off')
@@ -30,89 +28,124 @@ var socket = io.connect();
 // 	socket.emit('Pump Speed 4')
 // 	console.log("Pump Speed 4");
 // }
+var messageTimer;
+var showMessage = function () {
+	$('#message').text("Message Sent")
+	messageTimer = setTimeout(() => {
+		$('#message').html("&nbsp;")
+	}, 2000);
+}
 
+var confirmMessage = function () {
+	$('#message').text("Message Confirmed")
+	// alert('received')
+	messageTimer = setTimeout(() => {
+		$('#message').html("&nbsp;")
+	}, 2000);
+}
 
 
 $('document').ready(function () {
-
+	socket = io.connect();
 	$('#powerOn').click(function (){
-		socket.emit('pumpPower', 'on')
+		socket.emit('pumpPower', 'on', confirmMessage);
+		showMessage();
 	})
 
 	$('#powerOff').click(function (){
-		socket.emit('pumpPower', 'off')
+		socket.emit('pumpPower', 'off', () => {
+			console.log('recievedd')
+		});
+		showMessage();
 	})
 
 	$('#powerToggle').click(function (){
-		socket.emit('pumpPower', 'toggle')
+		socket.emit('pumpPower', 'toggle', confirmMessage);
+		showMessage();
 	})
 
 	$('#speed1').click(function (){
-		socket.emit('intellicom', 1)
+		socket.emit('intellicom', 1, confirmMessage);
+		showMessage();
 	})
-	
+
 	$('#speed2').click(function (){
-		socket.emit('intellicom', 2)
+		socket.emit('intellicom', 2, confirmMessage);
+		showMessage();
 	})
 
 	$('#speed3').click(function (){
-		socket.emit('intellicom', 3)
+		socket.emit('intellicom', 3, confirmMessage);
+		showMessage();
 	})
 
 	$('#speed4').click(function (){
-		socket.emit('intellicom', 4)
+		socket.emit('intellicom', 4, confirmMessage);
+		showMessage();
 	})
 
 	$('.speedOff').click(function (){
-		socket.emit('intellicom', 0)
+		socket.emit('intellicom', 0, confirmMessage);
+		showMessage();
 	})
 
 	$('#test').click(function (){
-		socket.emit('test_runpumpSpeedAt1000RPM')
+		socket.emit('test_runpumpSpeedAt1000RPM', confirmMessage);
+		showMessage();
 	})
 
 	$('#toggleStatusUpdates').click(function (){
-		socket.emit('toggleStatusUpdate')
+		socket.emit('toggleStatusUpdate', confirmMessage);
+		showMessage();
 	})
 
 	$('#pumpStatus').click(function (){
-		socket.emit('pumpData')
+		socket.emit('pumpData', confirmMessage);
+		showMessage();
 	})
 
 	$('#pumpStatusForce').click(function (){
-		socket.emit('pumpDataForceUpdate')
+		socket.emit('pumpDataForceUpdate', confirmMessage);
+		showMessage();
 	})
 
-	
+
 	$('#runPumpAtSpeed').click(function (){
-		socket.emit('runPumpAtSpeed', $('#speedInput').val() ) 
+		socket.emit('runPumpAtSpeed', $('#speedInput').val(), confirmMessage )
+		showMessage();
 	})
-	
+
 	$('#setPumpTimer').click(function (){
-		socket.emit('setPumpTimer', $('#timerInMin').val() ) 
+		socket.emit('setPumpTimer', $('#timerInMin').val(), confirmMessage )
+		showMessage();
 	})
 
 	$('#pumpControlSetToRemote').click(function (){
-		socket.emit('pumpControlPanelState', 'remote')
+		socket.emit('pumpControlPanelState', 'remote', confirmMessage)
+		showMessage();
 	})
+
 	$('#pumpControlSetToLocal').click(function (){
-		socket.emit('pumpControlPanelState', 'local')
+		socket.emit('pumpControlPanelState', 'local', confirmMessage)
+		showMessage();
 	})
+
 	$('#pumpControlSetToggle').click(function (){
-		socket.emit('pumpControlPanelState', 'toggle')
+		socket.emit('pumpControlPanelState', 'toggle', confirmMessage)
+		showMessage();
 	})
 
+	socket.on('confirm', function (){
+		console.log ('running')
+	});
 
 
-	socket.emit('pumpData')
-})
-
-
-
+	// socket.emit('pumpData')
 
 	// ('http://localhost');
+
 	socket.on('pumpDataReturn', function (data) {
-		console.log(data);
+		// console.log(data);
 		// alert(JSON.stringify(data))
 		data.state===4 ? $('#pumpState').text('Off') : $('#pumpState').text('On')
 		// $('#pumpState').text(data.state)
@@ -140,7 +173,7 @@ $('document').ready(function () {
     // state:         data[6], //4= off, 10 = on //power i think
     // driveState:   data[7],
     // ppc:          data[8],
-    // wattHighBit:  data[9], 
+    // wattHighBit:  data[9],
     // wattLowBit:   data[10],
     // rpmHighBit:   data[11],
     // rpmLowBit:    data[12],
@@ -148,3 +181,8 @@ $('document').ready(function () {
     // timerLowBit:  data[18],
     // timeHours:    data[19],
     // timeMin:      data[20]
+})
+
+
+
+
