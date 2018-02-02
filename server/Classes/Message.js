@@ -1,18 +1,31 @@
 class Message {
-  constructor(message, name) {
-    this.message = this.returnDefaultMessage(message);
+  constructor(message, name = 'unknown', options = { numberOfRetries: 3}) {
+    this.acknowledgment = flipSourceAndDestinationFromStrippedMessage(message);
+    this.message = this.convertToDefaultMessage(message);
     this.name = name;
     this.originalMessage = message;
     this.retryAttempts = 0;
+    this.options.numberOfRetries = options.numberOfRetries || 3;
+
   }
 
   isAcknowledgment(messageToCheck) {
-    var originalByteArray = this.flipSourceAndDestinationFromStrippedMessage(this.message);
-    if (originalByteArray.toString() === messageToCheck.toString()) {
+    if (this.acknowledgment.toString() === messageToCheck.toString()) {
       return true;
     } else {
       return false;
     }
+  }
+
+  tryAcknowledgment (messageToCheck) {
+    if (isAcknowledgment(messageToCheck) === true) {
+      return true;
+    } else if (this.retryAttempts <= this.options.numberOfRetries) {
+      this.retryAttempts++;
+      return this.retryAttempts;
+    }
+    this.retryAttempts = 0;
+    return false;
   }
 
   flipSourceAndDestinationFromStrippedMessage (buffer) {
@@ -41,7 +54,7 @@ class Message {
     return message.constructor.name;
   }
 
-  returnDefaultMessage (message) {
+  convertToDefaultMessage (message) {
     // var type = this.findType(message);
     var type, convertedMessage;
     try {
@@ -80,7 +93,7 @@ class Message {
     return convertedMessage;
   }
 
-  sliceStringByRecurringAmounts (str, val) {
+  sliceStringByRecurringAmounts (str = '', val = 1) {
     var output = [];
     if (typeof str !== 'string') { throw 'Incoming value must be a string'; }
     var numberOfTimesToSlice = Math.ceil(str.length / val);
@@ -133,33 +146,59 @@ class Message {
   }
 
   hasHeader (message) {
+    if (Array.isArray(message) !== true) { return null; }
     var indexOfStart = message.indexOf(165);
+
     if (indexOfStart === -1) {
-      console.log ('hasHeader: Error: Message does not have a 165 bit');
-    } else if (indexOfStart === 0) {
       return false;
-    } else if (indexOfStart >= 1) {
+    } else if (indexOfStart >= 0 ) {
       return true;
     } else {
-      console.log ('hasHeader: Error: 165 Bit location caused an Error');
+      return null;
+      throw 'hasHeader: Error: 165 Bit location caused an Error';
     }
+  }
+
+  stripHeader (message) {
+    if (!Array.isArray(message)) { return undefined; }
+    var StartOfMessege = messageArray.indexOf(165);
+    if (StartOfMessege === -1) {
+      // console.log (message);
+      // return 'Error No Start (165) byte the Message';
+      return message;
+    } else {
+      return message.slice (StartOfMessege, message.length); //removes the high and low checksum bytes in back and the HEADER
+    }
+  }
+
+  stripchecksum (message) {
+    if (!Array.isArray(message)) { return undefined; }
+    return message.slice (0, message.length - 2);
   }
 
   stripMessageOfHeaderAndChecksum (message, returnArrayOrBuffer = null) {
     //removes the HEADER and high and low bit checksum
     //converts either Buffer or array, and returns same
+    var strippedMessage;
     if (Buffer.isBuffer(message) === false && Array.isArray (message) === true) {
       var messageArray = message;
     } else if (Buffer.isBuffer(message) === true) {
       var buffer = true;
       var messageArray = [...message]; //convert to a normal array
     }
-    var StartOfMessege = messageArray.indexOf(165);
-    if (StartOfMessege === -1) {
-      console.log (message);
-      return 'Error No Start (165) byte the Message';
-    }
-    var strippedMessage = message.slice (StartOfMessege, message.length - 2); //removes the high and low checksum bytes in back and the HEADER
+
+    strippedMessage = this.stripchecksum(message);
+    strippedMessage = this.stripHeader(message);
+
+    // var StartOfMessege = messageArray.indexOf(165);
+
+    // if (StartOfMessege === -1) {
+    //   // console.log (message);
+    //   // return 'Error No Start (165) byte the Message';
+    //   strippedMessage = message;
+    // } else {
+    //   strippedMessage = message.slice (StartOfMessege, message.length - 2); //removes the high and low checksum bytes in back and the HEADER
+    // }
 
     if (returnArrayOrBuffer.toLowerCase() === 'array') {
       return strippedMessage;
