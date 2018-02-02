@@ -17,6 +17,7 @@
     "mochawesome": "^3.0.2"
   },
   "scripts": {
+    "nodemon": "nodemon app.js",
     "test": "mocha ./spec/* --recursive --reporter mochawesome",
     "start": "node app.js"
   },
