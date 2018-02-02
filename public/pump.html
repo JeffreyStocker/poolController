@@ -1,0 +1,36 @@
+<html>
+  <header>Manual Pump Control</header>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js"></script>
+  <link rel="stylesheet" type="text/css" href="index.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+  <!-- <script src="index.js"></script> -->
+  <script src="pump.js"></script>
+  <body>
+    <div class='center '> <!-- top -->
+      <div>Pump Info</div>
+      <div>Power:<b><span id="pumpState">--</span></b><span>Timer:<b><span id="PumpTimers">--</span></b>  </span></div>
+      <div></div>
+      <div>RPM:<b><span id="pumpRPM">--</span></b><span> Watts:<b><span id="pumpWatt">--</span></b> </span></div>
+
+      <div>Destination:<b><span id="pumpDestination">--</span></b> <span> Source: 	<b><span id="pumpSource">--</span></b> </span></div>
+      <div>action:<b><span id="pumpAction">--</span></b> <span> length: 	<b><span id="pumpLength">--</span></b> </span></div>
+      <div>driveState:<b><span id="pumpDriveState">--</span></b> <span> ppc: 	<b><span id="pumpPpc">--</span></b> </span></div>
+
+      <div id="message">&nbsp;</div>
+    </div>
+
+    <div >
+      1<input type="number" id="1" value="96">Destination<br>
+      2<input type="number" id="2" value="16">Source<br>
+      3<input type="number" id="3" value="1">Action<br>
+      4<input type="number" id="4" value="96">Mode/Command<br>
+      <!-- 5<input type="number" id="5" value="96">Length<br> -->
+      6<input type="number" id="6" value="96">Action<br>
+      7<input type="number" id="7" value="96">High bit<br>
+      8<input type="number" id="8" value="96">Low Bit<br>
+      9<input type="number" id="9" value="96"><br>
+      10<input type="number" id="10" default=""><br>
+      <button id="Submit">Submit</button>
+    </div>
+  </body>
+</html>
