@@ -1,19 +1,21 @@
 process.env.NODE_PATH = __dirname;
 
 // var config = require('./server/configureFile').init('./config.json');
-var config = require('./server/configureFile').init('default');
-var logger = require('./server/logs/winston.js').setupLogging(config.system.logs);
+var configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
+var logger = require(process.env.NODE_PATH + '/server/logs/winston.js').init(configureFile.config.system.logs);
+configureFile.initLogging('system', logger)
+
+var { statusRequestUpdateInverval } = require (process.env.NODE_PATH + '/server/variables');
+// var { timeBetweenQueueSending } = require (process.env.NODE_PATH + '/server/server');
+var { pumpGetStatus } = require (process.env.NODE_PATH + '/server/messages');
+var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/pump/queue');
+var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
 
 
-var { statusRequestUpdateInverval } = require ('./server/variables');
-var { timeBetweenQueueSending } = require ('./server/server');
-var { pumpGetStatus } = require ('./server/messages');
-var { queueLoopMain, addToQueue } = require ('./server/pump/queue');
-var incommingSockets = require ('./server/communications/incomingSocketIO');
 var timeBetweenQueueSending = 250; //intervel beteen when the queue sends off another message
 
 //start main program
-setInterval(queueLoopMain, timeBetweenQueueSending);
+setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending);
 //starts routine pump status updates
 addToQueue(pumpGetStatus);
 
@@ -22,5 +24,8 @@ setInterval( ()=> {
   addToQueue(pumpGetStatus);
 }, statusRequestUpdateInverval); //gets pump status once every mintute
 
-// console.log ('path NODE_PATH:', process.env.NODE_PATH)
-// console.log ('path __dir', __dirname)
+
+
+// process.on('uncaughtException', function(err) {
+//   console.log('Caught exception: ' + err);
+// });
