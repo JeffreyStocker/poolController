@@ -17,7 +17,7 @@
               "type": "node",
               "request": "launch",
               "name": "Launch App.js",
-              "program": "${workspaceFolder}/index.js",
+              "program": "${workspaceFolder}/app.js",
               "outputCapture": "std"
             },
             {
@@ -28,9 +28,9 @@
               "runtimeArgs": [
                 "run-script",
                 "debug",
-                "--max-old-space-size=4096"
+                // "--max-old-space-size=4096"
               ],
-              "port": 9229,
+              // "port": 9229,
               "outputCapture": "std"
           },
           {
@@ -41,7 +41,7 @@
               "runtimeArgs": [
                 "run-script",
                 "start",
-                "--max-old-space-size=4096"
+                // "--max-old-space-size=4096"
               ],
               "port": 9229,
               "outputCapture": "std"
