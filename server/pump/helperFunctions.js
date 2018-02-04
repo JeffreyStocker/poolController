@@ -43,7 +43,7 @@ var stripMessageOfHeaderAndChecksum = function (message) {
   var StartOfMessege = messageArray.indexOf(165);
   if (StartOfMessege === -1) {
     console.log (message);
-    throw 'Error No Start (165) byte the Message';
+    throw new Error ('Error No Start (165) byte the Message');
   }
   var strippedMessage = message.slice (StartOfMessege, message.length - 2); //removes the high and low checksum bytes in back and the HEADER
 
@@ -116,6 +116,24 @@ var parsePumpStatus = function (data) {
   //input a stripped array, NO BUFFER //may work with buffer, not tested
   //165,0,16,96,7,15,10,0,0,0,198,5,120,0,0,0,0,0,1,22,4
   var indexAdjust = 0;
+  // var pumpData = {
+  //   destination:  data[2],
+  //   source:       data[3],
+  //   action:       data[4],
+  //   length:       data[5],
+  //   state:        data[6], //4= off, 10 = on //power i think
+  //   driveState:   data[7],
+  //   ppc:          data[8],
+  //   wattHighBit:  data[9],
+  //   wattLowBit:   data[10],
+  //   rpmHighBit:   data[11],
+  //   rpmLowBit:    data[12],
+  //   timerHighBit: data[15],
+  //   timerLowBit:  data[18],
+  //   timeHours:    data[19],
+  //   timeMin:      data[20]
+  // };
+
   var pumpData = {
     destination:  data[2],
     source:       data[3],
@@ -128,11 +146,16 @@ var parsePumpStatus = function (data) {
     wattLowBit:   data[10],
     rpmHighBit:   data[11],
     rpmLowBit:    data[12],
+    unknown1:     data[13],
+    unknown2:     data[14],
     timerHighBit: data[15],
+    unknown3:     data[16],
+    unknown4:     data[17],
     timerLowBit:  data[18],
     timeHours:    data[19],
     timeMin:      data[20]
   };
+
   pumpData.watt = combineHighPlusLowBit(pumpData.wattHighBit, pumpData.wattLowBit );
   pumpData.rpm = combineHighPlusLowBit(pumpData.rpmHighBit, pumpData.rpmLowBit );
   pumpData.timer = pumpData.timerHighBit + ':' + pumpData.timerLowBit;
