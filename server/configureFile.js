@@ -1,8 +1,8 @@
 var fs = require('fs');
-var loggerSystem;
 var config = {};
 var configFileLocation = './confisg.json';
-var logger = [];
+var logs = [];
+
 var defaults =
   {
     system: {
@@ -13,16 +13,18 @@ var defaults =
         mainLoopInterval: 25,
         numberOfRetriesForMissingMessages: 3,
         statusRequestUpdateInverval: 500,
+        timeBetweenQueueSending: 250
+
       },
       logs: {
         system: {
           console: {
             colorize: true,
             label: 'system',
-            level: 'info',
+            level: 'debug',
           },
           file: {
-            filename: './server/logs/system.log'
+            filename: '/server/logs/system.log'
           }
         },
         events: {
@@ -32,7 +34,7 @@ var defaults =
             level: 'info',
           },
           file: {
-            filename: './server/logs/events.log'
+            filename: '/server/logs/events.log'
           }
         },
         pump: {
@@ -42,7 +44,7 @@ var defaults =
             level: 'info',
           },
           file: {
-            filename: './server/logs/power.log'
+            filename: '/server/logs/power.log'
           }
         },
       },
@@ -97,24 +99,35 @@ var parseConfig = function (json, callback) {
 module.exports.init = function (location = configFileLocation, useDefault = false) {
   var data;
   if (Object.keys(config).length !== 0) { return config; }
-  if (useDefault === false) {
+  if (location === 'default' || useDefault === true) {
+    data = defaults;
+    logs.push('Using Default Configuration');
+  }
+  else {
     try {
       data = fs.readFileSync(location, 'utf8');
       data = parseConfig(data);
-      logger.push('location');
+      logs.push('location');
     } catch (err) {
       data = defaults;
-      console.log ('Error loading User Config File. Using Defaults');
-      logger.push('defaults');
+      console.log ('User Config File not found. Using Defaults Configuration');
+      logs.push('User Config File not found. Using Default Configuration');
     }
-  } else {
-    data = defaults;
-    logger.push('defaults');
   }
   Object.assign(module.exports.config, data);
-  // loggerSystem = require('./logs/winston').loggers.power;
-  // loggerSystem.info ('Using Configuration from ' + typeOfUsing);
-  return data;
+  return module.exports;
+};
+
+module.exports.initLogging = function (loggerName, loggers) {
+  if (!loggers[loggerName]) { return new Error ('Logger Missing from initLogging'); }
+
+  var logger = loggers[loggerName];
+  logs.forEach(log => {
+    logger.info(log);
+  });
+  logs = function (newLog) {
+    logger.info(newLog);
+  };
 };
 
 

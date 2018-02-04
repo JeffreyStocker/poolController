@@ -1,6 +1,7 @@
-var msg = require (__dirname + '/../messages');
-var { queueLoopMain, addToQueue } = require (__dirname + '/queue');
-var { exteralTimer } = require ('../variables');
+var msg = require (process.env.NODE_PATH + '/server/messages');
+var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/pump/queue');
+var { exteralTimer } = require (process.env.NODE_PATH + '/server/variables');
+var Message = require (process.env.NODE_PATH + '/server/Classes/Message.js');
 
 
 var runIntellicomPumpSpeed = exports.runIntellicomPumpSpeed = function (speed = 0, interval = 10000) {

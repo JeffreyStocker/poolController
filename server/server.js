@@ -10,7 +10,7 @@ var loggerSystem = require(process.env.NODE_PATH + '/server/logs/winston').logge
 
 var port = process.env.PORT = 8181;
 
-app.use(express.static('public'));
+app.use(express.static(process.env.NODE_PATH + '/public'));
 
 var server = require('http').createServer(app);
 

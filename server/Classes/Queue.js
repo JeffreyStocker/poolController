@@ -1,4 +1,4 @@
-var stack = require('./TwinLinkedStack');
+var stack = require(process.env.NODE_PATH + '/server/Classes/TwinLinkedStack');
 class Queue extends stack {
   constructor (config = {actions: {}, data: undefined, } ) {
     super(data);
