@@ -44,20 +44,48 @@
 
 	<div class="row">
 
-	<div class='center '> <!-- top -->
+		<div class='center '> <!-- top -->
 			<div>Pump Info</div>
-			<div>Power: <b><span id="pumpState">--</span></b> <span>Timer: 	<b><span id="PumpTimers">--</span></b>  </span></div>
+			<div>Running:<b>
+				<span class="pumpState" id="pumpState">--</span></b>
+				<span> Timer:<b><span class="PumpTimers" id="PumpTimers">--</span></b>  </span>
+			</div>
 			<div></div>
-			<div>RPM: 		<b><span id="pumpRPM">--</span></b> <span> Watts: 	<b><span id="pumpWatt">--</span></b> </span></div>
 
-			<div>Destination: 		<b><span id="pumpDestination">--</span></b> <span> Source: 	<b><span id="pumpSource">--</span></b> </span></div>
-			<div>action: 		<b><span id="pumpAction">--</span></b> <span> length: 	<b><span id="pumpLength">--</span></b> </span></div>
-			<div>driveState: 		<b><span id="pumpDriveState">--</span></b> <span> ppc: 	<b><span id="pumpPpc">--</span></b> </span></div>
+			<div>RPM:<b><span class="pumpRPM" id="pumpRPM">--</span></b>
+				<span> Watts:<b><span class="pumpWatt" id="pumpWatt">--</span></b> </span>
+			</div>
 
-			<div id="message">&nbsp;</div>
+			<div>Destination:<b>
+				<span class="pumpDestination" id="pumpDestination">--</span></b>
+				<span> Source: 	<b><span class="pumpSource" id="pumpSource">--</span></b> </span>
+			</div>
+
+			<div>action:<b>
+				<span class="pumpAction" id="pumpAction">--</span></b>
+				<span> Time:<b><span class="timeCurrent">--</span></b> </span>
+			</div>
+
+			<div>driveState:<b><span class="pumpDriveState" id="pumpDriveState">--</span></b>
+				<span> ppc: 	<b><span class="pumpPpc" id="pumpPpc">--</span></b> </span>
+			</div>
+
+			<div>Unknown1:<b><span class="unknown1">--</span></b>
+				<span> Unknown2: 	<b><span class="unknown2">--</span></b> </span>
+			</div>
+
+			<div>Unknown3:<b><span class="unknown3">--</span></b>
+				<span> Unknown4: 	<b><span class="unknown4">--</span></b> </span>
+			</div>
+
+			<!-- <div><span> length: 	<b><span id="pumpLength">--</span></b> </span> -->
+				<!-- <span> Unknown4: 	<b><span class="unknown4">--</span></b> </span> -->
+			<!-- </div> -->
+
+			<div class="message" id="message">&nbsp;</div>
 		</div>
 
-		<div id= "blankBoxAtTop"></div>
+		<div class="blankBoxAtTop" id= "blankBoxAtTop"></div>
 
 
 
@@ -65,16 +93,16 @@
 <div class="row">
 	<div class='col-sm-2 center'>
 		<div>Power</div>
-		<button class="btn" id="powerOn"> Power On </button>
-		<button class="btn" id="powerOff"> Power Off </button>
-		<button class="btn" id="powerToggle"> Toggle Off/On </button>
+		<button class="btn powerOn" id="powerOn"> Power On </button>
+		<button class="btn powerOff" id="powerOff"> Power Off </button>
+		<button class="btn powerToggle" id="powerToggle"> Toggle Off/On </button>
 	</div>
 	<div class='col-sm-2 center'>
 		<div>External Controls</div>
 		<!-- <button class="btn" id="speed1" > 1:Spa </button> -->
-		<button class="btn" id="speed2" > 2:Waterfall </button>
-		<button class="btn" id="speed3" > 3:Slow </button>
-		<button class="btn" id="speed4" > 4:solar </button>
+		<button class="btn speed2" id="speed2" > 2:Waterfall </button>
+		<button class="btn speed3" id="speed3" > 3:Slow </button>
+		<button class="btn speed4" id="speed4" > 4:solar </button>
 		<button class="btn speedOff" id='speedOff'> Stop Pump </button>
 	</div>
 
@@ -94,7 +122,7 @@
 		<div>
 			<label for="speedInput">Speed in RPM & <br> Save Prog 1:</label>
 			<!-- <input id= "speedInput" type="number" class="form-control" >  -->
-			<select  id= "speedInput" class="form-control">
+			<select  id= "speedInput" class="form-control speedInput">
 				<option>900</option>
 				<option>1000</option>
 				<option>1100</option>
@@ -121,9 +149,9 @@
 				<option>3200</option>
 			</select>
 		</div>
-		<button id="runPumpAtSpeed" class="btn">Run Speed</button>
+		<button id="runPumpAtSpeed" class="btn runPumpAtSpeed">Run Speed</button>
 
-		<button id='speedOff_runPumpSpeed' class="btn speedOff" > Stop Pump </button>
+		<button id='speedOff_runPumpSpeed' class="btn speedOff speedOff_runPumpSpeed" > Stop Pump </button>
 	</div>
 
 
@@ -134,11 +162,11 @@
 			<input type="number" class="form-control" id="usr" >
 		</div> -->
 		<div><label for="timerInMin">Timer in Minutes: </label>
-			<input id="timerInMin" type="number" class="form-control" value= "50">
+			<input id="timerInMin" type="number" class="form-control timerInMin" value= "50">
 		</div>
 		<br>
-		<button id='setPumpTimer' class="btn"> Start Timer</button>
-		<button id='speedOff_timer' class="btn speedOff"> Stop Pump </button>
+		<button id='setPumpTimer' class="btn setPumpTimer"> Start Timer</button>
+		<button id='speedOff_timer' class="btn speedOff speedOff_timer"> Stop Pump </button>
 	</div>
 
 
@@ -170,22 +198,22 @@
 
 <div class='col-sm-2 center'>
 		<div>Testing</div>
-		<button class="btn" id="test"> Run Pump @ 1000 </button>
-		<button class="btn" id="pumpStatus"> get Pump Status </button>
+		<button class="btn test" id="test"> Run Pump @ 1000 </button>
+		<button class="btn pumpStatus" id="pumpStatus"> get Pump Status </button>
 		<!-- <button class="btn" id="pumpStatusForce"> Force Status </button> -->
-		<button class="btn" id="toggleStatusUpdates"> Toggle Status </button>
-		<button class="btn" id="pumpControlSetToLocal"> Local Control </button>
-		<button class="btn" id="pumpControlSetToRemote"> Remote Control </button>
+		<button class="btn toggleStatusUpdates" id="toggleStatusUpdates"> Toggle Status </button>
+		<button class="btn pumpControlSetToLocal" id="pumpControlSetToLocal"> Local Control </button>
+		<button class="btn pumpControlSetToRemote" id="pumpControlSetToRemote"> Remote Control </button>
 		<!-- <button class="btn" id="pumpControlSetToggle"> Toggle Status </button> -->
 	</div>
 
 	<div class='col-sm-2 center'>
 		<div>Pump Controls</div>
-		<button class="btn" id="powerOn"> Power On </button>
-		<button class="btn" id="powerOff"> Power Off </button>
-		<button class="btn" id="powerToggle"> Toggle Off/On </button>
-		<button class="btn" id="pumpControlSetToLocal"> Local Control </button>
-		<button class="btn" id="pumpControlSetToRemote"> Remote Control </button>
+		<button class="btn powerOn" id="powerOn"> Power On </button>
+		<button class="btn powerOff" id="powerOff"> Power Off </button>
+		<button class="btn powerToggle" id="powerToggle"> Toggle Off/On </button>
+		<button class="btn pumpControlSetToLocal" id="pumpControlSetToLocal"> Local Control </button>
+		<button class="btn pumpControlSetToRemote" id="pumpControlSetToRemote"> Remote Control </button>
 	</div>
 
 </body>

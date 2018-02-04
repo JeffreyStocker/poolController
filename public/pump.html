@@ -8,13 +8,41 @@
   <body>
     <div class='center '> <!-- top -->
       <div>Pump Info</div>
-      <div>Power:<b><span id="pumpState">--</span></b><span>Timer:<b><span id="PumpTimers">--</span></b>  </span></div>
+      <div>Running:<b>
+        <span class="pumpState" id="pumpState">--</span></b><span>Timer:<b>
+        <span class="PumpTimers" id="PumpTimers">--</span></b>  </span>
+      </div>
       <div></div>
-      <div>RPM:<b><span id="pumpRPM">--</span></b><span> Watts:<b><span id="pumpWatt">--</span></b> </span></div>
 
-      <div>Destination:<b><span id="pumpDestination">--</span></b> <span> Source: 	<b><span id="pumpSource">--</span></b> </span></div>
-      <div>action:<b><span id="pumpAction">--</span></b> <span> length: 	<b><span id="pumpLength">--</span></b> </span></div>
-      <div>driveState:<b><span id="pumpDriveState">--</span></b> <span> ppc: 	<b><span id="pumpPpc">--</span></b> </span></div>
+      <div>RPM:<b><span class="pumpRPM" id="pumpRPM">--</span></b>
+        <span> Watts:<b><span class="pumpWatt" id="pumpWatt">--</span></b> </span>
+      </div>
+
+      <div>Destination:<b>
+        <span class="pumpDestination" id="pumpDestination">--</span></b>
+        <span> Source: 	<b><span class="pumpSource" id="pumpSource">--</span></b> </span>
+      </div>
+
+      <div>action:<b>
+        <span class="pumpAction" id="pumpAction">--</span></b>
+        <span> Time:<b><span class="timeCurrent">--</span></b> </span>
+      </div>
+
+      <div>driveState:<b><span class="pumpDriveState" id="pumpDriveState">--</span></b>
+        <span> ppc: 	<b><span class="pumpPpc" id="pumpPpc">--</span></b> </span>
+      </div>
+
+      <div>Unknown1:<b><span class="unknown1">--</span></b>
+        <span> Unknown2: 	<b><span class="unknown2">--</span></b> </span>
+      </div>
+
+      <div>Unknown3:<b><span class="unknown3">--</span></b>
+        <span> Unknown4: 	<b><span class="unknown4">--</span></b> </span>
+      </div>
+
+      <!-- <div><span> length: 	<b><span id="pumpLength">--</span></b> </span> -->
+        <!-- <span> Unknown4: 	<b><span class="unknown4">--</span></b> </span> -->
+      <!-- </div> -->
 
       <div id="message">&nbsp;</div>
     </div>
