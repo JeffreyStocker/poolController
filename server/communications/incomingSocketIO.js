@@ -1,7 +1,7 @@
 var io = require ('socket.io');
 var socketServer = require ('../server').socketServer;
 const { addToQueue } = require ('../pump/queue');
-
+const logger = require (process.env.NODE_PATH + '/server/logs/winston').sendToLogs;
 // module.pushPumpInfoToWebPages = function pushPumpInfoToWebPages (){
 //   socket.emit('pumpDataReturn', pumpData)
 // }
@@ -17,100 +17,17 @@ const {
   setPumpTimer,
 } = require ('../pump/commands');
 
-
-
-// // exports.pushPumpInfoToWebPages = pushPumpInfoToWebPages;
-// io.listen(server).on('connection', function (socket) {// WebSocket Connection
-//   module.pushPumpInfoToWebPages()
-//   //  = function pushPumpInfoToWebPages (){
-//   //   socket.emit('pumpDataReturn', pumpData)
-//   // }
-// });
-
-// io.listen(server).on('connection', function (socket) {// WebSocket Connection
-
-//   socket.on ('pumpDataForceUpdate', function (){
-//     console.log ('pump data requested and Pump Information')
-//     addToQueue (pumpGetStatus)
-//     socket.emit('pumpDataReturn', pumpData)
-//   })
-
-//   socket.on ('pumpData', function (){
-//     console.log ('pump data requested')
-//     socket.emit('pumpDataReturn', pumpData)
-//   })
-
-
-//   socket.on('pump off', function() {
-//     clearInterval(exteralTimer) //clear external timers
-//     // addToQueue(pumpToRemote)
-//     addToQueue(pump_Off)
-//     // addToQueue(pumpToLocal)
-//   });
-
-
-//   socket.on('intellicom', function (speed){
-//     runIntellicomPumpSpeed(speed);
-//   })
-
-
-//   socket.on ('test_runpumpSpeedAt1000RPM', function () {
-//     addToQueue ([ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ])
-//   })
-
-
-//   socket.on('setPumpExternalspeed', function (speed){
-//     runIntellicomPumpSpeed(speed)
-//   })
-
-
-//   socket.on ('pumpPower', function (powerState){
-//     pumpPower(powerState)
-//   })
-
-
-//   socket.on ('runPumpAtSpeed', function (rpm){
-//     runPumpAtSpeed(rpm)
-//   })
-
-
-//   socket.on ('setPumpTimer', function (time){
-//     setPumpTimer(time)
-//   })
-
-
-//   socket.on ('manualPumpControl', function (time){
-//     manualPumpControl(time)
-//   })
-
-
-//   socket.on ('pumpControlPanelState', function (state){
-//     pumpControlPanelState(state)
-//   })
-
-
-//   socket.on ('toggleStatusUpdate', function (state){
-//     if (pumpGetStatus) {
-//       clearInterval (exteralTimer)
-//     }
-//     else {
-//       addToQueue(pumpGetStatus)
-//       exteralTimer = setInterval(()=> {
-//         addToQueue(pumpGetStatus)
-//       }, statusRequestUpdateInverval) //gets pump status once every mintute  statusRequestUpdateInverval
-//     }
-//   })
-// });
-socketServer.on ('disconnect', function () {
-  // console.log ('socket disconnected');
+socketServer.on ('disconnect', function (socket) {
+  logger('event', 'verbose', 'socket disconnected: ' + socket.id);
 });
 
 
 socketServer.on('connection', function (socket) { // WebSocket Connection
-  console.log ('socket connected');
+  logger('event', 'verbose', 'socket connected:' + socket.id);
 
   socket.on ('pumpDataForceUpdate', function (callback) {
-    console.log ('pump data requested and Pump Information');
+    logger('event', 'debug', 'pump data requested and Pump Information');
+
     addToQueue (pumpGetStatus);
     socket.emit('pumpDataReturn', pumpData);
     // socket.emit('confirm');
@@ -118,13 +35,14 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   });
 
   socket.on ('pumpData', function (callback) {
-    console.log ('pump data requested');
+    // logger.debug('pumpData');
     socket.emit('pumpDataReturn', pumpData);
     callback(0);
   });
 
 
   socket.on('pump off', function(callback) {
+    // logger.debug('pump off');
     clearInterval(exteralTimer); //clear external timers
     // addToQueue(pumpToRemote);
     addToQueue(pump_Off);
@@ -135,6 +53,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on('intellicom', function (speed, callback) {
+    // logger.debug('intellicom');
     runIntellicomPumpSpeed(speed);
     // socket.emit('confirm');
     callback(0);
@@ -142,12 +61,14 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('test_runpumpSpeedAt1000RPM', function () {
+    // logger.debug('test_runpumpSpeedAt1000RPM');
     addToQueue ([ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]);
     // socket.emit('confirm');
   });
 
 
   socket.on('setPumpExternalspeed', function (speed, callback) {
+    // logger.debug('setPumpExternalspeed');
     runIntellicomPumpSpeed(speed);
     // socket.emit('confirm');
     callback(0);
@@ -155,6 +76,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('pumpPower', function (powerState, callback) {
+    // logger.debug('pumpPower');
     pumpPower(powerState);
     // socket.emit('confirm');
     callback(0);
@@ -162,6 +84,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('runPumpAtSpeed', function (rpm, callback) {
+    // logger.debug('runPumpAtSpeed');
     runPumpAtSpeed(rpm);
     // socket.emit('confirm');
     callback(0);
@@ -169,6 +92,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('setPumpTimer', function (time, callback) {
+    // logger.debug('setPumpTimer');
     setPumpTimer(time);
     // socket.emit('confirm');
     callback(0);
@@ -176,6 +100,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('manualPumpControl', function (time, callback) {
+    // logger.debug('manualPumpControl');
     manualPumpControl(time);
     // socket.emit('confirm');
     callback(0);
@@ -183,6 +108,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('pumpControlPanelState', function (state, callback) {
+    // logger.debug('pumpControlPanelState');
     pumpControlPanelState(state);
     // socket.emit('confirm');
     callback(0);
@@ -190,6 +116,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('toggleStatusUpdate', function (state, callback) {
+    // logger.debug('toggleStatusUpdate');
     if (pumpGetStatus) {
       clearInterval (exteralTimer);
     } else {
