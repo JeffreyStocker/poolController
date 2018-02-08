@@ -68,17 +68,16 @@ var init = exports.init = function () {
       console.log('Acknowledged:  [' + [... data] + ']');
       // acknowledgment.message.push(data);
       // acknowledgment.reset();
+    } else if (Array.isArray(data) === false) {
+      console.log(data);
+    } else {
+      console.log('Data Received:  [' + [... data] + ']');
     }
 
     // else if (acknowledgment.status !== 'waiting For' || acknowledgment.isAcknowledgment(data) !== true) {
     //   console.log ('not acknowledgment', data)
     // }
 
-    else if (Array.isArray(data) === false) {
-      console.log(data);
-    } else {
-      console.log('Data Received:  [' + [... data] + ']');
-    }
   });
 
 };
