@@ -17,6 +17,15 @@ const {
   setPumpTimer,
 } = require ('../pump/commands');
 
+
+
+var sendMessage = function (queue, queueName, message, options = {}, callback = ()=>{}) {
+  var response = queue.addMessageToQueue (queueName, message);
+
+};
+
+
+
 socketServer.on ('disconnect', function (socket) {
   logger('event', 'verbose', 'socket disconnected: ' + socket.id);
 });
@@ -24,6 +33,17 @@ socketServer.on ('disconnect', function (socket) {
 
 socketServer.on('connection', function (socket) { // WebSocket Connection
   logger('event', 'verbose', 'socket connected:' + socket.id);
+
+  socket.on('Trial_intellicom', function (speed, callback) {
+    // logger.debug('intellicom');
+    runIntellicomPumpSpeed(speed);
+    // socket.emit('confirm');
+    callback(0);
+  });
+
+  socket.on('manualPacket', function (message, callback) {
+    callback(0);
+  });
 
   socket.on ('pumpDataForceUpdate', function (callback) {
     logger('event', 'debug', 'pump data requested and Pump Information');
