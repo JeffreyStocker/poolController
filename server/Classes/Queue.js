@@ -10,10 +10,10 @@ class Queue extends stack {
     this.timer;
   }
 
-  runAction(name) {
+  runAction(name, context = this) {
     var action = this_actions[name];
     if (typeof action === 'function') {
-      return action();
+      return action().bind(this);
     }
     return action;
   }
@@ -26,7 +26,7 @@ class Queue extends stack {
     if (this._InUse && this.length === 0) {
       this._InUse = false;
       if (this._actions.empty !== undefined) {
-        return this.runAction('empty');
+        return this.runAction('empty', this);
       } else {
         return undefined;
       }
@@ -38,7 +38,7 @@ class Queue extends stack {
       this._InUse = true;
       // console.log ('start', this._startAction)
       if (this._actions.start !== undefined) {
-        return this.runAction('start');
+        return this.runAction('start', this);
       }
       return this.shift();
     }
@@ -51,8 +51,9 @@ class Queue extends stack {
     }
     return this.head.val;
   }
-  add(value) {
-    this.push(value);
+
+  add(message) {
+    this.push(message);
     if (this._actions.start !== undefined) {
       return this.runAction('add');
     }
