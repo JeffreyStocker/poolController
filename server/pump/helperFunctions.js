@@ -148,9 +148,9 @@ var parsePumpStatus = function (data) {
     rpmLowBit:    data[12],
     unknown1:     data[13],
     unknown2:     data[14],
-    timerHighBit: data[15],
-    unknown3:     data[16],
-    unknown4:     data[17],
+    unknown3:     data[15],
+    unknown4:     data[16],
+    timerHighBit: data[17],
     timerLowBit:  data[18],
     timeHours:    data[19],
     timeMin:      data[20]
