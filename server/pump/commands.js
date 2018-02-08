@@ -75,6 +75,43 @@ var runPumpAtSpeed = exports.runPumpAtSpeed = function(rpm) {
   addToQueue (packet);
 };
 
+
+var setPumpSpeed = function (rpm, program, destination = 96, source = 16) {
+  var packet = {};
+  var action = 1;           //1= set speed mode, unsure if other modes
+  var length = 4;            //for speed, i don't think this changes from 4,
+  var command = 33;           //3= run program , 2= run/save? at speed????
+  var subcommand;
+  switch (program) {
+  case 0:
+    subcommand = 33;
+  case 1:
+    subcommand = 39;
+    break;
+  case 2:
+    subcommand = 40;
+    break;
+  case 3:
+    subcommand = 41;
+    break;
+  case 4:
+    subcommand = 42;
+    break;
+
+  } //33 = run program xx / turn off pump, 39-42, save P1-4 as xx, 43 set pump timer for xx min || command =2; subcommand - 96 or 196 then might be linked to speed 1
+  var commandHighBit = returnHighBit (rpm); //changes, either RPM high or timer HH or MM
+  var commandLowBit = returnLowBit (rpm); //changes either rpm low, or timer MM
+  // var checksumHighBit = //checksum high added later in code
+  // var checksumLowBit = //chechsum low added later in code
+  // console.log('commandHighBit: ' , commandHighBit);
+  // console.log('returnLowBit (rpm): ' , commandLowBit);
+  packet['byte'] = [165, 0, destination, source, action, length, command, subcommand, commandHighBit, commandLowBit];
+  // console.log (packet.byte)
+  packet.name = 'Run Pump Program: ' + program + ' at ' + rpm;
+  addToQueue (packet);
+};
+
+//wip
 var setPumpTimer = exports.setPumpTimer = function (min) {
   // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
   console.log('time: ', min);
