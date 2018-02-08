@@ -9,7 +9,7 @@
               "program": "${file}",
               "cwd": "${workspaceFolder}",
               "runtimeArgs": [
-                "--max-old-space-size=4096"
+                // "--max-old-space-size=4096"
               ],
               "outputCapture": "std"
             },
@@ -23,7 +23,7 @@
             {
               "type": "node",
               "request": "launch",
-              "name": "Launch via NPM",
+              "name": "Launch Debug via NPM",
               "runtimeExecutable": "npm",
               "runtimeArgs": [
                 "run-script",
@@ -36,15 +36,37 @@
           {
               "type": "node",
               "request": "launch",
-              "name": "Launch via NPM Start",
+              "name": "Launch Start via NPM",
               "runtimeExecutable": "npm",
               "runtimeArgs": [
                 "run-script",
                 "start",
                 // "--max-old-space-size=4096"
               ],
-              "port": 9229,
+              // "port": 9229,
               "outputCapture": "std"
+          },
+          {
+            "type": "node",
+            "request": "launch",
+            "name": "Mocha Tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "args": [
+              "-u",
+              "tdd",
+              "--timeout",
+              "999999",
+              "--colors",
+              "${workspaceFolder}/spec"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+          },
+          {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against localhost",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}"
           }
   ]
 },
