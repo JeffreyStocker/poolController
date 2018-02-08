@@ -1,12 +1,44 @@
-class Message {
-  constructor(message, name = 'unknown', options = { numberOfRetries: 3}) {
-    this.acknowledgment = flipSourceAndDestinationFromStrippedMessage(message);
-    this.message = this.convertToDefaultMessage(message);
-    this.name = name;
-    this.originalMessage = message;
-    this.retryAttempts = 0;
-    this.options.numberOfRetries = options.numberOfRetries || 3;
+var msg = require (process.env.NODE_PATH + '/server/messages');
+var { exteralTimer } = require (process.env.NODE_PATH + '/server/variables');
 
+
+class Message {
+  constructor(message, name = 'unknown', options = {
+    numberOfRetries: 3,
+    logLevel: 'info'
+  }, callback = ()=>{}) {
+
+    this.retryAttempts = 0;
+    this.acknowledgment = this.flipSourceAndDestinationFromStrippedMessage(message);
+
+    if (typeof options === 'function') {
+      this.callback = options;
+      options = {};
+    }
+
+    this.numberOfRetries = options.numberOfRetries || 3;
+    this.logLevel = options.logLevel || 'info';
+
+    if (typeof callback === 'function') {
+      this.callback = callback;
+    } else {
+      this.callback = () => {};
+    }
+
+    if (typeof message === 'string') {
+      let defaultMessage = this.returnDefaults(message);
+      if (!!defaultMessage) {
+        this.message = defaultMessage.message;
+        this.name = defaultMessage.name;
+        this.originalMessage = defaultMessage.message;
+      } else {
+
+      }
+    } else if (Array.isArray(message)) {
+      this.message = this.convertToDefaultMessage(message);
+      this.name = name;
+      this.originalMessage = message;
+    }
   }
 
   isAcknowledgment(messageToCheck) {
@@ -18,9 +50,9 @@ class Message {
   }
 
   tryAcknowledgment (messageToCheck) {
-    if (isAcknowledgment(messageToCheck) === true) {
+    if (this.isAcknowledgment(messageToCheck) === true) {
       return true;
-    } else if (this.retryAttempts <= this.options.numberOfRetries) {
+    } else if (this.retryAttempts <= this.numberOfRetries) {
       this.retryAttempts++;
       return this.retryAttempts;
     }
@@ -69,14 +101,14 @@ class Message {
       break;
     }
     case 'array': {
-      this.isHexArray === true ? convertedMessage = convertHexArrayToByteArray (message) : convertedMessage = message;
+      this.isHexArray === true ? convertedMessage = this.convertHexArrayToByteArray (message) : convertedMessage = message;
       break;
     }
     case 'string': {
       if (message.length % 2 !== 0) { throw 'A message string must be divisable by 2'; }
-      if (isHexString(message)) {
+      if (this.isHexString(message)) {
         convertedMessage = this.sliceStringByRecurringAmounts(message, 2);
-        convertedMessage = convertHexArrayToByteArray(convertedMessage);
+        convertedMessage = this.convertHexArrayToByteArray(convertedMessage);
       } else {
         convertedMessage = this.sliceStringByRecurringAmounts(message, 2);
       }
@@ -108,7 +140,6 @@ class Message {
     return output;
   }
 
-
   isHexString(str) {
     var expression = new RegExp('^([0-7A-F][0-7A-F])+$', 'i');
     return expression.test(str);
@@ -126,7 +157,6 @@ class Message {
     return true;
   }
 
-
   convertHexArrayToByteArray (hexarray, transformIntoArray = false) {
     //https://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
     //converts an array/buffer of hex into numeric
@@ -138,14 +168,13 @@ class Message {
     return transformIntoArray === false ? output : [...output];
   }
 
-
   returnArrayFromBuffer(buffer) {
     //https://stackoverflow.com/questions/18148827/convert-buffer-to-array
     return Array.prototype.slice.call(buffer, 0);
     //or [...exampleBuffer]
   }
 
-  hasHeader (message) {
+  hasStartByte (message) {
     if (Array.isArray(message) !== true) { return null; }
     var indexOfStart = message.indexOf(165);
 
@@ -155,7 +184,7 @@ class Message {
       return true;
     } else {
       return null;
-      throw 'hasHeader: Error: 165 Bit location caused an Error';
+      throw new Error ('hasStartByte: Error: 165 Bit location caused an Error');
     }
   }
 
@@ -163,8 +192,6 @@ class Message {
     if (!Array.isArray(message)) { return undefined; }
     var StartOfMessege = messageArray.indexOf(165);
     if (StartOfMessege === -1) {
-      // console.log (message);
-      // return 'Error No Start (165) byte the Message';
       return message;
     } else {
       return message.slice (StartOfMessege, message.length); //removes the high and low checksum bytes in back and the HEADER
@@ -190,16 +217,6 @@ class Message {
     strippedMessage = this.stripchecksum(message);
     strippedMessage = this.stripHeader(message);
 
-    // var StartOfMessege = messageArray.indexOf(165);
-
-    // if (StartOfMessege === -1) {
-    //   // console.log (message);
-    //   // return 'Error No Start (165) byte the Message';
-    //   strippedMessage = message;
-    // } else {
-    //   strippedMessage = message.slice (StartOfMessege, message.length - 2); //removes the high and low checksum bytes in back and the HEADER
-    // }
-
     if (returnArrayOrBuffer.toLowerCase() === 'array') {
       return strippedMessage;
     } else if ( returnArrayOrBuffer.toLowerCase() === 'buffer') {
@@ -217,6 +234,18 @@ class Message {
     return sum;
   }
 
+  combineHighPlusLowBit (highBit, lowBit) {
+    //returns the checksum, calculated from the high Bit and Low bit
+    return highBit * 256 + lowBit;
+  }
+
+  returnHighAndLowBitOfChecksum (message) {
+    //returns an array [highBit, lowBit] calculated by taking the sum of the message
+    var checksum = this.sumOfBytes(message);
+    var checksumLargeandSmallBit = [this.returnHighBit (checksum), this.returnLowBit (checksum)];
+    return checksumLargeandSmallBit;
+  }
+
   returnHighBit (value) {
     return parseInt(value / 256);
   }
@@ -225,40 +254,114 @@ class Message {
     return value % 256;
   }
 
-  combineHighPlusLowBit (highBit, lowBit) {
-    //returns the checksum, calculated from the high Bit and Low bit
-    return highBit * 256 + lowBit;
-  }
-
   appendCheckSum (packet) {
     //appends the
-    var checksum = sumOfBytes(packet);
-    var highAndLowBitArray = [];
-
-    highAndLowBitArray.push(returnHighBit(checksum));
-    highAndLowBitArray.push(returnLowBit(checksum));
+    var checksum = this.sumOfBytes(packet);
+    var highAndLowBitArray = [this.returnHighBit(checksum), this.returnLowBit(checksum)];
     return packet.concat(highAndLowBitArray);
   }
 
-  addOnHeaderToPacket (packet) {
-    return [255, 0, 255].concat(packet);
+  addBufferToMessage (message) {
+    return this.returnDefault('buffer').concat(message);
   }
 
-  preparePacketForSending (packet) {
+  addstartToMessage (message) {
+    return this.returnDefaultreturnDefault('start').concat(message);
+  }
+
+  prepareMessageForSending (packet) {
     //prepares a packet ie: [2,4,3,2] for sending by adding a header and checksum high & lowbit
     var clonePacket = packet;
-    clonePacket = appendCheckSum (clonePacket);
-    clonePacket = addOnHeaderToPacket (clonePacket);
+    // clonePacket = this.addstartToMessage(message);
+    clonePacket = this.appendCheckSum (clonePacket);
+    clonePacket = this.addBufferToMessage(clonePacket);
     return clonePacket;
   }
 
-  returnHighAndLowBitOfChecksum (message) {
-    //returns an array [highBit, lowBit] calculated by taking the sum of the message
-    var checksum = sumOfBytes(message);
-    var checksumLargeandSmallBit = [returnHighBit (checksum), returnLowBit (checksum)];
-    return checksumLargeandSmallBit;
+  returnDefault(name) {
+    var defaults = {
+      header: [255, 0, 255, 165, 0],
+      buffer: [255, 0, 255],
+      start: [165, 0],
+      pumpToRemote:       {name: 'Set Pump to Remote', message: [4, 1, 255, 2, 25 ]}, //intellicom set pump to remote  //works
+      pumpToLocal:        {name: 'Set Pump to Local',  message: [4, 1, 0, 1, 26 ]},
+      pumpExternalSpeed4: {name: 'Exteral Speed 4',    message: [1, 4, 3, 33, 0, 32, 1, 94 ]}, //intellicom use external command i think 4 (highest his is solar  priority) (possibley with 1 min timer?)
+      pumpExternalSpeed3: {name: 'Exteral Speed 3',    message: [1, 4, 3, 33, 0, 24, 1, 86 ]}, //slow Speed
+      pumpExternalSpeed2: {name: 'Exteral Speed 2',    message: [1, 4, 3, 33, 0, 16, 1, 78 ]}, //waterfall
+      pumpExternalSpeed1: {name: 'Exteral Speed 1',    message: [1, 4, 3, 33, 0, 8, 1, 70 ]}, //spa
+      pumpOff:            {name: 'Speed OFF',          message: [1, 4, 3, 33, 0, 0, 1, 62 ]},
+      pumpGetStatus:      {name: 'Get Pump Status',    message: [7, 0, 1, 28 ]},
+      pumpPowerOn:        {name: 'Set Power On',       message: [6, 1, 10 ]},
+      pumpPowerOff:       {name: 'Set Power Off',      message: [6, 1, 4 ]},
+    };
+    return defaults[name];
   }
-
 }
 
 module.exports = Message;
+
+
+var MessagePumpPower = exports.pumpPower = function (powerState, callback = ()=>{}) {
+  var core;
+  if (powerState === 'on') {
+    core = msg.pump_PowerOn;
+  } else if (powerState === 'off') {
+    core = msg.pump_PowerOff;
+  } else {
+    return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
+  }
+  return new Message(core, 'Pump Power' + powerState, {callback: callback});
+};
+
+var pumpControlPanelState = exports.pumpControlPanelState = function (powerState, callback = ()=>{}) {
+  var core;
+  if (powerState === 'remote') {
+    core = mgs.pumpToRemote;
+  } else if (powerState === 'local') {
+    core = mgs.pumpToLocal;
+  } else {
+    return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
+  }
+  return new Message (core.byte, core.name, callback);
+};
+
+var messagePumpSpeed = function (rpm, program, destination = 96, source = 16, callback = ()=>{}) {
+  var possibleSubcommands = {
+    0: 33,
+    1: 39,
+    2: 40,
+    3: 41,
+    4: 42,
+  };
+  var packet = {};
+  var action = 1;           //1= set speed mode, unsure if other modes
+  var length = 4;            //for speed, i don't think this changes from 4,
+  var command = 33;           //3= run program , 2= run/save? at speed????
+  var subcommand = possibleSubcommands[program]; //33 = run program xx / turn off pump, 39-42, save P1-4 as xx, 43 set pump timer for xx min || command =2; subcommand - 96 or 196 then might be linked to speed 1
+  var commandHighBit = returnHighBit (rpm); //changes, either RPM high or timer HH or MM
+  var commandLowBit = returnLowBit (rpm); //changes either rpm low, or timer MM
+  // var checksumHighBit = //checksum high added later in code
+  // var checksumLowBit = //chechsum low added later in code
+  // console.log('commandHighBit: ' , commandHighBit);
+  // console.log('returnLowBit (rpm): ' , commandLowBit);
+  packet['byte'] = [165, 0, destination, source, action, length, command, subcommand, commandHighBit, commandLowBit];
+  // console.log (packet.byte)
+  packet.name = 'Run Pump Program: ' + program + ' at ' + rpm;
+  return new Message(packet.byte, packet.name, callback);
+};
+
+var runIntellicomPumpSpeed = exports.runIntellicomPumpSpeed = function (speed = 0, interval = 10000, callback = ()=>{}) {
+  var externalVariable = {
+    0: msg.pump_Off,
+    1: msg.pumpExternal_Speed1,
+    2: msg.pumpExternal_Speed2,
+    3: msg.pumpExternal_Speed3,
+    4: msg.pumpExternal_Speed4
+  };
+  if (!speed === 0) {
+    exteralTimer = setInterval( function() {
+      addToQueue(externalVariable[speed]);
+    }, interval);
+  }
+  return new Message (externalVariable[speed].byte, externalVariable[speed].name, callback);
+};
