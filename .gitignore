@@ -39,6 +39,6 @@ bower_components/
 
 #Other Data
 *NotGitData/
-logs
 .env
 database/mockData
+testingRandomStuff
