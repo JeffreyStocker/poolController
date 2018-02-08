@@ -3,7 +3,7 @@ var config = {};
 var configFileLocation = './confisg.json';
 var logs = [];
 
-var defaults =
+var defaults = module.exports.defaults =
   {
     system: {
       web: {
@@ -13,7 +13,7 @@ var defaults =
         mainLoopInterval: 25,
         numberOfRetriesForMissingMessages: 3,
         statusRequestUpdateInverval: 500,
-        timeBetweenQueueSending: 250
+        timeBetweenQueueSending: 100
 
       },
       logs: {
@@ -50,7 +50,9 @@ var defaults =
       },
       communications: {
         rs485: {
-          port: '/dev/ttyUSB0'
+          ports: [
+            '/dev/ttyUSB0'
+          ]
         },
         GPIO: {
         }
@@ -60,8 +62,9 @@ var defaults =
       pumps: {
         1: {
           enabled: true,
-          name: 'pump 1',
+          name: 'pump1',
           communications: {
+            protocol: 'pentair',
             type: 'rs485',
             address: 96,
           }
@@ -81,8 +84,22 @@ var defaults =
   };
 
 
-  // module.exports.config = module.exports.init();
+// module.exports.config = module.exports.init();
 module.exports.config = {};
+
+module.exports.retrieveConfigInfo = function (pathString = '') {
+  var path = pathString.split('.');
+  var obj = module.exports.config;
+
+  for (var i = 0; i < path.length; i++) {
+    if (!obj[path[i]]) {
+      obj = undefined;
+      break;
+    }
+    obj = obj[path[i]];
+  }
+  return obj;
+};
 
 
 var parseConfig = function (json, callback) {
@@ -102,15 +119,14 @@ module.exports.init = function (location = configFileLocation, useDefault = fals
   if (location === 'default' || useDefault === true) {
     data = defaults;
     logs.push('Using Default Configuration');
-  }
-  else {
+  } else {
     try {
       data = fs.readFileSync(location, 'utf8');
       data = parseConfig(data);
       logs.push('location');
     } catch (err) {
       data = defaults;
-      console.log ('User Config File not found. Using Defaults Configuration');
+      // console.log ('User Config File not found. Using Defaults Configuration');
       logs.push('User Config File not found. Using Default Configuration');
     }
   }
