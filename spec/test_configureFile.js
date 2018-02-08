@@ -1,3 +1,5 @@
+process.env.NODE_PATH = __dirname + '/../';
+
 var cf = require('../server/configureFile');
 var assert = require('assert');
 var fs = require('fs');

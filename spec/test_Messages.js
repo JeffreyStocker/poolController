@@ -1,3 +1,5 @@
+process.env.NODE_PATH = __dirname + '/../';
+
 var Message = require('../server/Classes/Message.js');
 var assert = require('assert');
 var fs = require('fs');
