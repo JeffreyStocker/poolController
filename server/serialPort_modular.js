@@ -2,7 +2,7 @@ var SerialPort = require('serialport');
 var port = module.exports.ports = {};
 var logger = () => {};
 
-var init = exports.init = function (server, portNames = [], newLogger = logger) {
+var init = exports.init = function (portNames = [], newLogger = logger) {
   //////// server, serial Port Functions //////////////////////
   if (logger !== newLogger && typeof newLogger === 'function') { logger = newLogger; }
 
@@ -44,6 +44,7 @@ var init = exports.init = function (server, portNames = [], newLogger = logger) 
     //   logger('system', 'verbose', name + ': Data Received | ' + data );
     // });
   }
+  return module.exports;
 };
 
 module.exports.setLogger = function (newLogger = logger) {
