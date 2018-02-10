@@ -17,9 +17,6 @@ module.exports = {
   pumpExternal_Speed1: {packet: Buffer.from('a50060100104032100080146', 'hex'), name: 'Exteral Speed 1',     hex: 'a50060100104032100080146', byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 8, 1, 70 ]}, //spa
   pump_Off:            {packet: Buffer.from('a5006010010403210000013e', 'hex'), name: 'Speed OFF',           hex: 'a5006010010403210000013e', byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 0, 1, 62]},
   pumpGetStatus:       {packet: Buffer.from([165, 0, 96, 16, 7, 0, 1, 28]),     name: 'Get Pump Status',     hex: 'A50961670128',             byte: [165, 0, 96, 16, 7, 0, 1, 28]},
-
-
-  //this works//may not be working
-  pump_PowerOn:  {packet: Buffer.from('A500601006010A0126','hex'),       name: 'Set Power On',        hex: 'A500601006010A0126',       byte:[165, 0, 96, 16, 6, 1, 10], byteWithChecksum:[165, 0, 96, 16, 6, 1, 10, 1, 38]},
-  pump_PowerOff: {packet: Buffer.from('A50060100601040120','hex'),       name: 'Set Power Off',       hex: 'A50060100601040120',       byte:[165, 0, 96, 16, 6, 1, 4], byteWithChecksum:[165, 0, 96, 16, 6, 1, 4, 1, 32]},
+  pump_PowerOn:        {packet: Buffer.from('A500601006010A0126', 'hex'),       name: 'Set Power On',        hex: 'A500601006010A0126',       byte:[165, 0, 96, 16, 6, 1, 10], byteWithChecksum:[165, 0, 96, 16, 6, 1, 10, 1, 38]},
+  pump_PowerOff:       {packet: Buffer.from('A50060100601040120', 'hex'),       name: 'Set Power Off',       hex: 'A50060100601040120',       byte:[165, 0, 96, 16, 6, 1, 4], byteWithChecksum:[165, 0, 96, 16, 6, 1, 4, 1, 32]},
 };
