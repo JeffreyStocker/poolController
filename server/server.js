@@ -4,7 +4,7 @@
 var express = require ('express');
 var app = express();
 var io = require ('socket.io');
-var loggerSystem = require(process.env.NODE_PATH + '/server/logs/winston').loggers.system;
+var loggerSystem = require(process.env.NODE_PATH + '/server/logging/winston').loggers.system;
 // var events = require('events');
 // var pumpFunctions= require ('./pumpFunction.js')
 

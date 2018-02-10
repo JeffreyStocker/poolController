@@ -1,13 +1,13 @@
 var io = require ('socket.io');
 var socketServer = require ('../server').socketServer;
 const { addToQueue } = require ('../pump/queue');
-const logger = require (process.env.NODE_PATH + '/server/logs/winston').sendToLogs;
+const logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 // module.pushPumpInfoToWebPages = function pushPumpInfoToWebPages (){
 //   socket.emit('pumpDataReturn', pumpData)
 // }
 const { server } = require ('../server');
 var { statusRequestUpdateInverval, exteralTimer } = require('../variables');
-var { pumpData } = require ('../serialPort');
+var { pumpData, port } = require ('../serialPort');
 const {
   manualPumpControl,
   pumpControlPanelState,
@@ -20,8 +20,14 @@ const {
 
 
 var sendMessage = function (queue, queueName, message, options = {}, callback = ()=>{}) {
-  var response = queue.addMessageToQueue (queueName, message);
+  var response = queue.addMessageToQueue (queueName, message, null, (err, data) => {
+    if (err) {
 
+    } else {
+      logger('events', 'info', data.name + 'was sent to:' + queueName);
+      callback(0);
+    }
+  });
 };
 
 
@@ -132,6 +138,17 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
     pumpControlPanelState(state);
     // socket.emit('confirm');
     callback(0);
+  });
+
+  socket.on ('pumpControlSetToLocalOverride', function (state, callback) {
+    let packet = Buffer.from([165, 0, 96, 16, 4, 1, 0, 1, 26, 1, 53]); //adds header, checksum and converts to a buffer
+
+    port.write(packet, function(err) {
+      if (err) {
+        console.log('Error on write: ', err.message);
+      }
+      callback(0);
+    });
   });
 
 

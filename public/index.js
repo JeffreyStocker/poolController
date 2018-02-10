@@ -129,6 +129,11 @@ $('document').ready(function () {
     showMessage();
   });
 
+  $('.pumpControlSetToLocalOverride').click(function () {
+    socket.emit('pumpControlSetToLocalOverride', 'local', confirmMessage);
+    showMessage();
+  });
+
   $('.pumpControlSetToggle').click(function () {
     socket.emit('pumpControlPanelState', 'toggle', confirmMessage);
     showMessage();
