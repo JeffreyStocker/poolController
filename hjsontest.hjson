@@ -1,0 +1,78 @@
+{
+  system: {
+    web: {
+      port: 8181
+    },
+    queue: { //test
+      mainLoopInterval: 25,
+      numberOfRetriesForMissingMessages: 3,
+      statusRequestUpdateInverval: 500,
+      timeBetweenQueueSending: 100
+
+    },
+    logs: {
+      system: {
+        console: {
+          colorize: true,
+          label: 'system',
+          level: 'debug',
+        },
+        file: {
+          filename: '/logs/system.log'
+        }
+      },
+      events: {
+        console: {
+          colorize: true,
+          label: 'events',
+          level: 'info',
+        },
+        file: {
+          filename: '/logs/events.log'
+        }
+      },
+      pump: {
+        console: {
+          colorize: true,
+          label: 'pump',
+          level: 'info',
+        },
+        file: {
+          filename: '/logs/power.log'
+        }
+      },
+    },
+    communications: {
+      rs485: {
+        ports: [
+          '/dev/ttyUSB0'
+        ]
+      },
+      GPIO: {
+      }
+    },
+  },
+  equipment: {
+    pumps: {
+      1: {
+        enabled: true,
+        name: 'pump1',
+        communications: {
+          protocol: 'pentair',
+          type: 'rs485',
+          address: 96,
+        }
+      }
+    },
+    controllers: {
+      'intellicom': {
+        'enabled': true,
+        'name': ''
+      },
+      'intellitouch': {
+        'enabled': false,
+        'name': ''
+      }
+    }
+  }
+}
