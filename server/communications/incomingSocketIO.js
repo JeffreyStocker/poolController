@@ -1,11 +1,9 @@
 var io = require ('socket.io');
-var socketServer = require ('../server').socketServer;
 const { addToQueue } = require ('../pump/queue');
+const defaultMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
 const logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
-// module.pushPumpInfoToWebPages = function pushPumpInfoToWebPages (){
-//   socket.emit('pumpDataReturn', pumpData)
-// }
 const { server } = require ('../server');
+var socketServer = require ('../server').socketServer;
 var { statusRequestUpdateInverval, exteralTimer } = require('../variables');
 var { pumpData, port } = require ('../serialPort');
 const {
@@ -17,6 +15,14 @@ const {
   setPumpTimer,
 } = require ('../pump/commands');
 
+var returnSocketCallback = function (cb) {
+  cb(0);
+};
+
+
+var createMessage = function (message, name, logLevel = 'info', messageCallback = ()=>{}) {
+  return new Message (message, name, {logLevel}, messageCallback);
+};
 
 
 var sendMessage = function (queue, queueName, message, options = {}, callback = ()=>{}) {
@@ -30,11 +36,9 @@ var sendMessage = function (queue, queueName, message, options = {}, callback = 
   });
 };
 
-
-
-socketServer.on ('disconnect', function (socket) {
-  logger('event', 'verbose', 'socket disconnected: ' + socket.id);
-});
+var temp = function () {
+  var message = createMessage();
+};
 
 
 socketServer.on('connection', function (socket) { // WebSocket Connection
@@ -42,9 +46,11 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
   socket.on('Trial_intellicom', function (speed, callback) {
     // logger.debug('intellicom');
-    runIntellicomPumpSpeed(speed);
+    // runIntellicomPumpSpeed(speed);
     // socket.emit('confirm');
-    callback(0);
+    var message = new Message (defaultMsg.pumpToLocal, 'Trial_intellicom, pumpToLocal', null, callback);
+
+    // callback(0);
   });
 
   socket.on('manualPacket', function (message, callback) {
@@ -165,4 +171,10 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
     // socket.emit('confirm');
     callback(0);
   });
+});
+
+
+
+socketServer.on ('disconnect', function (socket) {
+  logger('event', 'verbose', 'socket disconnected: ' + socket.id);
 });

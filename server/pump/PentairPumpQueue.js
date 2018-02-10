@@ -1,5 +1,5 @@
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
-var messages = require (process.env.NODE_PATH + '/server/messages.js');
+var messages = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
 var config = require (process.env.NODE_PATH + '/server/variables.js').config;
 
 var empty = function (context) {
