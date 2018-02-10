@@ -41,6 +41,10 @@ class Message {
     }
   }
 
+  runCallback () {
+    this.callback();
+  }
+
   isAcknowledgment(messageToCheck) {
     if (this.acknowledgment.toString() === messageToCheck.toString()) {
       return true;
