@@ -61,18 +61,14 @@ var queueLoopMain = module.exports.queueLoopMain = function (stopFunction = fals
       acknowledgment.reset();
     }
 
-
     if (acknowledgment.status === 'none' && queueMessagesToSend.length !== 0 ) {
       // console.log('queueMessagesToSend.length: ' , queueMessagesToSend.length);
       var specificMessageToSend = queueMessagesToSend.shift();
       sendCommand(specificMessageToSend);
       acknowledgment.status = 'waiting For';
       acknowledgment.orginalMessage = specificMessageToSend;
-
-
       // console.log('specificMessageToSend: ' , specificMessageToSend);
       // console.log('queueMessagesToSend.length: ' , queueMessagesToSend.length);
-
     }
     queueLoopMain_InUse = false;
 
@@ -94,12 +90,11 @@ var addToQueue = module.exports.addToQueue = function (packet) {
   //this way the pump should only be set to remote when sending information
 
   if (queueMessagesToSend.length === 0) {
-    // queueMessagesToSend.push(pumpToRemote);   //i guess i don't really need SetToLocal/SetToRemote
+    // queueMessagesToSend.push(pumpToRemote);   //i guess i don't really need SetToRemote
     queueMessagesToSend.push(packet);
-    // queueMessagesToSend.push(pumpToLocal);   //i guess i don't really need SetToLocal/SetToRemote
+    queueMessagesToSend.push(pumpToLocal);
   } else {
     queueMessagesToSend[queueMessagesToSend.length - 1] = packet;
-    // queueMessagesToSend.push(pumpToLocal);   //i guess i don't really need SetToLocal/SetToRemote
     // ok i guess i do, it appears that while you can send commands without the SetToRemote, if you fail to have SetToLocal, the pump does not come out of remote  --or it might be an another annoying artiface from nodejs-PentairControlSystem
   }
 };
