@@ -194,30 +194,37 @@ class TwinLinkedStack {
     }
     return false;
   }
+  peak () {
+    if (this.head === null) {
+      return;
+    }
+    return this.head.val;
+  }
 
 }
-
-var stack = new TwinLinkedStack();
-
-stack.push (5);
-// stack.push (3)
-// console.log (stack.pop())
-stack.unshift(1);
-stack.shift();
-stack.shift();
-stack.push(3);
-// stack.pop();
-stack.unshift(10);
-stack.unshift(333);
-// stack.pop()
-// stack.pop()
-
-// console.log(stack.shift());
-console.log(stack.toArray());
-console.log('find', stack.remove(333));
-console.log('find', stack.remove(10));
-console.log('find', stack.remove(3));
-console.log('find', stack.remove(3));
-console.log(stack.toArray());
-
 module.exports = TwinLinkedStack;
+
+//test//
+
+// var stack = new TwinLinkedStack();
+
+// stack.push (5);
+// // stack.push (3)
+// // console.log (stack.pop())
+// stack.unshift(1);
+// stack.shift();
+// stack.shift();
+// stack.push(3);
+// // stack.pop();
+// stack.unshift(10);
+// stack.unshift(333);
+// // stack.pop()
+// // stack.pop()
+
+// // console.log(stack.shift());
+// console.log(stack.toArray());
+// console.log('find', stack.remove(333));
+// console.log('find', stack.remove(10));
+// console.log('find', stack.remove(3));
+// console.log('find', stack.remove(3));
+// console.log(stack.toArray());

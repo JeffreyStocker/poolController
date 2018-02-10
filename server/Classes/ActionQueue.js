@@ -1,5 +1,6 @@
-var stack = require(process.env.NODE_PATH + '/server/Classes/TwinLinkedStack');
-class Queue extends stack {
+var TwinLinkedStack = require(process.env.NODE_PATH + '/server/Classes/TwinLinkedStack');
+
+class ActionQueue extends TwinLinkedStack {
   constructor (config = {actions: {}, data: undefined, } ) {
     super(data);
 
@@ -43,13 +44,6 @@ class Queue extends stack {
       return this.shift();
     }
     return null;
-  }
-
-  peak () {
-    if (this.head === null) {
-      return;
-    }
-    return this.head.val;
   }
 
   add(message) {
