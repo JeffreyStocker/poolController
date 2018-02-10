@@ -42,8 +42,9 @@ var stripMessageOfHeaderAndChecksum = function (message) {
   }
   var StartOfMessege = messageArray.indexOf(165);
   if (StartOfMessege === -1) {
-    console.log (message);
-    throw new Error ('Error No Start (165) byte the Message');
+    // console.log (message);
+    // throw new Error ('Error No Start (165) byte the Message');
+    StartOfMessege = 0;
   }
   var strippedMessage = message.slice (StartOfMessege, message.length - 2); //removes the high and low checksum bytes in back and the HEADER
 
