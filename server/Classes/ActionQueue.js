@@ -8,7 +8,6 @@ class ActionQueue extends TwinLinkedStack {
     this._InUse = false;
     this._started = false;
     this._actions = config.actions;
-    this.timer;
   }
 
   runAction(name, context = this) {
