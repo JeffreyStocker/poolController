@@ -84,11 +84,11 @@ class Stack {
   }
 }
 
-var stack = new Stack();
+// var stack = new Stack();
 
-stack.push (5);
-// stack.push (3)
-// console.log (stack.pop())
-stack.unshift(1);
-console.log(stack.shift());
-console.log(stack);
+// stack.push (5);
+// // stack.push (3)
+// // console.log (stack.pop())
+// stack.unshift(1);
+// console.log(stack.shift());
+// console.log(stack);
