@@ -1,7 +1,6 @@
 var msg = require (process.env.NODE_PATH + '/server/messages');
 var { exteralTimer } = require (process.env.NODE_PATH + '/server/variables');
 
-
 class Message {
   constructor(message, name = 'unknown', options = {
     numberOfRetries: 3,
@@ -41,8 +40,23 @@ class Message {
     }
   }
 
-  runCallback () {
-    this.callback();
+  setDestination (destintation) {
+    if (!destintation && typeof destintation !== 'number') { return undefined; }
+    this.message[2] = destination;
+    return this.message;
+  }
+
+  setSource (source) {
+    if (!source && typeof source !== 'number') { return undefined; }
+    this.message[3] = source;
+    return this.message;
+  }
+
+  endMessage (err, data) {
+    if (err) {
+
+    }
+    this.callback(err, data);
   }
 
   isAcknowledgment(messageToCheck) {
@@ -243,13 +257,6 @@ class Message {
     return highBit * 256 + lowBit;
   }
 
-  returnHighAndLowBitOfChecksum (message) {
-    //returns an array [highBit, lowBit] calculated by taking the sum of the message
-    var checksum = this.sumOfBytes(message);
-    var checksumLargeandSmallBit = [this.returnHighBit (checksum), this.returnLowBit (checksum)];
-    return checksumLargeandSmallBit;
-  }
-
   returnHighBit (value) {
     return parseInt(value / 256);
   }
@@ -258,45 +265,46 @@ class Message {
     return value % 256;
   }
 
-  appendCheckSum (packet) {
-    //appends the
-    var checksum = this.sumOfBytes(packet);
-    var highAndLowBitArray = [this.returnHighBit(checksum), this.returnLowBit(checksum)];
-    return packet.concat(highAndLowBitArray);
+  returnChecksum (message) {
+    //returns an array [highBit, lowBit] calculated by taking the sum of the message
+    var checksum = this.sumOfBytes(message);
+    return [this.returnHighBit (checksum), this.returnLowBit (checksum)];
   }
 
-  addBufferToMessage (message) {
+  appendCheckSum (message) {
+    return message.concat(returnChecksum(message));
+  }
+
+  prependBuffer (message) {
     return this.returnDefault('buffer').concat(message);
   }
 
-  addstartToMessage (message) {
+  addStartToMessage (message) {
     return this.returnDefaultreturnDefault('start').concat(message);
   }
 
-  prepareMessageForSending (packet) {
+  prepareMessageForSending (message) {
     //prepares a packet ie: [2,4,3,2] for sending by adding a header and checksum high & lowbit
-    var clonePacket = packet;
-    // clonePacket = this.addstartToMessage(message);
-    clonePacket = this.appendCheckSum (clonePacket);
-    clonePacket = this.addBufferToMessage(clonePacket);
-    return clonePacket;
+    message = this.prependBuffer (message);
+    message = this.addBufferToMessage(message);
+    return message;
   }
 
-  returnDefault(name) {
+  returnDefault(name, destination = 96, source = 16) {
     var defaults = {
-      header: [255, 0, 255, 165, 0],
+      header: [255, 0, 255, 165, 0], //should not be used as messages should have this by default
       buffer: [255, 0, 255],
-      start: [165, 0],
-      pumpToRemote:       {name: 'Set Pump to Remote', message: [4, 1, 255, 2, 25 ]}, //intellicom set pump to remote  //works
-      pumpToLocal:        {name: 'Set Pump to Local',  message: [4, 1, 0, 1, 26 ]},
-      pumpExternalSpeed4: {name: 'Exteral Speed 4',    message: [1, 4, 3, 33, 0, 32, 1, 94 ]}, //intellicom use external command i think 4 (highest his is solar  priority) (possibley with 1 min timer?)
-      pumpExternalSpeed3: {name: 'Exteral Speed 3',    message: [1, 4, 3, 33, 0, 24, 1, 86 ]}, //slow Speed
-      pumpExternalSpeed2: {name: 'Exteral Speed 2',    message: [1, 4, 3, 33, 0, 16, 1, 78 ]}, //waterfall
-      pumpExternalSpeed1: {name: 'Exteral Speed 1',    message: [1, 4, 3, 33, 0, 8, 1, 70 ]}, //spa
-      pumpOff:            {name: 'Speed OFF',          message: [1, 4, 3, 33, 0, 0, 1, 62 ]},
-      pumpGetStatus:      {name: 'Get Pump Status',    message: [7, 0, 1, 28 ]},
-      pumpPowerOn:        {name: 'Set Power On',       message: [6, 1, 10 ]},
-      pumpPowerOff:       {name: 'Set Power Off',      message: [6, 1, 4 ]},
+      start: [165, 0], //should not be used as messages should have this by default
+      pumpToRemote:       {name: 'Set Pump to Remote', message: [165, 0, destination, source, 4, 1, 255, 2, 25 ]}, //intellicom set pump to remote  //works
+      pumpToLocal:        {name: 'Set Pump to Local',  message: [165, 0, destination, source, 4, 1, 0, 1, 26 ]},
+      pumpExternalSpeed4: {name: 'Exteral Speed 4',    message: [165, 0, destination, source, 1, 4, 3, 33, 0, 32, 1, 94 ]}, //intellicom use external command i think 4 (highest his is solar  priority) (possibley with 1 min timer?)
+      pumpExternalSpeed3: {name: 'Exteral Speed 3',    message: [165, 0, destination, source, 1, 4, 3, 33, 0, 24, 1, 86 ]}, //slow Speed
+      pumpExternalSpeed2: {name: 'Exteral Speed 2',    message: [165, 0, destination, source, 1, 4, 3, 33, 0, 16, 1, 78 ]}, //waterfall
+      pumpExternalSpeed1: {name: 'Exteral Speed 1',    message: [165, 0, destination, source, 1, 4, 3, 33, 0, 8, 1, 70 ]}, //spa
+      pumpOff:            {name: 'Speed OFF',          message: [165, 0, destination, source, 1, 4, 3, 33, 0, 0, 1, 62 ]},
+      pumpGetStatus:      {name: 'Get Pump Status',    message: [165, 0, destination, source, 7, 0, 1, 28 ]},
+      pumpPowerOn:        {name: 'Set Power On',       message: [165, 0, destination, source, 6, 1, 10 ]},
+      pumpPowerOff:       {name: 'Set Power Off',      message: [165, 0, destination, source, 6, 1, 4 ]},
     };
     return defaults[name];
   }
