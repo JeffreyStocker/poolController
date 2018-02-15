@@ -4,7 +4,8 @@ var logger = () => {};
 
 var init = exports.init = function (portNames = [], newLogger = logger) {
   //////// server, serial Port Functions //////////////////////
-  if (logger !== newLogger && typeof newLogger === 'function') { logger = newLogger; }
+  module.exports.setLogger(newLogger);
+  // if (logger !== newLogger && typeof newLogger === 'function') { logger = newLogger; }
 
   for (var name of portNames) {
     if (typeof name === 'string') {
