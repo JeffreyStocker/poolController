@@ -27,7 +27,7 @@ var logInternal = function (newLog) {
 module.exports.sendToLogs = function (loggerName, level, message) {
   var logger = module.exports.loggers[loggerName];
   if (logger === undefined) { return; }
-  logger.info(level, message);
+  logger.log(level, message);
 };
 
 module.exports.init = function (logs = {}) {
