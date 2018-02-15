@@ -1,9 +1,9 @@
 const os = require('os'); //to get os version so i can install some testings
 const { pushPumpInfoToWebPages } = require (process.env.NODE_PATH + '/server/communications/outgoingSocketIO');
 const { convertToDecArray, parsePumpStatus } = require(process.env.NODE_PATH + '/server/pump/helperFunctions.js');
-// const { pushPumpInfoToWebPages } = require (process.env.NODE_PATH + '/pump/sockets');
 var { showPumpStatusInConsole, acknowledgment } = require(process.env.NODE_PATH + '/server/variables');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
+var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
 
 var port;
@@ -39,7 +39,8 @@ var init = exports.init = function () {
       if (err) {
         return console.log('Error: ', err.message);
       }
-      console.log ('Serial Port Created');
+      logger('system', 'info', 'Serial Port Created');
+      // console.log ('Serial Port Created');
     });
   }
 
@@ -57,21 +58,24 @@ var init = exports.init = function () {
         socketServer.emit('pumpDataReturn', pumpData);
       } catch (err) {
         // console.log ('Error: Port:On: pushPUmpInfoToWebPages is not working')
-        console.log ('err: ', err);
-        console.log('Status Received:  [' + [... data] + ']');
+        logger('system', 'error', 'Error proccesing data' + err);
+        // console.log ('err: ', err);
+        // console.log('Status Received:  [' + [... data] + ']');
       }
       acknowledgment.status = 'found';
     } else if (acknowledgment.status === 'waiting For') {
       var check = acknowledgment.isAcknowledgment(data);
-      // console.log('check', check)
       acknowledgment.status = 'found';
-      console.log('Acknowledged:  [' + [... data] + ']');
+      logger('events', 'verbose', 'Acknowledged:  [' + [... data] + ']');
+      // console.log('Acknowledged:  [' + [... data] + ']');
       // acknowledgment.message.push(data);
       // acknowledgment.reset();
     } else if (Array.isArray(data) === false) {
-      console.log(data);
+      // console.log(data);
+      logger('events', 'debug', 'Data raw: ' + data);
+
     } else {
-      console.log('Data Received:  [' + [... data] + ']');
+      logger('events', 'verbose', 'Data Received:  [' + [... data] + ']');
     }
 
     // else if (acknowledgment.status !== 'waiting For' || acknowledgment.isAcknowledgment(data) !== true) {
@@ -79,7 +83,6 @@ var init = exports.init = function () {
     // }
 
   });
-
 };
 
 init();
