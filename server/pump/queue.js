@@ -2,6 +2,7 @@
 const { preparePacketForSending } = require ('./helperFunctions');
 const { port } = require('./../serialPort');
 var { queueLoopMain_InUse, showPumpStatusInConsole, acknowledgment } = require('../variables');
+var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
 const { prefix,
   shortPrefix,
@@ -122,7 +123,8 @@ var sendCommand = module.exports.sendCommand = function (message, name = 'unknow
     // || message === pumpToRemote
     ) {
     } else { //ignore logging of the status messages
-      console.log('Sent Command: ' + name, ': [' + [...packet] + ']');
+      // console.log('Sent Command: ' + name, ': [' + [...packet] + ']');
+      logger('event', 'verbose', 'Sent Command: ' + name, ': [' + [...packet] + ']');
     }
   });
 };
