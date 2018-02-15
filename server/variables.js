@@ -1,6 +1,8 @@
 
 var flipSourceAndDestinationFromStrippedMessage = require('./pump/helperFunctions').flipSourceAndDestinationFromStrippedMessage;
 module.exports.exteralTimer;
+module.exports.statusTimers;
+module.exports.timerIntellicom;
 module.exports.statusRequestUpdateInverval = 500; //controls how often pump status are sent
 module.exports.showPumpStatusInConsole = false;
 
@@ -48,25 +50,25 @@ var acknowledgment = module.exports.acknowledgment =
 };
 
 module.exports.addresses = {
-  Chlorinator: [2, 16], // 	Chlorinator (This is a different type of packet)
-  Broadcast: 15,
-  Pool_controller: 16, // 	Pool controller (EasyTouch, intellicom, et al)
-  RemoteWiredController: 32,
-  RemoteWirelessController: 34, 	//(Screen Logic, or any apps that connect to it, like this one)
-  Pump1: 96,
-  Pump2: 97,
-  Pump3: 98,
-  Pump4: 99,
-  Pump5: 100,
-  Pump6: 101,
-  Pump7: 102,
-  Pump8: 103,
-  Pump9: 104,
-  Pump10: 105,
-  Pump11: 106,
-  Pump12: 107,
-  Pump13: 108,
-  Pump14: 109,
-  Pump15: 110,
-  Pump16: 111,
+  chlorinator: [2, 16], // 	Chlorinator (This is a different type of packet)
+  broadcast: 15,
+  pool_controller: 16, // 	Pool controller (EasyTouch, intellicom, et al)
+  remoteWiredController: 32,
+  remoteWirelessController: 34, 	//(Screen Logic, or any apps that connect to it, like this one)
+  pump1: 96,
+  pump2: 97,
+  pump3: 98,
+  pump4: 99,
+  pump5: 100,
+  pump6: 101,
+  pump7: 102,
+  pump8: 103,
+  pump9: 104,
+  pump10: 105,
+  pump11: 106,
+  pump12: 107,
+  pump13: 108,
+  pump14: 109,
+  pump15: 110,
+  pump16: 111,
 };

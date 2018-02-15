@@ -1,8 +1,8 @@
 var msg = require (process.env.NODE_PATH + '/server/messages');
 var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/pump/queue');
-var { exteralTimer } = require (process.env.NODE_PATH + '/server/variables');
+var { exteralTimer, timerIntellicom } = require (process.env.NODE_PATH + '/server/variables');
 var Message = require (process.env.NODE_PATH + '/server/Classes/Message.js');
-
+var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
 var runIntellicomPumpSpeed = exports.runIntellicomPumpSpeed = function (speed = 0, interval = 10000) {
   var externalVariable = {
@@ -13,12 +13,17 @@ var runIntellicomPumpSpeed = exports.runIntellicomPumpSpeed = function (speed = 
     4: msg.pumpExternal_Speed4
   };
   addToQueue(externalVariable[speed]);
-  if (!speed === 0) {
-    exteralTimer = setInterval( function() {
+  if (speed !== 0) {
+    logger('events', 'info', 'Running Intellicom External Pump Speed: ' + speed);
+    timerIntellicom = setInterval( function() {
       addToQueue(externalVariable[speed]);
+      logger('events', 'verbose', 'Running Intellicom in interval with External Pump Speed: ' + speed);
     }, interval);
+  } else {
+    logger('events', 'info', 'Running Intellicom External Pump Speed: Stop');
+    clearInterval(timerIntellicom);
+    addToQueue(externalVariable[speed]);
   }
-  // console.log('externalVariable[speed]: ' , externalVariable[speed]);
 };
 
 

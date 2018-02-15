@@ -2,9 +2,9 @@ var io = require ('socket.io');
 const { addToQueue } = require ('../pump/queue');
 const defaultMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
 const logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
-const { server } = require ('../server');
+// const { server } = require ('../server');
 var socketServer = require ('../server').socketServer;
-var { statusRequestUpdateInverval, exteralTimer } = require('../variables');
+var { statusRequestUpdateInverval, exteralTimer, statusTimers, timerIntellicom } = require('../variables');
 var { pumpData, port } = require ('../serialPort');
 const {
   manualPumpControl,
@@ -14,10 +14,6 @@ const {
   runPumpAtSpeed,
   setPumpTimer,
 } = require ('../pump/commands');
-
-var returnSocketCallback = function (cb) {
-  cb(0);
-};
 
 
 var createMessage = function (message, name, logLevel = 'info', messageCallback = ()=>{}) {
@@ -36,8 +32,13 @@ var sendMessage = function (queue, queueName, message, options = {}, callback = 
   });
 };
 
+
 var temp = function () {
   var message = createMessage();
+};
+
+var endMessage = function () {
+
 };
 
 
@@ -45,12 +46,8 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   logger('event', 'verbose', 'socket connected:' + socket.id);
 
   socket.on('Trial_intellicom', function (speed, callback) {
-    // logger.debug('intellicom');
-    // runIntellicomPumpSpeed(speed);
-    // socket.emit('confirm');
     var message = new Message (defaultMsg.pumpToLocal, 'Trial_intellicom, pumpToLocal', null, callback);
 
-    // callback(0);
   });
 
   socket.on('manualPacket', function (message, callback) {
@@ -76,6 +73,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   socket.on('pump off', function(callback) {
     // logger.debug('pump off');
     clearInterval(exteralTimer); //clear external timers
+    clearInterval(timerIntellicom);
     // addToQueue(pumpToRemote);
     addToQueue(pump_Off);
     // addToQueue(pumpToLocal);
@@ -157,17 +155,18 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
     });
   });
 
-
+  var pumpGetStatus = true;
   socket.on ('toggleStatusUpdate', function (state, callback) {
     // logger.debug('toggleStatusUpdate');
     if (pumpGetStatus) {
-      clearInterval (exteralTimer);
+      clearInterval (statusTimers);
     } else {
       addToQueue(pumpGetStatus);
-      exteralTimer = setInterval(()=> {
+      statusTimers = setInterval(()=> {
         addToQueue(pumpGetStatus);
       }, statusRequestUpdateInverval); //gets pump status once every mintute  statusRequestUpdateInverval
     }
+    pumpGetStatus = !pumpGetStatus;
     // socket.emit('confirm');
     callback(0);
   });
