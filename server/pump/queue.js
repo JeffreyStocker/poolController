@@ -1,7 +1,7 @@
 // const { acknowledgment, preparePacketForSending } = require ('./helperFunctions');
-const { preparePacketForSending } = require ('./helperFunctions');
-const { port } = require('./../serialPort');
-var { queueLoopMain_InUse, showPumpStatusInConsole, acknowledgment } = require('../variables');
+const { preparePacketForSending } = require (process.env.NODE_PATH + '/server/pump/helperFunctions');
+const { port } = require(process.env.NODE_PATH + '/server/serialPort');
+var { queueLoopMain_InUse, showPumpStatusInConsole, acknowledgment } = require(process.env.NODE_PATH + '/server/variables');
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
 const { prefix,
@@ -15,7 +15,7 @@ const { prefix,
   pump_Off,
   pumpGetStatus,
   pump_PowerOn,
-  pump_PowerOff } = require('../messages');
+  pump_PowerOff } = require(process.env.NODE_PATH + '/server/prebuiltMessages');
 
 var queueMessagesToSend = [];
 var queueLoopMain_InUse = false;

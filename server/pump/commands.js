@@ -1,4 +1,4 @@
-var msg = require (process.env.NODE_PATH + '/server/messages');
+var msg = require (process.env.NODE_PATH + '/server/prebuiltMessages');
 var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/pump/queue');
 var { exteralTimer, timerIntellicom } = require (process.env.NODE_PATH + '/server/variables');
 var Message = require (process.env.NODE_PATH + '/server/Classes/Message.js');

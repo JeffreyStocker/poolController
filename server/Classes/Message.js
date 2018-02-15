@@ -1,4 +1,4 @@
-var msg = require (process.env.NODE_PATH + '/server/messages');
+var msg = require (process.env.NODE_PATH + '/server/prebuiltMessages');
 var { exteralTimer } = require (process.env.NODE_PATH + '/server/variables');
 
 class Message {

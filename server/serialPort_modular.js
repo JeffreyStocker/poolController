@@ -1,5 +1,5 @@
 var SerialPort = require('serialport');
-var port = module.exports.ports = {};
+var ports = module.exports.ports = {};
 var logger = () => {};
 
 var init = exports.init = function (portNames = [], newLogger = logger) {
