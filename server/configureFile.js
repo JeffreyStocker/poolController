@@ -2,9 +2,11 @@ var fs = require('fs');
 var config = {};
 var configFileLocation = './confisg.json';
 var logs = [];
+var pretty = require ('jsonminify');
+var hjson = require('hjson');
 
-var defaults = module.exports.defaults =
-  {
+var defaultsFunction = function () {
+  return {
     system: {
       web: {
         port: 8181
@@ -21,10 +23,10 @@ var defaults = module.exports.defaults =
           console: {
             colorize: true,
             label: 'system',
-            level: 'debug',
+            level: 'info',
           },
           file: {
-            filename: '/server/logs/system.log'
+            filename: '/logs/system.log'
           }
         },
         events: {
@@ -34,7 +36,7 @@ var defaults = module.exports.defaults =
             level: 'info',
           },
           file: {
-            filename: '/server/logs/events.log'
+            filename: '/logs/events.log'
           }
         },
         pump: {
@@ -44,7 +46,7 @@ var defaults = module.exports.defaults =
             level: 'info',
           },
           file: {
-            filename: '/server/logs/power.log'
+            filename: '/logs/power.log'
           }
         },
       },
@@ -62,11 +64,11 @@ var defaults = module.exports.defaults =
       pumps: {
         1: {
           enabled: true,
-          name: 'pump1',
+          name: 'Pump1',
           communications: {
+            address: '1',
             protocol: 'pentair',
             type: 'rs485',
-            address: 96,
           }
         }
       },
@@ -82,7 +84,9 @@ var defaults = module.exports.defaults =
       }
     }
   };
+};
 
+module.exports.defaults = defaultsFunction();
 
 // module.exports.config = module.exports.init();
 module.exports.config = {};
@@ -117,7 +121,7 @@ module.exports.init = function (location = configFileLocation, useDefault = fals
   var data;
   if (Object.keys(config).length !== 0) { return config; }
   if (location === 'default' || useDefault === true) {
-    data = defaults;
+    data = module.exports.defaults;
     logs.push('Using Default Configuration');
   } else {
     try {
@@ -125,7 +129,7 @@ module.exports.init = function (location = configFileLocation, useDefault = fals
       data = parseConfig(data);
       logs.push('location');
     } catch (err) {
-      data = defaults;
+      data = module.exports.defaults;
       // console.log ('User Config File not found. Using Defaults Configuration');
       logs.push('User Config File not found. Using Default Configuration');
     }
@@ -188,7 +192,31 @@ module.exports.resetDefault = function () {
   module.exports.saveConfig();
 };
 
+var exportTestString = function () {
+  var functionString = defaultsFunction.toString();
+  var firstIndex = functionString.indexOf('\n');
+  functionString = functionString.slice(firstIndex + 1);
+  var secondIndex = functionString.indexOf('\n');
 
+  // console.log(functionString.indexOf('\n'));
+  // console.log(functionString.slice(secondIndex + 1));
+  // console.log(lastIndex);
+
+  var lastIndex = functionString.lastIndexOf('\n');
+  functionString = functionString.slice(0, lastIndex - 2);
+  return JSON.parse(functionString);
+
+};
+
+// exportTestString();
+
+var inportHJSON = function () {
+  var string = fs.readFileSync('./hjsontest.hjson', 'utf8');
+  var HJSON = hjson.parse(string, {keepWsc: true});
+  console.log (HJSON.toString());
+};
+
+// inportHJSON();
 
 // module.exports.init();
 // module.exports.loadDefault();
@@ -198,3 +226,4 @@ module.exports.resetDefault = function () {
 //   get: function() { return config; }
 // });
 
+// console.log ('');
