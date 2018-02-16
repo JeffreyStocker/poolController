@@ -16,13 +16,13 @@ A web based pool pump controller that allows a user to control a pentair pool pu
 
 ## Requirements
 
--raspberry pi or equivelent
--RS485 (either adapter or built in)
--Node.js
--Express
--winston
--socket.io
--serialPort
+- raspberry pi or equivelent
+- RS485 (either adapter or built in)
+- Node.js
+- Express
+- winston
+- socket.io
+- serialPort
 
 ## Current Goals
 
