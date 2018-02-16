@@ -22,7 +22,7 @@
   },
   "scripts": {
     "mochawesome": "mocha ./spec/* --recursive --reporter mochawesome",
-    "nodemon": "nodemon app.js",
+    "nodemon": "nodemon --ignore 'public/' --delay 1  app.js",
     "start": "node app.js",
     "test": "mocha ./spec/* --recursive"
   },
