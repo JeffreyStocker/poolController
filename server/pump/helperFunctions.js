@@ -192,18 +192,28 @@ var convertToDecArray = function (bufferArray) {
   return stripMessageOfHeaderAndChecksum(output);
 };
 
+var isStatusMessage = function (message) {
+  if (message[4] === 7) {
+    return true;
+  }
+  return false;
+};
+
 // module.exports.acknowledgment = acknowledgment;
-module.exports.appendCheckSum = appendCheckSum;
-module.exports.addOnHeaderToPacket = addOnHeaderToPacket;
-module.exports.combineHighPlusLowBit = combineHighPlusLowBit;
-module.exports.convertToDecArray = convertToDecArray;
-module.exports.convertHexArrayToByteArray = convertHexArrayToByteArray;
-module.exports.flipSourceAndDestinationFromStrippedMessage = flipSourceAndDestinationFromStrippedMessage;
-module.exports.hasHeader = hasHeader;
-module.exports.preparePacketForSending = preparePacketForSending;
-module.exports.returnLowBit = returnLowBit;
-module.exports.returnHighAndLowBitOfChecksum = returnHighAndLowBitOfChecksum;
-module.exports.returnHighBit = returnHighBit;
-module.exports.parsePumpStatus = parsePumpStatus;
-module.exports.stripMessageOfHeaderAndChecksum = stripMessageOfHeaderAndChecksum;
-module.exports.sumOfBytes = sumOfBytes;
+module.exports = {
+  appendCheckSum,
+  addOnHeaderToPacket,
+  combineHighPlusLowBit,
+  convertToDecArray,
+  convertHexArrayToByteArray,
+  flipSourceAndDestinationFromStrippedMessage,
+  hasHeader,
+  isStatusMessage,
+  preparePacketForSending,
+  returnLowBit,
+  returnHighAndLowBitOfChecksum,
+  returnHighBit,
+  parsePumpStatus,
+  stripMessageOfHeaderAndChecksum,
+  sumOfBytes,
+};
