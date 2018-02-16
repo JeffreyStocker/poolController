@@ -1,6 +1,6 @@
-# Project Name
+# Pool Pump Controller
 
-The project description
+A web based pool pump controller that allows a user to control a pentair pool pump. This program does not need a enternal controller.
 
 # Table of Contents
 
@@ -16,10 +16,21 @@ The project description
 
 ## Requirements
 
--
--
+-raspberry pi or equivelent
+-RS485 (either adapter or built in)
+-Node.js
+-Express
+-winston
+-socket.io
+-serialPort
 
-## Other Information
+## Current Goals
 
-(TODO: fill this out with details about your project. Suggested ideas: architecture diagram, schema, and any other details from your app plan that sound interesting.)
+- Refactoring current code to be more modular
+- incorperate a configuration file
+
+## Future Goals
+
+- Use GPIO to control other equipment besides Pentiar Equipment
+- Scheduling via web interface
 
