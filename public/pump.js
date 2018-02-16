@@ -21,17 +21,22 @@ $('document').ready(function () {
 
   $('#Submit').click(function () {
     var packet = [];
-    console.log ($('input').val());
 
-    for (var i = 5; i < 30; i++) {
+    for (var i = 1; i < 99; i++) {
       var val = $('#' + i).val();
-      if (val === undefined) { break; }
-      packet[i] = val;
+      if (val === undefined || val === '') { continue; }
+      packet.push(+val);
     }
-    console.log (packet);
-    // socket.emit('sendManualPumpPacket', 'off', () => {
-    //   confirmMessage();
-    // });
+    // console.log (packet);
+    var font = packet.slice(0, 3);
+    var end = packet.slice(3);
+
+    var newPacket = [165, 0].concat(font, end.length, end);
+    console.log (newPacket);
+
+    socket.emit('manualPacket', newPacket, () => {
+      confirmMessage();
+    });
   });
 
   socket.on('pumpDataReturn', function (data) {
@@ -43,26 +48,96 @@ $('document').ready(function () {
     // $('#PumpTimers').text(data.timer)
     $('#pumpRPM').text(data.rpm);
     $('#pumpWatt').text(data.watt);
-
-
     $('#pumpSource').text(data.source);
     $('#pumpDestination').text(data.destination);
     $('#pumpAction').text(data.action);
     $('#pumpLength').text(data.length);
     $('#pumpDriveState').text(data.driveState);
     $('#pumpPpc').text(data.ppc);
-
-    $('#pumpWatt').text(data.watt);
-    $('#pumpWatt').text(data.watt);
   });
+
+
+  $('#external1').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 8]); });
+
+  $('#external2').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 16]); });
+
+  $('#external3').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 24]); });
+
+  $('#external4').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 32]); });
+
+  $('#externalOff').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 0]); });
+
+  $('#SpeedFilter').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 0]); });
+
+  $('#SpeedManual').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 1]); });
+
+  $('#Speed1').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 2]); });
+
+  $('#Speed2').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 3]); });
+
+  $('#Speed3').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 4]); });
+
+  $('#Speed4').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 5]); });
+
+  $('#SpeedFeature1').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 6]); });
+
+  $('#external1Save').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 39, 0, 0]); });
+
+  $('#external2Save').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 40, 0, 0]); });
+
+  $('#external3Save').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 41, 0, 0]); });
+
+  $('#external4Save').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 42, 0, 0]); });
+
+  $('#externalTimer').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 43, 0, 0]); });
+
+  $('#runAtSpeed').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 4, 196]); });
+
+  $('#runAtGPM').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 4, 228]); });
+
+  $('#runSpeedWithoutProgram').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 2, 196]); });
+
+  $('#runSpeedWithoutProgram1000RPM').on('click',
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 2, 196, 3, 232]); });
+
 });
+
+var parseValueIntoPumpHtmlPage = function (values) {
+  for (var i = 0; i < 30; i++) {
+    if (i < values.length ) {
+      $('#' + (i + 1)).val(values[i]);
+    } else {
+      $('#' + (i + 1)).val('');
+    }
+  }
+};
 
 
 var returnHighBit = function (value) {
   return parseInt(value / 256);
 };
 
-var returnLowBit = function  (value) {
+var returnLowBit = function (value) {
   return value % 256;
 };
 

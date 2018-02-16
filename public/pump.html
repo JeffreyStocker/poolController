@@ -1,10 +1,14 @@
 <html>
   <header>Manual Pump Control</header>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.slim.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
   <link rel="stylesheet" type="text/css" href="index.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   <!-- <script src="index.js"></script> -->
   <script src="pump.js"></script>
+  <script src="index.js"></script>
+
   <body>
     <div class='center '> <!-- top -->
       <div>Pump Info</div>
@@ -28,37 +32,63 @@
         <span> Time:<b><span class="timeCurrent">--</span></b> </span>
       </div>
 
-      <div>driveState:<b><span class="pumpDriveState" id="pumpDriveState">--</span></b>
-        <span> ppc: 	<b><span class="pumpPpc" id="pumpPpc">--</span></b> </span>
-      </div>
-
-      <div>Unknown1:<b><span class="unknown1">--</span></b>
-        <span> Unknown2: 	<b><span class="unknown2">--</span></b> </span>
-      </div>
-
-      <div>Unknown3:<b><span class="unknown3">--</span></b>
-        <span> Unknown4: 	<b><span class="unknown4">--</span></b> </span>
-      </div>
-
-      <!-- <div><span> length: 	<b><span id="pumpLength">--</span></b> </span> -->
-        <!-- <span> Unknown4: 	<b><span class="unknown4">--</span></b> </span> -->
-      <!-- </div> -->
-
       <div id="message">&nbsp;</div>
     </div>
 
-    <div >
+    <div>
       1<input type="number" id="1" value="96">Destination<br>
       2<input type="number" id="2" value="16">Source<br>
       3<input type="number" id="3" value="1">Action<br>
-      4<input type="number" id="4" value="96">Mode/Command<br>
-      <!-- 5<input type="number" id="5" value="96">Length<br> -->
-      6<input type="number" id="6" value="96">Action<br>
-      7<input type="number" id="7" value="96">High bit<br>
-      8<input type="number" id="8" value="96">Low Bit<br>
-      9<input type="number" id="9" value="96"><br>
+      length <br>
+      4<input type="number" id="4" value="3">Mode<br>
+      5<input type="number" id="5" value="33">Command<br>
+      6<input type="number" id="6" value="0">High bit<br>
+      7<input type="number" id="7" value="16">Low Bit<br>
+      8<input type="number" id="8" value=""><br>
+      9<input type="number" id="9" value=""><br>
       10<input type="number" id="10" default=""><br>
+      11<input type="number" id="11" default=""><br>
+      12<input type="number" id="12" default=""><br>
       <button id="Submit">Submit</button>
+    </div>
+    <br><br>
+    <div class="row">
+      <div class='col-sm-2 center'>
+        <div>Power</div>
+        <button class="btn powerOn" id="powerOn"> Power On </button>
+        <button class="btn powerOff" id="powerOff"> Power Off </button>
+        <button class="btn powerToggle" id="powerToggle"> Toggle Off/On </button>
+      </div>
+    <div class='col-sm-2 center'>
+      Exteral Control Test
+      <button id="external1">External 1</button>
+      <button id="external2">External 2</button>
+      <button id="external3">External 3</button>
+      <button id="external4">External 4</button>
+      <button id="externalOff">External off</button>
+    </div>
+    <div class='col-sm-2 center'>
+      Exteral Save test
+      <button id="external1Save">External 1 Save</button>
+      <button id="external2Save">External 2 Save</button>
+      <button id="external3Save">External 3 Save</button>
+      <button id="external4Save">External 4 Save</button>
+    </div>
+    <div class='col-sm-2 center'>
+      Speeds 1-4 Test
+      <button id="Speed1">Speed 1</button>
+      <button id="Speed2">Speed 2</button>
+      <button id="Speed3">Speed 3</button>
+      <button id="Speed4">Speed 4</button>
+      <button id="runAtSpeed">run At Speed</button>
+    </div>
+    <div class='col-sm-2 center'>
+      Prob Useless
+      <button id="runAtGPM">run At GPM</button>
+      <button id="externalTimer">external Timer</button>
+      <button id="SpeedFeature1">Feature 1</button>
+      <button id="runSpeedWithoutProgram">Run Speed w/o Pr</button>
+      <button id="runSpeedWithoutProgram1000RPM">Run Speed 1000RPM</button>
     </div>
   </body>
 </html>
