@@ -1,6 +1,6 @@
 const os = require('os'); //to get os version so i can install some testings
 const { pushPumpInfoToWebPages } = require (process.env.NODE_PATH + '/server/communications/outgoingSocketIO');
-const { convertToDecArray, parsePumpStatus } = require(process.env.NODE_PATH + '/server/pump/helperFunctions.js');
+const { convertToDecArray, parsePumpStatus, isStatusMessage } = require(process.env.NODE_PATH + '/server/pump/helperFunctions.js');
 var { showPumpStatusInConsole, acknowledgment } = require(process.env.NODE_PATH + '/server/variables');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
@@ -46,32 +46,21 @@ var init = exports.init = function () {
 
   // Switches the port into 'flowing mode'
   port.on('data', function (data) {
-    // console.log ('data', data)
     data = convertToDecArray (data);
-    if (data[4] === 7) {
+    if (isStatusMessage(data)) {
       var pumpData = parsePumpStatus(data);
-      if (showPumpStatusInConsole) { console.log('Data Received:  [' + [... data] + ']'); }
-      // console.log ('Pump Data Updated')
+      if (showPumpStatusInConsole) { logger('events', 'verbose', 'Data Received:  [' + [... data] + ']'); }
       try {
-        // pushPumpInfoToWebPages(pumpData);
-        // console.log (socketServer.emit)
         socketServer.emit('pumpDataReturn', pumpData);
       } catch (err) {
-        // console.log ('Error: Port:On: pushPUmpInfoToWebPages is not working')
         logger('system', 'error', 'Error proccesing data' + err);
-        // console.log ('err: ', err);
-        // console.log('Status Received:  [' + [... data] + ']');
       }
       acknowledgment.status = 'found';
     } else if (acknowledgment.status === 'waiting For') {
       var check = acknowledgment.isAcknowledgment(data);
       acknowledgment.status = 'found';
       logger('events', 'verbose', 'Acknowledged:  [' + [... data] + ']');
-      // console.log('Acknowledged:  [' + [... data] + ']');
-      // acknowledgment.message.push(data);
-      // acknowledgment.reset();
     } else if (Array.isArray(data) === false) {
-      // console.log(data);
       logger('events', 'debug', 'Data raw: ' + data);
 
     } else {
