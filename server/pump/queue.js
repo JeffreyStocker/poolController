@@ -15,7 +15,7 @@ const { prefix,
   pump_Off,
   pumpGetStatus,
   pump_PowerOn,
-  pump_PowerOff } = require(process.env.NODE_PATH + '/server/prebuiltMessages');
+  pump_PowerOff } = require(process.env.NODE_PATH + '/server/preBuiltMessages');
 
 var queueMessagesToSend = [];
 var queueLoopMain_InUse = false;

@@ -1,4 +1,4 @@
-var msg = require (process.env.NODE_PATH + '/server/prebuiltMessages');
+var msg = require (process.env.NODE_PATH + '/server/preBuiltMessages');
 var { exteralTimer } = require (process.env.NODE_PATH + '/server/variables');
 
 class Message {
@@ -272,7 +272,7 @@ class Message {
   }
 
   appendCheckSum (message) {
-    return message.concat(returnChecksum(message));
+    return message.concat(this.returnChecksum(message));
   }
 
   prependBuffer (message) {
@@ -280,13 +280,13 @@ class Message {
   }
 
   addStartToMessage (message) {
-    return this.returnDefaultreturnDefault('start').concat(message);
+    return this.returnDefault('start').concat(message);
   }
 
   prepareMessageForSending (message) {
     //prepares a packet ie: [2,4,3,2] for sending by adding a header and checksum high & lowbit
+    message = this.appendCheckSum(message);
     message = this.prependBuffer (message);
-    message = this.addBufferToMessage(message);
     return message;
   }
 
@@ -352,12 +352,7 @@ var messagePumpSpeed = function (rpm, program, destination = 96, source = 16, ca
   var subcommand = possibleSubcommands[program]; //33 = run program xx / turn off pump, 39-42, save P1-4 as xx, 43 set pump timer for xx min || command =2; subcommand - 96 or 196 then might be linked to speed 1
   var commandHighBit = returnHighBit (rpm); //changes, either RPM high or timer HH or MM
   var commandLowBit = returnLowBit (rpm); //changes either rpm low, or timer MM
-  // var checksumHighBit = //checksum high added later in code
-  // var checksumLowBit = //chechsum low added later in code
-  // console.log('commandHighBit: ' , commandHighBit);
-  // console.log('returnLowBit (rpm): ' , commandLowBit);
   packet['byte'] = [165, 0, destination, source, action, length, command, subcommand, commandHighBit, commandLowBit];
-  // console.log (packet.byte)
   packet.name = 'Run Pump Program: ' + program + ' at ' + rpm;
   return new Message(packet.byte, packet.name, callback);
 };
