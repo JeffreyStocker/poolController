@@ -2,10 +2,11 @@ var io = require ('socket.io');
 const { addToQueue } = require ('../pump/queue');
 const defaultMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
 const logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
-// const { server } = require ('../server');
 var socketServer = require ('../server').socketServer;
 var { statusRequestUpdateInverval, exteralTimer, statusTimers, timerIntellicom } = require('../variables');
 var { pumpData, port } = require ('../serialPort');
+// const {  } = require (process.env.NODE_PATH + '/server/pump/helperFunctions.js');
+var Message = require (process.env.NODE_PATH + '/server/Classes/Message');
 const {
   manualPumpControl,
   pumpControlPanelState,
@@ -51,6 +52,16 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   });
 
   socket.on('manualPacket', function (message, callback) {
+    logger('events', 'info', 'emitting: ' + message);
+    message = Message.prototype.prepareMessageForSending(message);
+
+    logger('events', 'info', 'emitting: ' + message);
+    port.write(message, function(err) {
+      if (err) {
+        return console.log('Error on write: ', err.message);
+      }
+      logger('event', 'verbose', 'Sent Command:', ': [' + [...message] + ']');
+    });
     callback(0);
   });
 
