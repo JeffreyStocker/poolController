@@ -1,7 +1,7 @@
-var preBuiltMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages');
-var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/pump/queue');
+var preBuiltMsg = require (process.env.NODE_PATH + '/server/equipment/pentair/preBuiltMessages');
+var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
 var { exteralTimer, timerIntellicom } = require (process.env.NODE_PATH + '/server/variables');
-var Message = require (process.env.NODE_PATH + '/server/Classes/Message.js');
+var Message = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
 module.exports = {

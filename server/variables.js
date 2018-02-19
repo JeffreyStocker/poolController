@@ -1,5 +1,4 @@
-
-var flipSourceAndDestinationFromStrippedMessage = require('./pump/helperFunctions').flipSourceAndDestinationFromStrippedMessage;
+var flipSourceAndDestinationFromStrippedMessage = require(process.env.NODE_PATH + '/server/equipment/pentair/helperFunctions.js').flipSourceAndDestinationFromStrippedMessage;
 module.exports.exteralTimer;
 module.exports.statusTimers;
 module.exports.timerIntellicom;

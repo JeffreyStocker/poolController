@@ -2,7 +2,7 @@ process.env.NODE_PATH = __dirname + '/../';
 const SerialPort = require('serialport/test');
 const MockBinding = SerialPort.Binding;
 const portPath = 'COM_ANYTHING';
-const helperFunctions = require (process.env.NODE_PATH + '/server/pump/helperFunctions.js');
+const helperFunctions = require (process.env.NODE_PATH + '/server/equipment/pentair/helperFunctions.js');
 
 MockBinding.createPort(portPath, { echo: false, record: false });
 

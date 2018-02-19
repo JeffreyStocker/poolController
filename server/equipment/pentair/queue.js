@@ -1,6 +1,6 @@
 // const { acknowledgment, preparePacketForSending } = require ('./helperFunctions');
-const { preparePacketForSending } = require (process.env.NODE_PATH + '/server/pump/helperFunctions');
-const { port } = require(process.env.NODE_PATH + '/server/serialPort');
+const { preparePacketForSending } = require (process.env.NODE_PATH + '/server/equipment/pentair/helperFunctions');
+const { port } = require(process.env.NODE_PATH + '/server/communications/serialPort');
 var { queueLoopMain_InUse, showPumpStatusInConsole, acknowledgment } = require(process.env.NODE_PATH + '/server/variables');
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
@@ -15,7 +15,7 @@ const { prefix,
   pump_Off,
   pumpGetStatus,
   pump_PowerOn,
-  pump_PowerOff } = require(process.env.NODE_PATH + '/server/preBuiltMessages');
+  pump_PowerOff } = require(process.env.NODE_PATH + '/server/equipment/pentair/preBuiltMessages');
 
 var queueMessagesToSend = [];
 var queueLoopMain_InUse = false;

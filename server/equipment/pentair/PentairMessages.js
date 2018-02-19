@@ -20,7 +20,7 @@ class Message {
 
     this.originalPacket = packet.slice();
     this.retryAttempts = 0;
-    this.packet = preparePacketForSending(packet);
+    this.packet = this.preparePacketForSending(packet);
   }
 
 
@@ -36,8 +36,8 @@ class Message {
     this.setSource(source);
   }
 
-  setDestination (destintation) {
-    if (!destintation && typeof destintation !== 'number') { return undefined; }
+  setDestination (destination) {
+    if (!destination && typeof destination !== 'number') { return undefined; }
     this.packet[2] = destination;
     return this.packet;
   }
@@ -247,11 +247,11 @@ class Message {
   }
 
   prependBuffer (packet) {
-    return defaultMessages.buffer.concat(packet);
+    return defaultMessages.shortPrefix.concat(packet);
   }
 
   prependStart (packet) {
-    return defaultMessages.start.concat(packet);
+    return defaultMessages.prefix.concat(packet);
   }
 
   preparePacketForSending (packet) {
@@ -268,6 +268,7 @@ module.exports.Message = Message;
 var defaultMessages = {
   prefix: [255, 0, 255, 165, 0],
   shortPrefix: [255, 0, 255],
+  start: [165, 0],
   pumpToRemote:        {name: 'Set Pump to Remote', byte: [165, 0, 96, 16, 4, 1, 255],          buffer: Buffer.from('a50060100401ff0219', 'hex'),       hex: 'a50060100401ff0219'},       byteWithChecksum: [165, 0, 96, 16, 4, 1, 255, 2, 25], //intellicom set pump to remote  //works
   pumpToLocal:         {name: 'Set Pump to Local',  byte: [165, 0, 96, 16, 4, 1, 0],            buffer: Buffer.from('a5006010040100011a', 'hex'),       hex: 'a5006010040100011a'},       byteWithChecksum: [165, 0, 96, 16, 4, 1, 0, 1, 26],
   pumpExternal_Speed4: {name: 'Exteral Speed 4',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 32], buffer: Buffer.from('a5006010010403210020015e', 'hex'), hex: 'a5006010010403210020015e'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 32, 1, 94], //intellicom use external command i think 4 (highest his is solar  priority) (possibley with 1 min timer?)
@@ -303,10 +304,7 @@ module.exports.returnDefaultMessage = function (preBuiltMessage, destination = 9
 };
 
 module.exports.defaultStatusMessage = function(destination = 96, callback) {
-  if (!prebuiltMessages.status) {
-    prebuiltMessages.status = returnDefaultMessage('pumpGetStatus', destination, {logLevel: 'debug'});
-  }
-  var message = new Message (defaultMessages.byte, defaultMessages.name, {logLevel: 'debug'}, callback);
+  var message = new Message (defaultMessages.pumpGetStatus.byte, defaultMessages.pumpGetStatus.name, {logLevel: 'debug'}, callback);
   message.setDestination(destination);
   return message;
 };

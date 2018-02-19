@@ -1,9 +1,9 @@
 const os = require('os'); //to get os version so i can install some testings
 const { pushPumpInfoToWebPages } = require (process.env.NODE_PATH + '/server/communications/outgoingSocketIO');
-const { parsePumpStatus, isStatusMessage, processBufferMessage } = require(process.env.NODE_PATH + '/server/pump/helperFunctions.js');
+const { parsePumpStatus, isStatusMessage, processBufferMessage } = require(process.env.NODE_PATH + '/server/equipment/pentair/helperFunctions.js');
 var { showPumpStatusInConsole, acknowledgment } = require(process.env.NODE_PATH + '/server/variables');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
-var queue = require (process.env.NODE_PATH + '/server/pump/queue.js');
+var queue = require (process.env.NODE_PATH + '/server/equipment/pentair/queue.js');
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
 

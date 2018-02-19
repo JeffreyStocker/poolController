@@ -10,7 +10,7 @@ var useModular = false;
 if (useModular) {
   // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
   // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
-  require(process.env.NODE_PATH + '/server/serialPortInit.js').init();
+  require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init();
   var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
 
 } else {
@@ -18,8 +18,9 @@ if (useModular) {
 
   var { statusRequestUpdateInverval, statusTimers } = require (process.env.NODE_PATH + '/server/variables');
   // var { timeBetweenQueueSending } = require (process.env.NODE_PATH + '/server/server');
-  var { pumpGetStatus } = require (process.env.NODE_PATH + '/server/preBuiltMessages');
-  var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/pump/queue');
+  // var { pumpGetStatus } = require (process.env.NODE_PATH + '/server/equipment/pentair/preBuiltMessages');
+  var statusMessage = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js').defaultStatusMessage;
+  var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
   var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
 
 
@@ -29,11 +30,11 @@ if (useModular) {
   ////start main program
   setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending);
   ////starts routine pump status updates
-  addToQueue(returnDefaultMessage('pumpGetStatus'));
+  addToQueue(statusMessage());
 
 
   statusTimers = setInterval( ()=> {
-    addToQueue(returnDefaultMessage('pumpGetStatus'));
+    addToQueue(statusMessage());
     // console.log (pumpToLocal);
     // addToQueue(pumpToLocal);
   }, statusRequestUpdateInverval); //gets pump status once every mintute

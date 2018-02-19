@@ -1,12 +1,12 @@
 var io = require ('socket.io');
-var defaultMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
+// var defaultMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
-var socketServer = require ('../server').socketServer;
-var { addToQueue } = require ('../pump/queue');
-var { statusRequestUpdateInverval, exteralTimer, statusTimers, timerIntellicom } = require('../variables');
-var { pumpData, port } = require ('../serialPort');
+var socketServer = require (process.env.NODE_PATH + '/server/server').socketServer;
+var { addToQueue } = require (process.env.NODE_PATH + 'server/equipment/pentair/queue');
+var { statusRequestUpdateInverval, exteralTimer, statusTimers, timerIntellicom } = require(process.env.NODE_PATH + '/server/variables');
+var { pumpData, port } = require (process.env.NODE_PATH + '/server/communications/serialPort');
 // const {  } = require (process.env.NODE_PATH + '/server/pump/helperFunctions.js');
-var Message = require (process.env.NODE_PATH + '/server/Classes/Message');
+var Message = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages');
 var {
   manualPumpControl,
   pumpControlPanelState,
@@ -15,7 +15,7 @@ var {
   runPumpAtSpeed,
   setPumpTimer,
   runPumpProgram
-} = require ('../pump/commands');
+} = require (process.env.NODE_PATH + '/server/equipment/pentair/pentairPumpCommands.js');
 
 
 var createMessage = function (message, name, logLevel = 'info', messageCallback = ()=>{}) {

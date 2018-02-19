@@ -1,6 +1,6 @@
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
-var msg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
-var serialPorts = require(process.env.NODE_PATH + '/server/serialPort_modular').ports;
+var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/preBuiltMessages.js');
+var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPort_modular').ports;
 var helpers = require(process.env.NODE_PATH + '/server/helpers');
 
 
