@@ -11,7 +11,8 @@
     "lodash": "^4.17.4",
     "serialport": "^6.0.4",
     "socket.io": "^2.0.4",
-    "winston": "^2.4.0"
+    "winston": "^2.4.0",
+    "onoff": "1.2.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -21,6 +22,7 @@
     "rewire": "^3.0.2"
   },
   "scripts": {
+    "pm2": "pm2 start app.js",
     "mochawesome": "mocha ./spec/* --recursive --reporter mochawesome",
     "nodemon": "nodemon --ignore 'public/' --delay 1  app.js",
     "start": "node app.js",

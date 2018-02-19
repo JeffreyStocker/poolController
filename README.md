@@ -28,9 +28,14 @@ A web based pool pump controller that allows a user to control a pentair pool pu
 
 - Refactoring current code to be more modular
 - incorperate a configuration file
+- Discover and implement more pump controls
 
 ## Future Goals
 
 - Use GPIO to control other equipment besides Pentiar Equipment
 - Scheduling via web interface
+- Logging and displaying energy and equipment usage
+- Logging Pool Temperatures
+- Solar Control (Most likely via GPIO)
+- Pool Valve Control (Most likely via GPIO)
 

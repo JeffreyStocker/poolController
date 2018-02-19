@@ -39,12 +39,10 @@ var queueLoopMain = module.exports.queueLoopMain = function (stopFunction = fals
     queueLoopMain_InUse = true;
 
     if (acknowledgment.status === 'waiting For') {
-      // console.log(acknowledgment.status);
       if (!acknowledgment.startTimeWait) { acknowledgment.startTimeWait = new Date(); }
 
       acknowledgment.nowTimeWait = new Date();
       var deltaTime = acknowledgment.nowTimeWait.getTime() - acknowledgment.startTimeWait.getTime();
-      // console.log (acknowledgment.nowTimeWait.getTime(), '|', acknowledgment.startTimeWait.getTime() )
       if (deltaTime >= 75) {
         if (acknowledgment.missingMessageCount >= 3) {
           acknowledgment.missingMessageCount = 0;
@@ -58,7 +56,6 @@ var queueLoopMain = module.exports.queueLoopMain = function (stopFunction = fals
       } else {
       }
     } else if (acknowledgment.status === 'found') {
-      // console.log ('Message Found')
       acknowledgment.reset();
     }
 
@@ -103,20 +100,20 @@ var addToQueue = module.exports.addToQueue = function (packet) {
 
 var sendCommand = module.exports.sendCommand = function (message, name = 'unknown') { //sendCommandViaArrayOfBytes
   var packet, byteArray;
-  if (message === undefined) { return undefined; }
+  if (!message) { return logger('events', 'error', 'sendCommand: Message is invalid:' + message); }
 
   if (typeof message === 'object' && Array.isArray(message) === false) {
-    byteArray = message.byte;
+    byteArray = message.packet;
     name = message.name;
   } else if (Array.isArray(message) === true) {
     byteArray = message;
-  } else { return console.log ('Error: sendCommand: Message is invalid'); }
+  } else { return logger('events', 'error', 'sendCommand: Message is invalid:' + message); }
 
   packet = Buffer.from(preparePacketForSending (byteArray)); //adds header, checksum and converts to a buffer
 
   port.write(packet, function(err) {
     if (err) {
-      return console.log('Error on write: ', err.message);
+      returnlogger('events', 'error', 'Error on write: ', err.message);
     }
     if ((showPumpStatusInConsole === false && name === pumpGetStatus.name)
     // || message === pumpToLocal
@@ -124,7 +121,7 @@ var sendCommand = module.exports.sendCommand = function (message, name = 'unknow
     ) {
     } else { //ignore logging of the status messages
       // console.log('Sent Command: ' + name, ': [' + [...packet] + ']');
-      logger('event', 'verbose', 'Sent Command: ' + name, ': [' + [...packet] + ']');
+      logger('events', 'verbose', 'Sent Command: ' + name, ': [' + [...packet] + ']');
     }
   });
 };

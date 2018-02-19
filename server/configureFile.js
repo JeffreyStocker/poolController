@@ -16,7 +16,6 @@ var defaultsFunction = function () {
         numberOfRetriesForMissingMessages: 3,
         statusRequestUpdateInverval: 500,
         timeBetweenQueueSending: 100
-
       },
       logs: {
         system: {
@@ -82,7 +81,12 @@ var defaultsFunction = function () {
           'name': ''
         }
       }
-    }
+    },
+    groups: [
+    ],
+    activities: [
+
+    ]
   };
 };
 

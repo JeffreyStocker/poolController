@@ -8,8 +8,9 @@ configureFile.initLogging('system', logger);
 var useModular = false;
 
 if (useModular) {
-  var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
-  require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
+  // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
+  // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
+  require(process.env.NODE_PATH + '/server/serialPortInit.js').init();
   var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
 
 } else {
@@ -17,7 +18,7 @@ if (useModular) {
 
   var { statusRequestUpdateInverval, statusTimers } = require (process.env.NODE_PATH + '/server/variables');
   // var { timeBetweenQueueSending } = require (process.env.NODE_PATH + '/server/server');
-  var { pumpGetStatus } = require (process.env.NODE_PATH + '/server/messages');
+  var { pumpGetStatus } = require (process.env.NODE_PATH + '/server/preBuiltMessages');
   var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/pump/queue');
   var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
 
@@ -25,14 +26,14 @@ if (useModular) {
   var timeBetweenQueueSending = 250; //intervel beteen when the queue sends off another message
 
 
-  //start main program
+  ////start main program
   setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending);
-  //starts routine pump status updates
-  addToQueue(pumpGetStatus);
+  ////starts routine pump status updates
+  addToQueue(returnDefaultMessage('pumpGetStatus'));
 
 
   statusTimers = setInterval( ()=> {
-    addToQueue(pumpGetStatus);
+    addToQueue(returnDefaultMessage('pumpGetStatus'));
     // console.log (pumpToLocal);
     // addToQueue(pumpToLocal);
   }, statusRequestUpdateInverval); //gets pump status once every mintute
@@ -52,23 +53,22 @@ if (useModular) {
 //   if (options.cleanup) { console.log('clean'); }
 //   if (err) { console.log(err.stack); }
 //   let packet = Buffer.from([165, 0, 96, 16, 4, 1, 0, 1, 26, 1, 53]); //adds header, checksum and converts to a buffer
-
+//   var { port } = require (process.env.NODE_PATH + '/server/serialPort');
 //   port.write(packet, function(err) {
 //     if (err) {
-//       console.log('Error on write: ', err.message);
+//       console.log('Error on write: ', err.message + '/n' + err.stack);
 //     }
-//     callback(0);
-//     if (options.exit) { process.exit(); }
+//     if (options.exit) { console.log ('exiting'); process.exit(); }
 //   });
 // };
 
-// //do something when app is closing
+// // //do something when app is closing
 // process.on('exit', exitHandler.bind(null, {cleanup: true}));
 
-// //catches ctrl+c event
+// // //catches ctrl+c event
 // process.on('SIGINT', exitHandler.bind(null, {exit: true}));
 
-// // catches "kill pid" (for example: nodemon restart)
+// // // catches "kill pid" (for example: nodemon restart)
 // process.on('SIGUSR1', exitHandler.bind(null, {exit: true}));
 // process.on('SIGUSR2', exitHandler.bind(null, {exit: true}));
 

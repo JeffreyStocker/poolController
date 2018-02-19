@@ -58,77 +58,82 @@ $('document').ready(function () {
 
 
   $('#external1').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 8]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 33, 0, 8]); });
 
   $('#external2').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 16]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 33, 0, 16]); });
 
   $('#external3').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 24]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 33, 0, 24]); });
 
   $('#external4').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 32]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 33, 0, 32]); });
 
   $('#externalOff').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 33, 0, 0]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 33, 0, 0]); });
 
   $('#SpeedFilter').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 0]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 'length', 0]); });
 
   $('#SpeedManual').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 1]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 'length', 1]); });
 
   $('#Speed1').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 2]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 'length', 2]); });
 
   $('#Speed2').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 3]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 'length', 3]); });
 
   $('#Speed3').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 4]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 'length', 4]); });
 
   $('#Speed4').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 5]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 'length', 5]); });
 
   $('#SpeedFeature1').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 6]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 5, 'length', 6]); });
 
   $('#external1Save').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 39, 0, 0]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 39, 0, 0]); });
 
   $('#external2Save').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 40, 0, 0]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 40, 0, 0]); });
 
   $('#external3Save').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 41, 0, 0]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 41, 0, 0]); });
 
   $('#external4Save').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 42, 0, 0]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 42, 0, 0]); });
 
   $('#externalTimer').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 3, 43, 0, 0]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 3, 43, 0, 0]); });
 
   $('#runAtSpeed').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 4, 196]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 4, 'length', 196]); });
 
   $('#runAtGPM').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 4, 228]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 4, 'length', 228]); });
 
   $('#runSpeedWithoutProgram').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 2, 196]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 2, 196]); });
 
   $('#runSpeedWithoutProgram1000RPM').on('click',
-    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 2, 196, 3, 232]); });
+    ()=>{ parseValueIntoPumpHtmlPage([96, 16, 1, 'length', 2, 196, 3, 232]); });
 
 });
 
 var parseValueIntoPumpHtmlPage = function (values) {
+  var count = 0;
   for (var i = 0; i < 30; i++) {
-    if (i < values.length ) {
-      $('#' + (i + 1)).val(values[i]);
-    } else {
-      $('#' + (i + 1)).val('');
+    if (value[i] === 'length') {
+      continue;
     }
+    if (i < values.length ) {
+      $('#' + (i + count)).val(values[i]);
+    } else {
+      $('#' + (i + count)).val('');
+    }
+    count++;
   }
 };
 

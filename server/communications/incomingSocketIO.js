@@ -1,19 +1,20 @@
 var io = require ('socket.io');
-const { addToQueue } = require ('../pump/queue');
-const defaultMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
-const logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
+var defaultMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
+var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 var socketServer = require ('../server').socketServer;
+var { addToQueue } = require ('../pump/queue');
 var { statusRequestUpdateInverval, exteralTimer, statusTimers, timerIntellicom } = require('../variables');
 var { pumpData, port } = require ('../serialPort');
 // const {  } = require (process.env.NODE_PATH + '/server/pump/helperFunctions.js');
 var Message = require (process.env.NODE_PATH + '/server/Classes/Message');
-const {
+var {
   manualPumpControl,
   pumpControlPanelState,
   pumpPower,
   runIntellicomPumpSpeed,
   runPumpAtSpeed,
   setPumpTimer,
+  runPumpProgram
 } = require ('../pump/commands');
 
 
@@ -108,6 +109,18 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   });
 
 
+  socket.on('runSpeed', function (speed, callback) {
+    console.log ('run speed', speed);
+    runPumpProgram(speed, undefined, undefined, (err, val) => {
+      if (err) {
+        callback (err, null);
+      } else {
+        callback(0);
+      }
+    });
+  });
+
+
   socket.on('setPumpExternalspeed', function (speed, callback) {
     // logger.debug('setPumpExternalspeed');
     runIntellicomPumpSpeed(speed);
@@ -149,9 +162,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('pumpControlPanelState', function (state, callback) {
-    // logger.debug('pumpControlPanelState');
     pumpControlPanelState(state);
-    // socket.emit('confirm');
     callback(0);
   });
 
@@ -162,11 +173,12 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
       if (err) {
         console.log('Error on write: ', err.message);
       }
-      callback(0);
     });
   });
 
+
   var pumpGetStatus = true;
+
   socket.on ('toggleStatusUpdate', function (state, callback) {
     // logger.debug('toggleStatusUpdate');
     if (pumpGetStatus) {
@@ -179,7 +191,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
     }
     pumpGetStatus = !pumpGetStatus;
     // socket.emit('confirm');
-    callback(0);
+    // callback(0);
   });
 });
 

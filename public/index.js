@@ -53,9 +53,7 @@ $('document').ready(function () {
   });
 
   $('.powerOff').click(function () {
-    socket.emit('pumpPower', 'off', () => {
-      showMessage();
-    });
+    socket.emit('pumpPower', 'off', confirmMessage);
   });
 
   $('.powerToggle').click(function () {
@@ -64,26 +62,46 @@ $('document').ready(function () {
   });
 
   $('.speed1').click(function () {
-    socket.emit('intellicom', 1, confirmMessage);
+    socket.emit('runSpeed', 1, confirmMessage);
     showMessage();
   });
 
   $('.speed2').click(function () {
-    socket.emit('intellicom', 2, confirmMessage);
+    socket.emit('runSpeed', 2, confirmMessage);
     showMessage();
   });
 
   $('.speed3').click(function () {
-    socket.emit('intellicom', 3, confirmMessage);
+    socket.emit('runSpeed', 3, confirmMessage);
     showMessage();
   });
 
   $('.speed4').click(function () {
+    socket.emit('runSpeed', 4, confirmMessage);
+    showMessage();
+  });
+
+  $('.external1').click(function () {
+    socket.emit('intellicom', 1, confirmMessage);
+    showMessage();
+  });
+
+  $('.external2').click(function () {
+    socket.emit('intellicom', 2, confirmMessage);
+    showMessage();
+  });
+
+  $('.external3').click(function () {
+    socket.emit('intellicom', 3, confirmMessage);
+    showMessage();
+  });
+
+  $('.external4').click(function () {
     socket.emit('intellicom', 4, confirmMessage);
     showMessage();
   });
 
-  $('.speedOff').click(function () {
+  $('.externalOff').click(function () {
     socket.emit('intellicom', 0, confirmMessage);
     showMessage();
   });

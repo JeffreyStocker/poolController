@@ -1,8 +1,9 @@
 const os = require('os'); //to get os version so i can install some testings
 const { pushPumpInfoToWebPages } = require (process.env.NODE_PATH + '/server/communications/outgoingSocketIO');
-const { convertToDecArray, parsePumpStatus, isStatusMessage } = require(process.env.NODE_PATH + '/server/pump/helperFunctions.js');
+const { parsePumpStatus, isStatusMessage, processBufferMessage } = require(process.env.NODE_PATH + '/server/pump/helperFunctions.js');
 var { showPumpStatusInConsole, acknowledgment } = require(process.env.NODE_PATH + '/server/variables');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
+var queue = require (process.env.NODE_PATH + '/server/pump/queue.js');
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
 
@@ -46,32 +47,37 @@ var init = exports.init = function () {
 
   // Switches the port into 'flowing mode'
   port.on('data', function (data) {
-    data = convertToDecArray (data);
-    if (isStatusMessage(data)) {
-      var pumpData = parsePumpStatus(data);
-      if (showPumpStatusInConsole) { logger('events', 'verbose', 'Data Received:  [' + [... data] + ']'); }
-      try {
-        socketServer.emit('pumpDataReturn', pumpData);
-      } catch (err) {
-        logger('system', 'error', 'Error proccesing data' + err);
-      }
-      acknowledgment.status = 'found';
-    } else if (acknowledgment.status === 'waiting For') {
-      var check = acknowledgment.isAcknowledgment(data);
-      acknowledgment.status = 'found';
-      logger('events', 'verbose', 'Acknowledged:  [' + [... data] + ']');
-    } else if (Array.isArray(data) === false) {
-      logger('events', 'debug', 'Data raw: ' + data);
-
-    } else {
-      logger('events', 'verbose', 'Data Received:  [' + [... data] + ']');
-    }
-
-    // else if (acknowledgment.status !== 'waiting For' || acknowledgment.isAcknowledgment(data) !== true) {
-    //   console.log ('not acknowledgment', data)
-    // }
-
+    processIncomingSerialPortData(data);
   });
 };
 
 init();
+
+module.exports.processIncomingSerialPortData = processIncomingSerialPortData = function () {
+  data = processBufferMessage (data);
+  if (isStatusMessage(data)) {
+    var pumpData = parsePumpStatus(data);
+    if (showPumpStatusInConsole) { logger('events', 'verbose', 'Data Received:  [' + [... data] + ']'); }
+    try {
+      socketServer.emit('pumpDataReturn', pumpData);
+    } catch (err) {
+      logger('system', 'error', 'Error sending pump data via socketIO' + err);
+    }
+    acknowledgment.status = 'found';
+  } else if (acknowledgment.status === 'waiting For') {
+    var check = acknowledgment.isAcknowledgment(data);
+    acknowledgment.status = 'found';
+    logger('events', 'verbose', 'Acknowledged:  [' + [... data] + ']');
+  } else if (Array.isArray(data) === false) {
+    logger('events', 'debug', 'Data raw: ' + data);
+
+  } else {
+    logger('events', 'verbose', 'Data Received:  [' + [... data] + ']');
+  }
+
+  queue.queueLoopMain();
+
+  // else if (acknowledgment.status !== 'waiting For' || acknowledgment.isAcknowledgment(data) !== true) {
+  //   console.log ('not acknowledgment', data)
+  // }
+};
