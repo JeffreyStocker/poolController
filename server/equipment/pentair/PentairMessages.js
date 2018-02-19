@@ -21,6 +21,7 @@ class Message {
     this.originalPacket = packet.slice();
     this.retryAttempts = 0;
     this.packet = this.preparePacketForSending(packet);
+    this.name = name;
   }
 
 
@@ -81,7 +82,7 @@ class Message {
   flipSourceAndDestination (packet) {
     //flips the destination and source bits
     if (Array.isArray(packet) !== true) {
-      return Error ('flipSourceAndDestinationFromStrippedPacket: Input is not an Array');
+      throw Error ('flipSourceAndDestinationFromStrippedPacket: Input is not an Array');
     }
     var startByte = this.findStart(packet);
     var destination = startByte + 2;

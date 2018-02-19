@@ -53,7 +53,7 @@ var init = exports.init = function () {
 
 init();
 
-module.exports.processIncomingSerialPortData = processIncomingSerialPortData = function () {
+module.exports.processIncomingSerialPortData = processIncomingSerialPortData = function (data) {
   data = processBufferMessage (data);
   if (isStatusMessage(data)) {
     var pumpData = parsePumpStatus(data);

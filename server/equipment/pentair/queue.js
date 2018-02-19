@@ -109,13 +109,13 @@ var sendCommand = module.exports.sendCommand = function (message, name = 'unknow
     byteArray = message;
   } else { return logger('events', 'error', 'sendCommand: Message is invalid:' + message); }
 
-  packet = Buffer.from(preparePacketForSending (byteArray)); //adds header, checksum and converts to a buffer
+  // packet = Buffer.from(preparePacketForSending (byteArray)); //adds header, checksum and converts to a buffer
 
-  port.write(packet, function(err) {
+  port.write(Buffer.from(byteArray), function(err) {
     if (err) {
       returnlogger('events', 'error', 'Error on write: ', err.message);
     }
-    if ((showPumpStatusInConsole === false && name === pumpGetStatus.name)
+    if ((showPumpStatusInConsole === false && message.name === 'Get Pump Status')
     // || message === pumpToLocal
     // || message === pumpToRemote
     ) {

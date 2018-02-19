@@ -104,7 +104,7 @@ module.exports = {
 
 
   parsePumpStatus(data) {
-    if (hasHeader(data) === true) {
+    if (module.exports.hasHeader(data) === true) {
       try {
         data = module.exports.stripMessageOfHeaderAndChecksum (data);
       } catch (err) {
@@ -149,7 +149,7 @@ module.exports = {
     //flips the destinttion and source bits
     //
     if (Array.isArray(buffer) !== true) {
-      return Error ('flipSourceAndDestinationFromStrippedMessage: Input is not an Array');
+      throw Error ('flipSourceAndDestinationFromStrippedMessage: Input is not an Array');
     }
     //need to add prefix checking
     //assuming this is a stripped message
