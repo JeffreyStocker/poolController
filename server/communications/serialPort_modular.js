@@ -58,18 +58,21 @@ module.exports.setTrigger = function (portName, trigger, callback) {
   if (!ports.portName) {
     logger('system', 'warn', 'Error: setTrigger for Serial Port: ' + portName + ' does not exist');
   } else {
+    logger('system', 'info', 'setTrigger for Serial Port: ' + portName + ' now Set');
     ports[portName].on(trigger, callback);
   }
 };
 
 module.exports.setGroupOfTriggers = function (portName, triggers = {}) {
-  if (!ports.portName) {
+  ports;
+  if (!ports[portName]) {
     logger('system', 'warn', 'Error: Set Triggers for Serial Port: ' + portName + ' does not exist');
   } else {
     let keys = Object.keys(triggers);
     for (var key of keys) {
-      ports[portName].on(key, keys[key]);
+      ports[portName].on(key, triggers[key]);
     }
+    logger('system', 'info', 'setGroupOfTriggers for Serial Port: ' + portName + ' now Set');
   }
 };
 
