@@ -11,7 +11,7 @@ class TwinLinkedStack {
   }
   item (data) {
     var context = this;
-    var remove = TwinLinkedStack.prototype.remove();
+    // var remove = TwinLinkedStack.prototype.remove;
     return {
       val: data,
       prev: null,
