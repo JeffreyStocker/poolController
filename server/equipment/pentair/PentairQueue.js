@@ -1,114 +1,78 @@
+process.env.NODE_PATH = process.env.NODE_PATH || __dirname + '/../../..';
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
-var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/preBuiltMessages.js');
-var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPort_modular').ports;
-var helpers = require(process.env.NODE_PATH + '/server/helpers');
+var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 
-
-
-var logger = require(process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
-
-var empty = function (context) {
-  return pumpToLocal.byte;
-};
-
-var start = function () {
-  return pumpToRemote.byte;
-};
-
-var add = function (context) {
-  if (!context.timer) {
-    context.timer = setInterval(function () {
-
-    }.bind(context || this), config.system.timeBetweenQueueSending);
-  }
-  return;
-};
-
-module.exports.init = function (pumps = {}, logger = ()=>{}) {
-  module.exports.setLogger(logger);
-
-  var queues = module.exports.pentairPumpQueues = new PentairPumpQueues(logger);
-  var pumpsNames = Object.keys(pumps);
-  for (var pump of pumpsNames) {
-    try {
-      if (pump.enabled === true) {
-        queues.createQueue(pump);
+module.exports = class PentairQueue extends ActionQueue {
+  constructor (name, source = 16, serialPort, options = {logger: () => {}, numberOfRetries: 3, messageTimeoutLength: 100}) {
+    super ( {
+      empty: function (context) {
+        return msg.defaultPumpControlPanelMessage('local');
       }
-    } catch (err) {
-      logger ('system', 'warn', err);
-    }
-  }
-};
-
-
-class PentairPump extends ActionQueue {
-  constructor (name, source, destination, options = {}) {
-    super ();
+    });
+    if (!options) { options = {}; }
     this.timers = {};
-    this.destination;
-    this.source = 16;
+    this.source = source;
     this.logger = options.logger || (function () {});
+    this.running = false;
+    this.messageTimeoutLength = options.messageTimeoutLength || 100;
+    this.numberOfRetries = options.numberOfRetries || 3;
+    this.currentRetries = 0;
+    this.timeout;
+    this.currentMessage;
 
-    //////////////////////////
-
-    var name, protocol, address;
-    if (!queueInfo.name || !queueInfo.communications) {
-      logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name);
-      return;
-    }
-    try {
-      name = queueInfo.name;
-      protocol = queueInfo.communications.protocol;
-      address = msg.addresses['pump' + queueInfo.communications.address];
-    } catch (err) {
-      logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name + ' | ' + err);
-    }
-
-    if (!this.queues[queueInfo.name]) {
-      this.queues[queueName] = new ActionQueue ({empty, start, add});
-    }
-    return this.queues[queueName];
   }
 
-  addMessageToQueue(queueName, message, callback = ()=>{}) {
-
-    if (!this.queues[queueName]) { return null; }
-
-    this.queues[queueName].add(message);
-    callback();
+  add(message) {
+    super.add(message);
+    if (this.length === 1) {
+      this.runQueue();
+    }
   }
 
-  checkQueue(queueName, incomingMessage) {
-    if (!this.queues[queueName]) {
-      return null;
+  sendToSerialPort() {
+
+  }
+
+  runQueue () {
+    var message = this.currentMessage || this.pull();
+
+    if (!message) { return; }
+
+    message.setSource (this.source);
+    message.prep();
+    this.sendToSerialPort(message);
+
+    if (!this.timeout) {
+      this.timeout = setTimeout(() => {
+        if (this.currentRetries < this.numberOfRetries) {
+          this.logger('events', 'debug', 'Message timedout waiting for acknowledgment: ', message.name);
+          this.currentRetries++;
+        } else {
+          this.logger('events', 'warn', 'Message timeout ' + this.currentRetries + ': ', message.name + '/n Removing message from queue');
+          this.currentRetries = 0;
+        }
+        this.runQueue();
+      }, this.messageTimeoutLength);
     }
+  }
+
+  checkQueueForAcknowledgment (incomingMessage) {
     var queuedMessage = this.queues[queueName].peak();
     var response = queuedMessage.tryAcknowledgment(incomingMessage);
-    if (response) {
+    if (response === true) {
+      clearTimeout(this.timeout);
+      this.timeout = undefined;
       this.unshift();
-      this.logger('event', queuedMessage.logLevel, message.name + ': Received Return');
+      this.currentRetries = 0;
+      this.logger('events', queuedMessage.logLevel, message.name + ': Received Return');
+      this.runQueue();
       return true;
-    } else if (response === -1) {
-      this.logger('event', 'info', message.name + ': timedout');
     } else if (!response) {
-      this.logger('event', 'verbose', message.name + ': Received Return');
+      this.logger('events', 'debug', message.name + ': achologment failed for ' + incomingMessage);
       return false;
     }
   }
+};
 
-  setTimer (name, time, func = ()=>{}) {
-    if (this.timers[name]) {
-      this.timers[name] = setInterval(func, time);
-    }
-  }
-
-  returnTimer (name) {
-    return this.timers[name];
-  }
-  cancelTimer (name) {
-    try {
-      clearInterval(this.timers[name]);
-    } catch (err) {
-    }
-  }
-}
+var temp = new module.exports('test');
+temp.add('test');
