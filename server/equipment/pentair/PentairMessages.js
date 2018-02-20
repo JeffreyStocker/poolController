@@ -20,10 +20,12 @@ class Message {
 
     this.originalPacket = packet.slice();
     this.retryAttempts = 0;
-    this.packet = this.preparePacketForSending(packet);
     this.name = name;
   }
 
+  get packet () {
+    return this.preparePacketForSending(this.originalPacket);
+  }
 
   isPacket (packet) {
     if (Array.isArray(packet) && packet[0] === 165 && packet[1] === 0) {
@@ -38,14 +40,18 @@ class Message {
   }
 
   setDestination (destination) {
+    var startPos;
     if (!destination && typeof destination !== 'number') { return undefined; }
-    this.packet[2] = destination;
+    startPos = this.findStart(this.originalPacket);
+    this.packet[startPos + 2] = destination;
     return this.packet;
   }
 
   setSource (source) {
+    var startPos;
     if (!source && typeof source !== 'number') { return undefined; }
-    this.packet[3] = source;
+    startPos = this.findStart(this.originalPacket);
+    this.packet[startPos + 3] = source;
     return this.packet;
   }
 
@@ -257,7 +263,7 @@ class Message {
 
   preparePacketForSending (packet) {
     //prepares a packet ie: [2,4,3,2] for sending by adding a header and checksum high & lowbit
-    packet = packet.slice();
+    // packet = packet.slice();
     packet = this.appendCheckSum(packet);
     packet = this.prependBuffer (packet);
     return packet;
@@ -317,21 +323,21 @@ module.exports.defaultPumpPowerMessage = function (powerState, callback) {
   } else if (powerState === 'off') {
     defaultMessage = defaultMessages.pump_PowerOff;
   } else {
-    return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
+    throw new Error('Error: In order to change the pump Power state, you need to enter true/false or on/off');
   }
   return new Message(defaultMessage.byte, defaultMessage.name, callback);
 };
 
 module.exports.defaultPumpControlPanelMessage = function (powerState, callback) {
   var defaultMessage;
-  if (powerState === 'remote') {
+  if (powerState.toLowerCase() === 'remote') {
     return new Message (defaultMessages.pumpToRemote.byte, defaultMessages.pumpToRemote.name, callback);
     defaultMessage = defaultMessages.pumpToRemote;
-  } else if (powerState === 'local') {
+  } else if (powerState.toLowerCase() === 'local') {
     return new Message (defaultMessages.pumpToLocal.byte, defaultMessages.pumpToLocal.name, callback);
     defaultMessage = defaultMessages.pumpToLocal;
   } else {
-    return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
+    throw new Error('Error: In order to change the pump Power state, you need to enter local or remote');
   }
 };
 
