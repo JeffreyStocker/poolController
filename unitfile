@@ -1,0 +1,27 @@
+[Unit]
+Description=Pool Pump Controller
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/node /usr/pi/pool2/npm start
+WorkingDirectory=/usr/pi/pool2/
+
+User=nobody
+Group=nogroup
+
+# Environment variables:
+Environment=NODE_ENV=production
+
+# Allow many incoming connections
+LimitNOFILE=infinity
+
+# Allow core dumps for debugging
+LimitCORE=infinity
+
+StandardInput=null
+StandardOutput=syslog
+StandardError=syslog
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
