@@ -19,7 +19,7 @@ var acknowledgment = module.exports.acknowledgment =
   nowTimeWait: undefined,
 
   isAcknowledgment: function (messageToCheck) {
-    var originalByteArray = flipSourceAndDestinationFromStrippedMessage(this.orginalMessage.byte);
+    var originalByteArray = flipSourceAndDestinationFromStrippedMessage(this.orginalMessage.originalPacket);
     // console.log('orginalMessage: ' , originalByteArray.toString());
     // console.log('messageToCheck: ' , messageToCheck);
     if (originalByteArray.toString() === messageToCheck.toString()) {
