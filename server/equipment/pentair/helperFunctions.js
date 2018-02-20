@@ -43,8 +43,6 @@ module.exports = {
     }
     var StartOfMessege = messageArray.indexOf(165);
     if (StartOfMessege === -1) {
-      // console.log (message);
-      // throw new Error ('Error No Start (165) byte the Message');
       StartOfMessege = 0;
     }
     var strippedMessage = message.slice (StartOfMessege, message.length - 2); //removes the high and low checksum bytes in back and the HEADER
@@ -149,7 +147,7 @@ module.exports = {
     //flips the destinttion and source bits
     //
     if (Array.isArray(buffer) !== true) {
-      throw Error ('flipSourceAndDestinationFromStrippedMessage: Input is not an Array');
+      throw new Error ('flipSourceAndDestinationFromStrippedMessage: Input is not an Array');
     }
     //need to add prefix checking
     //assuming this is a stripped message
