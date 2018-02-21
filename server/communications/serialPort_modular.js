@@ -48,6 +48,30 @@ var init = exports.init = function (portNames = [], newLogger = logger) {
   return module.exports;
 };
 
+var returnPortByName = function (portName) {
+  if (!!ports[portName]) {
+    return ports[portName];
+  } else {
+    return null;
+  }
+};
+
+module.exports.sendData = function (portName, message) {
+  return new Promise ((resolve, revoke) => {
+    var port = returnPortByName(portName);
+    port.pause();
+    port.write(Buffer.from(message.packet), function (err) {
+      if (err) {
+        logger('events', 'error', 'sendData: Error writing' + message.outputInfo + ' to serialPort:' + err);
+        revoke(err);
+      }
+      logger('events', message.logLevel, 'sendData: Success writing ' + message.outputInfo + ' to serialPort');
+      resolve();
+    });
+    port.resume();
+  });
+};
+
 module.exports.setLogger = function (newLogger = logger) {
   if (logger !== newLogger && typeof newLogger === 'function') {
     logger = newLogger;
