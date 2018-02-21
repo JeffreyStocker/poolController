@@ -1,6 +1,5 @@
 class Message {
   constructor(packet, name = 'unknown', options = {
-    numberOfRetries: 3,
     logLevel: 'info'
   }) {
 
@@ -15,16 +14,18 @@ class Message {
     if (typeof options === 'function') {
       options = {};
     }
-    this.numberOfRetries = options.numberOfRetries || 3;
     this.logLevel = options.logLevel || 'info';
 
     this.originalPacket = packet.slice();
-    this.retryAttempts = 0;
     this.name = name;
   }
 
   get packet () {
     return this.preparePacketForSending(this.originalPacket);
+  }
+
+  get outputInfo() {
+    return this.name + '(' + this.originalPacket + ')';
   }
 
   isPacket (packet) {
