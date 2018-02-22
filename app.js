@@ -3,7 +3,7 @@ var configureFile = require(process.env.NODE_PATH + '/server/configureFile').ini
 var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging('system', logger);
 
-require(process.env.NODE_PATH + '/server/findFiles').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
+require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
 // console.log(requireGlob('PentairMessages.js'));
 
 //temp
