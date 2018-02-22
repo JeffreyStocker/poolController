@@ -1,7 +1,9 @@
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
-var msg = require (process.env.NODE_PATH + '/server/equipment/pentair//preBuiltMessages.js');
+var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPort_modular').ports;
 var helpers = require(process.env.NODE_PATH + '/server/helpers');
+
+var PentairQueue = requireGlob('PentairQueue');
 
 var logger = () => {};
 
@@ -22,39 +24,76 @@ var add = function (context) {
   return;
 };
 
-module.exports.init = function (pumps = {}, logger = ()=>{}) {
-  module.exports.setLogger(logger);
 
-  var queues = module.exports.pentairPumpQueues = new PentairPumpQueues(logger);
-  var pumpsNames = Object.keys(pumps);
-  for (var pump of pumpsNames) {
+module.exports.init = function (pumps = {}, queueTypes = {}, logger = ()=>{}) {
+  module.exports.setLogger(logger);
+  var queues = module.exports.PentairGroupOfQueues = new PentairGroupOfQueues(logger);
+
+  // var pumpsNames = Object.keys(pumps);
+  // for (var pump of pumps) {
+  //   try {
+  //     if (pump.enabled === true) {
+  //       queues.createQueue(pump);
+  //     }
+  //   } catch (err) {
+  //     logger ('system', 'warn', err);
+  //   }
+  // }
+  var names = {};
+  var queueT = {};
+
+  Object.keys(queueTypes).forEach(queueName => {
+    queues.createQueue(queueTypes[queueName]);
+  });
+
+  for (var pump of pumps) {
     try {
-      if (pump.enabled === true) {
-        queues.createQueue(pump);
+      if (pump.enabled === true && pump.communications.type === 'rs485') {
+        queues.addQueueName(pump.name, pump.communications.hardwareAddress);
+        // queues.createQueue(pump);
       }
     } catch (err) {
       logger ('system', 'warn', err);
     }
   }
+  return module.exports;
 };
 
 
-class PentairPumpQueues {
+class PentairGroupOfQueues {
   constructor (logger = ()=>{}) {
-    super ();
-    this.queues = { };
-    this.timers = {};
-    this.destination;
+    this.names = {};
+    this.queues = {};
     this.source = 16;
     this.logger = logger;
-
   }
 
   checkIfQueueExists (queueName) {
+    if (!this.queues[port]) {
+      return false;
+    }
+    return true;
+  }
 
+  addQueueName (name, hardwareAddress) {
+    if (this.checkIfQueueExists(hardwareAddress)) {
+      this.equipment[name] = this.queues[hardwareAddress];
+    } else {
+      throw new Error (port + ' address is not a valid queue port');
+    }
   }
 
   createQueue (queueInfo) {
+    var name, address;
+    if (!queueInfo.name || !queueInfo.hardwareAddress) {
+      logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name);
+      return;
+    }
+    this.names[queueInfo.name] = this.queues[queueInfo.hardwareAddress] = new PentairQueue();
+    return thithis.names[queueInfo.name];
+  }
+
+  createQueue2 (queueInfo) {
     var name, protocol, address;
     if (!queueInfo.name || !queueInfo.communications) {
       logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name);
@@ -74,18 +113,18 @@ class PentairPumpQueues {
     return this.queues[queueName];
   }
 
-  removeQueue(queueName) {
-    if (!this.queues[queueName]) {
+  removeQueueName(queueName) {
+    if (!this.names[queueName]) {
       return null;
     }
-    delete this.queues[queueName];
+    delete this.names[queueName];
   }
 
   addMessageToQueue(queueName, message, callback = ()=>{}) {
 
-    if (!this.queues[queueName]) { return null; }
+    if (!this.names[queueName]) { return null; }
 
-    this.queues[queueName].add(message);
+    this.names[queueName].add(message);
     callback();
   }
 
