@@ -8,14 +8,17 @@ require(process.env.NODE_PATH + '/server/findFiles').init(['node_modules', 'spec
 // console.log(requireGlob('PentairMessages.js'));
 
 //temp
-var useModular = false;
+var useModular = true;
 
 if (useModular) {
   // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
   // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
   require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init();
   var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
-
+  var groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues').init(
+    configureFile.config.equipment.pumps,
+    configureFile.config.system.communications.rs485,
+    logger);
 } else {
   // var config = require('./server/configureFile').init('./config.json');
 
@@ -30,7 +33,7 @@ if (useModular) {
 
 
   ////start main program
-  setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending);
+  setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending, configureFile.config.system.communications);
   ////starts routine pump status updates
   addToQueue(defaultStatusMessage());
 
