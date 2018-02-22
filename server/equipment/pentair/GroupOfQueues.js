@@ -90,7 +90,7 @@ class PentairGroupOfQueues {
       return;
     }
     this.names[queueInfo.name] = this.queues[queueInfo.hardwareAddress] = new PentairQueue();
-    return thithis.names[queueInfo.name];
+    return this.names[queueInfo.name];
   }
 
   createQueue2 (queueInfo) {
