@@ -1,5 +1,5 @@
 var io = require ('socket.io');
-// var defaultMsg = require (process.env.NODE_PATH + '/server/preBuiltMessages.js');
+// var defaultMsg = require (process.env.NODE_PATH + '/server/PentairMessages.js');
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 var socketServer = require (process.env.NODE_PATH + '/server/server').socketServer;
 var { addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');

@@ -4,6 +4,9 @@ var configureFile = require(process.env.NODE_PATH + '/server/configureFile').ini
 var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging('system', logger);
 
+require(process.env.NODE_PATH + '/server/findFiles').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
+// console.log(requireGlob('PentairMessages.js'));
+
 //temp
 var useModular = false;
 
@@ -18,8 +21,7 @@ if (useModular) {
 
   var { statusRequestUpdateInverval, statusTimers } = require (process.env.NODE_PATH + '/server/variables');
   // var { timeBetweenQueueSending } = require (process.env.NODE_PATH + '/server/server');
-  // var { pumpGetStatus } = require (process.env.NODE_PATH + '/server/equipment/pentair/preBuiltMessages');
-  var statusMessage = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js').defaultStatusMessage;
+  var {defaultStatusMessage} = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
   var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
   var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
 
@@ -30,11 +32,11 @@ if (useModular) {
   ////start main program
   setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending);
   ////starts routine pump status updates
-  addToQueue(statusMessage());
+  addToQueue(defaultStatusMessage());
 
 
   statusTimers = setInterval( ()=> {
-    addToQueue(statusMessage());
+    addToQueue(defaultStatusMessage());
     // console.log (pumpToLocal);
     // addToQueue(pumpToLocal);
   }, statusRequestUpdateInverval); //gets pump status once every mintute

@@ -1,4 +1,4 @@
-var preBuiltMsg = require (process.env.NODE_PATH + '/server/equipment/pentair/preBuiltMessages');
+var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages');
 var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
 var { exteralTimer, timerIntellicom } = require (process.env.NODE_PATH + '/server/variables');
 var Message = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
@@ -25,13 +25,13 @@ module.exports = {
   pumpControlPanelState (powerState) {
     if (powerState === 'toggle') {
       clearInterval(exteralTimer);
-      addToQueue(preBuiltMsg.pumpToRemote);
-      addToQueue(preBuiltMsg.pumpToLocal);
+      addToQueue(msg.pumpToRemote);
+      addToQueue(msg.pumpToLocal);
     } else if (powerState === 'remote') {
-      addToQueue(preBuiltMsg.pumpToRemote);
+      addToQueue(msg.pumpToRemote);
     } else if (powerState === 'local') {
       clearInterval(exteralTimer);
-      addToQueue(preBuiltMsg.pumpToLocal);
+      addToQueue(msg.pumpToLocal);
     } else {
       return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
     }
@@ -41,13 +41,13 @@ module.exports = {
   pumpPower (powerState) {
     if (powerState === 'toggle') {
       clearInterval(exteralTimer);
-      addToQueue(preBuiltMsg.pump_PowerOff);
-      addToQueue(preBuiltMsg.pump_PowerOn);
+      addToQueue(msg.pump_PowerOff);
+      addToQueue(msg.pump_PowerOn);
     } else if (powerState === 'on') {
-      addToQueue(preBuiltMsg.pump_PowerOn);
+      addToQueue(msg.pump_PowerOn);
     } else if (powerState === 'off') {
       clearInterval(exteralTimer);
-      addToQueue(preBuiltMsg.pump_PowerOff);
+      addToQueue(msg.pump_PowerOff);
     } else {
       return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
     }
@@ -80,7 +80,7 @@ module.exports = {
       pumpPower('toogle');
       callback (null);
     } else if (speed >= 1 || speed <= 4) {
-      addToQueue(preBuiltMsg.returnDefaultMessageByte('pumpSpeed' + speed, destination, source));
+      addToQueue(msg.returnDefaultMessageByte('pumpSpeed' + speed, destination, source));
       callback (null);
     } else {
       callback ('Speed outside Correct Range (0-4)');
