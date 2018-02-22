@@ -26,6 +26,7 @@
     "pm2": "pm2 start app.js",
     "mochawesome": "mocha ./spec/* --recursive --reporter mochawesome",
     "nodemon": "nodemon --ignore 'public/' --delay 1  app.js",
+    "debug": "node --inspect-brk=0.0.0.0:8000 app.js",
     "start": "node app.js",
     "test": "mocha ./spec/* --recursive"
   },

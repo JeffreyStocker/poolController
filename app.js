@@ -1,5 +1,4 @@
 process.env.NODE_PATH = __dirname;
-
 var configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
 var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging('system', logger);
