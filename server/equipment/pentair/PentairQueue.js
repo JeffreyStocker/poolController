@@ -1,8 +1,9 @@
 process.env.NODE_PATH = process.env.NODE_PATH || __dirname + '/../../..';
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
-
+var Message = msg.Message;
 var processIncomingSerialPortData = require(process.env.NODE_PATH + '/server/communications/serialPort.js').processIncomingSerialPortData;
+var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
 
 
 module.exports = class PentairQueue extends ActionQueue {
@@ -32,30 +33,49 @@ module.exports = class PentairQueue extends ActionQueue {
     this.timeout;
     this.currentMessage;
 
-    serialPort.on('data', function () {
-      data = processBufferMessage (data);
-      if (isStatusMessage(data)) {
-        var pumpData = parsePumpStatus(data);
-        logger('status', 'verbose', 'Data Received:  [' + [... data] + ']');
-        try {
-          socketServer.emit('pumpDataReturn', pumpData);
-        } catch (err) {
-          logger('system', 'error', 'Error sending pump data via socketIO' + err);
+    if (serialPort) {
+      serialPort.on('data', function (data) {
+        data = Message.prototype.stripPacketOfHeaderAndChecksum(data);
+        if (this.checkQueueForAcknowledgment(data) === true) {
+          if (Message.prototype.isStatusMessage(data)) {
+            var pumpData = parsePumpStatus(data);
+            logger('status', 'verbose', 'Data Received:  [' + [... data] + ']');
+            try {
+              socketServer.emit('pumpDataReturn', pumpData);
+            } catch (err) {
+              logger('system', 'error', 'Error sending pump data via socketIO' + err);
+            }
+          } else {
+
+          }
+          this.currentMessage.callback(null);
+        } else {
+          logger('events', 'verbose', 'Packet was not an acknowledgment' + data);
         }
-        acknowledgment.status = 'found';
-      } else if (acknowledgment.status === 'waiting For') {
-        var check = acknowledgment.isAcknowledgment(data);
-        acknowledgment.status = 'found';
-        logger('events', 'verbose', 'Acknowledged:  [' + [... data] + ']');
-      } else if (Array.isArray(data) === false) {
-        logger('events', 'debug', 'Data raw: ' + data);
 
-      } else {
-        logger('events', 'verbose', 'Data Received:  [' + [... data] + ']');
-      }
+      //   if (isStatusMessage(data)) {
+      //     var pumpData = parsePumpStatus(data);
+      //     logger('status', 'verbose', 'Data Received:  [' + [... data] + ']');
+      //     try {
+      //       socketServer.emit('pumpDataReturn', pumpData);
+      //     } catch (err) {
+      //       logger('system', 'error', 'Error sending pump data via socketIO' + err);
+      //     }
+      //     acknowledgment.status = 'found';
+      //   } else if (acknowledgment.status === 'waiting For') {
+      //     var check = acknowledgment.isAcknowledgment(data);
+      //     acknowledgment.status = 'found';
+      //     logger('events', 'verbose', 'Acknowledged:  [' + [... data] + ']');
+      //   } else if (Array.isArray(data) === false) {
+      //     logger('events', 'debug', 'Data raw: ' + data);
 
-      queue.queueLoopMain();
-    });
+      //   } else {
+      //     logger('events', 'verbose', 'Data Received:  [' + [... data] + ']');
+      //   }
+      //   queue.queueLoopMain();
+      });
+    }
+
     // processIncomingSerialPortData);
   }
 
@@ -74,11 +94,18 @@ module.exports = class PentairQueue extends ActionQueue {
 
   runQueue () {
     var message = this.currentMessage || this.pull();
+    if (!this.currentMessage) {
+      message = this.currentMessage = this.pull();
+      if (!message) { return; }
 
-    if (!message) { return; }
+      message.setSource (this.source);
+      this.sendToSerialPort(message);
+    } else {
+      message = this.currentMessage;
+    }
 
-    message.setSource (this.source);
-    this.sendToSerialPort(message);
+    // if (!message) { return; }
+
 
     if (!this.timeout) {
       this.timeout = setTimeout(() => {
@@ -88,6 +115,8 @@ module.exports = class PentairQueue extends ActionQueue {
         } else {
           this.logger('events', 'warn', 'Message timeout ' + this.currentRetries + ': ', message.name + '/n Removing message from queue');
           this.currentRetries = 0;
+          this.currentMessage.callback('Message failed to send to pump');
+          this.currentMessage = undefined;
         }
         this.runQueue();
       }, this.messageTimeoutLength);
@@ -105,12 +134,7 @@ module.exports = class PentairQueue extends ActionQueue {
       this.logger('events', queuedMessage.logLevel, message.name + ': Received Return');
       this.runQueue();
       return true;
-    } else if (!response) {
-      this.logger('events', 'debug', message.name + ': achologment failed for ' + incomingMessage);
-      return false;
     }
+    return false;
   }
 };
-
-var temp = new module.exports('test');
-temp.add('test');
