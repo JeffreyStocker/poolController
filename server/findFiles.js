@@ -8,7 +8,7 @@ module.exports = {
     filesLocations = {};
     foldersToIgnore = processToIgnoreIntoString(foldersToIgnore);
     filesToIgnore = processToIgnoreIntoString(filesToIgnore);
-    files = glob.sync(`!(${foldersToIgnore})/**/!(${filesToIgnore}).js`, {absolute: true});
+    files = glob.sync(`!(${foldersToIgnore})/**/!(${filesToIgnore}).?(js|json|node)`, {absolute: true});
 
     files.forEach(file => {
       let dot = file.lastIndexOf('.');
@@ -26,11 +26,14 @@ module.exports = {
   },
 
   requireGlob(name) {
+    if (typeof name !== 'string') {
+      throw new Error ('Name of file must be a string: ' + name);
+    }
     [name, ...test] = name.split('.');
     if (filesLocations[name]) {
       return require(filesLocations[name]);
     } else {
-      throw new Error (name + 'can not be found in files');
+      throw new Error (name + ' can not be found in files');
     }
   }
 };
