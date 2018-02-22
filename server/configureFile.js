@@ -50,37 +50,39 @@ var defaultsFunction = function () {
         },
       },
       communications: {
-        rs485: {
-          ports: [
-            '/dev/ttyUSB0'
-          ]
-        },
+        rs485: [
+          {
+            name: 'serialPort',
+            hardwareAddress: '/dev/ttyUSB0'
+          }
+        ],
         GPIO: {
         }
       },
     },
     equipment: {
-      pumps: {
-        1: {
-          enabled: true,
+      pumps: [
+        {
           name: 'Pump1',
+          enabled: true,
           communications: {
             address: '1',
             protocol: 'pentair',
             type: 'rs485',
+            hardwareAddress: '/dev/ttyUSB0'
           }
         }
-      },
-      controllers: {
-        'intellicom': {
-          'enabled': true,
-          'name': ''
+      ],
+      controllers: [
+        {
+          name: 'intellicom',
+          enabled: true,
         },
-        'intellitouch': {
-          'enabled': false,
-          'name': ''
+        {
+          name: 'intellitouch',
+          enabled: false,
         }
-      }
+      ]
     },
     groups: [
     ],
