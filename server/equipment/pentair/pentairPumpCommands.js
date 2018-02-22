@@ -1,24 +1,27 @@
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages');
 var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
 var { exteralTimer, timerIntellicom } = require (process.env.NODE_PATH + '/server/variables');
-var Message = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
+var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 
 module.exports = {
   runIntellicomPumpSpeed (speed = 0, interval = 10000) {
-    if (speed === 0) {
-      addToQueue(externalVariable['pumpExternal_Off']);
-      clearInterval(timerIntellicom);
-      logger('events', 'info', 'Running Intellicom External Pump Speed: Stop');
-    } else if (speed > 0 && speed < 5) {
-      addToQueue(externalVariable['pumpExternal_Speed' + speed]);
-      logger('events', 'info', 'Running Intellicom External Pump Speed: ' + speed);
+  //   if (speed === 0) {
+  //     addToQueue(externalVariable['pumpExternal_Off']);
+  //     clearInterval(timerIntellicom);
+  //     logger('events', 'info', 'Running Intellicom External Pump Speed: Stop');
+  //   } else if (speed > 0 && speed < 5) {
+  //     addToQueue(externalVariable['pumpExternal_Speed' + speed]);
+  //     logger('events', 'info', 'Running Intellicom External Pump Speed: ' + speed);
 
-      timerIntellicom = setInterval( function() {
-        addToQueue(externalVariable[speed]);
-        logger('events', 'verbose', 'Running Intellicom in interval with External Pump Speed: ' + speed);
-      }, interval);
-    }
+  //     timerIntellicom = setInterval( function() {
+  //       addToQueue(externalVariable[speed]);
+  //       logger('events', 'verbose', 'Running Intellicom in interval with External Pump Speed: ' + speed);
+  //     }, interval);
+  //   }
+    var message = msg.defaultIntellicomMessage(speed, {timer: intervals});
+
+
   },
 
 
