@@ -52,47 +52,52 @@
         "${workspaceFolder}/lib/**/*.js",
         "<node_internals>/**/*.js"
       ]
-  },
-  {
-    "name": "Launch Start via NPM",
-    "type": "node",
-    "request": "launch",
-    "runtimeExecutable": "npm",
-    "runtimeArgs": [
-      "run-script",
-      "start",
-      // "--max-old-space-size=4096"
-    ],
-    // "port": 9229,
-    "outputCapture": "std",
-    "smartStep": true,
-    "skipFiles": [
-      "${workspaceFolder}/node_modules/**/*.js",
-      "${workspaceFolder}/lib/**/*.js",
-      "<node_internals>/**/*.js"
-    ]
-  },
-  {
-    "name": "Mocha Tests",
-    "type": "node",
-    "request": "launch",
-    "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-    "args": [
-      "-u",
-      "tdd",
-      "--timeout",
-      "999999",
-      "--colors",
-      "${workspaceFolder}/spec"
-    ],
-    "internalConsoleOptions": "openOnSessionStart"
-  },
-  {
-    "name": "Launch Chrome against localhost",
-    "type": "chrome",
-    "request": "launch",
-    "url": "http://localhost:8080",
-    "webRoot": "${workspaceFolder}"
-  }
+    },
+    {
+      "name": "Launch Start via NPM",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run-script",
+        "start",
+        // "--max-old-space-size=4096"
+      ],
+      // "port": 9229,
+      "outputCapture": "std",
+      "smartStep": true,
+      "skipFiles": [
+        "${workspaceFolder}/node_modules/**/*.js",
+        "${workspaceFolder}/lib/**/*.js",
+        "<node_internals>/**/*.js"
+      ]
+    },
+    {
+      "name": "Mocha Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": [
+        "-u",
+        "tdd",
+        "--timeout",
+        "999999",
+        "--colors",
+        "${workspaceFolder}/spec"
+      ],
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "Launch Chrome against localhost",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:8080",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "//////////////////////////",
+      "type": "node",
+      "request": "launch",
+    }
   ]
 }
