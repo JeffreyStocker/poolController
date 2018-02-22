@@ -114,25 +114,25 @@ module.exports = {
     //165,0,16,96,7,15,10,0,0,0,198,5,120,0,0,0,0,0,1,22,4
     var indexAdjust = 0;
     var pumpData = {
-      destination:  data[2],
-      source:       data[3],
-      action:       data[4],
-      length:       data[5],
-      state:        data[6], //4= off, 10 = on //power i think
-      driveState:   data[7],
-      ppc:          data[8],
-      wattHighBit:  data[9],
-      wattLowBit:   data[10],
-      rpmHighBit:   data[11],
-      rpmLowBit:    data[12],
-      unknown1:     data[13],
-      unknown2:     data[14],
-      unknown3:     data[15],
-      unknown4:     data[16],
+      destination: data[2],
+      source: data[3],
+      action: data[4],
+      length: data[5],
+      state: data[6], //4= off, 10 = on //power i think
+      driveState: data[7],
+      ppc: data[8],
+      wattHighBit: data[9],
+      wattLowBit: data[10],
+      rpmHighBit: data[11],
+      rpmLowBit: data[12],
+      unknown1: data[13],
+      unknown2: data[14],
+      unknown3: data[15],
+      unknown4: data[16],
       timerHighBit: data[17],
-      timerLowBit:  data[18],
-      timeHours:    data[19],
-      timeMin:      data[20]
+      timerLowBit: data[18],
+      timeHours: data[19],
+      timeMin: data[20]
     };
 
     pumpData.watt = module.exports.combineHighPlusLowBit(pumpData.wattHighBit, pumpData.wattLowBit );
