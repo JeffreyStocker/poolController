@@ -8,7 +8,7 @@ var processIncomingSerialPortData = require(process.env.NODE_PATH + '/server/com
 module.exports.init = function () {
   var serialPaths = configureFile.system.communications && configureFile.system.communications.rs485.ports;
   var sp = require(process.env.NODE_PATH + '/server/communications/serialPort_modular.js');
-  sp.init(serialPaths, logger);
+  var wait = sp.init(serialPaths, logger);
   sp.setGroupOfTriggers('/dev/ttyUSB0', {
     'data': processIncomingSerialPortData
   });

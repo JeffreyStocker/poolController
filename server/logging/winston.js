@@ -50,7 +50,7 @@ module.exports.init = function (logs = {}) {
     // module.exports.loggers[name] = winston.loggers.get(name);
     logInternal('Added New Logger: ' + name);
   });
-  return module.exports.loggers;
+  return module.exports.sendToLogs;
 };
 
 
