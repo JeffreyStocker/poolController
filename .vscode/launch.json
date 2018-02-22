@@ -5,27 +5,39 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Current Window1",
       "type": "node",
       "request": "launch",
-      "name": "Launch Current Window",
       "program": "${file}",
       "cwd": "${workspaceFolder}",
       "runtimeArgs": [
         // "--max-old-space-size=4096"
       ],
-      "outputCapture": "std"
+      "outputCapture": "std",
+      "smartStep": true,
+      "skipFiles": [
+        "${workspaceFolder}/node_modules/**/*.js",
+        "${workspaceFolder}/lib/**/*.js",
+        "<node_internals>/**/*.js"
+      ]
     },
     {
-      "type": "node",
-      "request": "launch",
       "name": "Launch App.js",
-      "program": "${workspaceFolder}/app.js",
-      "outputCapture": "std"
-    },
-    {
       "type": "node",
       "request": "launch",
+      "program": "${workspaceFolder}/app.js",
+      "outputCapture": "std",
+      "smartStep": true,
+      "skipFiles": [
+        "${workspaceFolder}/node_modules/**/*.js",
+        "${workspaceFolder}/lib/**/*.js",
+        "<node_internals>/**/*.js"
+      ]
+    },
+    {
       "name": "Launch Debug via NPM",
+      "type": "node",
+      "request": "launch",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run-script",
@@ -33,25 +45,37 @@
         // "--max-old-space-size=4096"
       ],
       // "port": 9229,
-      "outputCapture": "std"
+      "outputCapture": "std",
+      "smartStep": true,
+      "skipFiles": [
+        "${workspaceFolder}/node_modules/**/*.js",
+        "${workspaceFolder}/lib/**/*.js",
+        "<node_internals>/**/*.js"
+      ]
   },
   {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch Start via NPM",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run-script",
-        "start",
-        // "--max-old-space-size=4096"
-      ],
-      // "port": 9229,
-      "outputCapture": "std"
-  },
-  {
+    "name": "Launch Start via NPM",
     "type": "node",
     "request": "launch",
+    "runtimeExecutable": "npm",
+    "runtimeArgs": [
+      "run-script",
+      "start",
+      // "--max-old-space-size=4096"
+    ],
+    // "port": 9229,
+    "outputCapture": "std",
+    "smartStep": true,
+    "skipFiles": [
+      "${workspaceFolder}/node_modules/**/*.js",
+      "${workspaceFolder}/lib/**/*.js",
+      "<node_internals>/**/*.js"
+    ]
+  },
+  {
     "name": "Mocha Tests",
+    "type": "node",
+    "request": "launch",
     "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
     "args": [
       "-u",
@@ -64,9 +88,9 @@
     "internalConsoleOptions": "openOnSessionStart"
   },
   {
+    "name": "Launch Chrome against localhost",
     "type": "chrome",
     "request": "launch",
-    "name": "Launch Chrome against localhost",
     "url": "http://localhost:8080",
     "webRoot": "${workspaceFolder}"
   }
