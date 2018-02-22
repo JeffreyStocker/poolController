@@ -14,7 +14,7 @@
         // "--max-old-space-size=4096"
       ],
       "outputCapture": "std",
-      "smartStep": true,
+      // "smartStep": true,
       "skipFiles": [
         "${workspaceFolder}/node_modules/**/*.js",
         "${workspaceFolder}/lib/**/*.js",
@@ -27,7 +27,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/app.js",
       "outputCapture": "std",
-      "smartStep": true,
+      // "smartStep": true,
       "skipFiles": [
         "${workspaceFolder}/node_modules/**/*.js",
         "${workspaceFolder}/lib/**/*.js",
@@ -46,7 +46,7 @@
       ],
       // "port": 9229,
       "outputCapture": "std",
-      "smartStep": true,
+      // "smartStep": true,
       "skipFiles": [
         "${workspaceFolder}/node_modules/**/*.js",
         "${workspaceFolder}/lib/**/*.js",
@@ -65,7 +65,7 @@
       ],
       // "port": 9229,
       "outputCapture": "std",
-      "smartStep": true,
+      // "smartStep": true,
       "skipFiles": [
         "${workspaceFolder}/node_modules/**/*.js",
         "${workspaceFolder}/lib/**/*.js",
