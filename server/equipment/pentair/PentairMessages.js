@@ -1,5 +1,6 @@
 class Message {
   constructor(packet, name = 'unknown', options = {
+    timer: 250,
     logLevel: 'info'
   }) {
 
@@ -14,8 +15,9 @@ class Message {
     if (typeof options === 'function') {
       options = {};
     }
-    this.logLevel = options.logLevel || 'info';
 
+    this.logLevel = options.logLevel || 'info';
+    this.timer = options.timer || null;
     this.originalPacket = packet.slice();
     this.name = name;
   }
@@ -160,6 +162,13 @@ class Message {
     //or [...exampleBuffer]
   }
 
+  isStatusMessage(packet) {
+    if (this.isPacket(packet) && packet[4] === 7) {
+      return true;
+    }
+    return false;
+  }
+
   findStart (packet) {
     if (Array.isArray(packet) !== true) { throw new Error ('findStart: packet must be an array'); }
 
@@ -200,14 +209,15 @@ class Message {
     return packet.slice (0, packet.length - 2);
   }
 
-  stripPacketOfHeaderAndChecksum (packet, returnArrayOrBuffer = null) {
+  stripPacketOfHeaderAndChecksum (packet, returnArrayOrBuffer = 'default') {
     //removes the HEADER and high and low bit checksum
     //converts either Buffer or array, and returns same
-    var strippedPacket;
+    var strippedPacket, buffer;
     if (Buffer.isBuffer(packet) === false && Array.isArray (packet) === true) {
       var packetArray = packet;
+      buffer = false;
     } else if (Buffer.isBuffer(message) === true) {
-      var buffer = true;
+      buffer = true;
       var packetArray = [...packet]; //convert to a normal array
     }
 
@@ -269,6 +279,13 @@ class Message {
     packet = this.prependBuffer (packet);
     return packet;
   }
+
+  stripPacket (packet) {
+    var strippedPacket = this.stripPacketOfHeaderAndChecksum(packet, 'array');
+
+    return strippedPacket;
+  }
+
 }
 
 /////// packet Information /////////////////////////
@@ -378,7 +395,7 @@ module.exports = {
     }
   },
 
-  defaultIntellicomMessage (speed = 0, callback = ()=>{}) {
+  defaultIntellicomMessage (speed = 0, options, callback = ()=>{}) {
     if (speed === 0) {
       return new Message (defaultMessages.pumpExternal_Off.byte, defaultMessages.pumpExternal_Off.name, callback);
     } else if (speed > 0 && speed < 5) {
