@@ -2,16 +2,28 @@ process.env.NODE_PATH = process.env.NODE_PATH || __dirname + '/../../..';
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 
+var processIncomingSerialPortData = require(process.env.NODE_PATH + '/server/communications/serialPort.js').processIncomingSerialPortData;
+
+
 module.exports = class PentairQueue extends ActionQueue {
-  constructor (name, source = 16, serialPort, options = {logger: () => {}, numberOfRetries: 3, messageTimeoutLength: 100}) {
-    super ( {
+  constructor (
+    name,
+    serialPort,
+    options = {
+      logger: () => {},
+      messageTimeoutLength: 100,
+      numberOfRetries: 3,
+      source: 16
+    }) {
+    super ({
       empty: function (context) {
         return msg.defaultPumpControlPanelMessage('local');
       }
     });
     if (!options) { options = {}; }
+    this.serialPort = serialPort || (() => {});
     this.timers = {};
-    this.source = source;
+    this.source = options.source || 16;
     this.logger = options.logger || (function () {});
     this.running = false;
     this.messageTimeoutLength = options.messageTimeoutLength || 100;
@@ -20,6 +32,31 @@ module.exports = class PentairQueue extends ActionQueue {
     this.timeout;
     this.currentMessage;
 
+    serialPort.on('data', function () {
+      data = processBufferMessage (data);
+      if (isStatusMessage(data)) {
+        var pumpData = parsePumpStatus(data);
+        logger('status', 'verbose', 'Data Received:  [' + [... data] + ']');
+        try {
+          socketServer.emit('pumpDataReturn', pumpData);
+        } catch (err) {
+          logger('system', 'error', 'Error sending pump data via socketIO' + err);
+        }
+        acknowledgment.status = 'found';
+      } else if (acknowledgment.status === 'waiting For') {
+        var check = acknowledgment.isAcknowledgment(data);
+        acknowledgment.status = 'found';
+        logger('events', 'verbose', 'Acknowledged:  [' + [... data] + ']');
+      } else if (Array.isArray(data) === false) {
+        logger('events', 'debug', 'Data raw: ' + data);
+
+      } else {
+        logger('events', 'verbose', 'Data Received:  [' + [... data] + ']');
+      }
+
+      queue.queueLoopMain();
+    });
+    // processIncomingSerialPortData);
   }
 
   add(message) {
@@ -29,8 +66,10 @@ module.exports = class PentairQueue extends ActionQueue {
     }
   }
 
-  sendToSerialPort() {
-
+  sendToSerialPort(message) {
+    if (typeof this.serialPort === 'function') {
+      this.serialPort(message);
+    }
   }
 
   runQueue () {
@@ -39,7 +78,6 @@ module.exports = class PentairQueue extends ActionQueue {
     if (!message) { return; }
 
     message.setSource (this.source);
-    message.prep();
     this.sendToSerialPort(message);
 
     if (!this.timeout) {
