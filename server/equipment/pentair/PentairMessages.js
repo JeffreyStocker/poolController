@@ -271,7 +271,14 @@ class Message {
   }
 }
 
-module.exports.Message = Message;
+/////// packet Information /////////////////////////
+/*
+speed #, Higher # higher priority
+soler 4
+slow speed 3
+waterfall speed 2
+heater/spa speed 1
+*/
 
 var defaultMessages = {
   prefix: [255, 0, 255, 165, 0],
@@ -297,63 +304,97 @@ var defaultMessages = {
   saveAndRunExternal1: {name: 'Save & Run External 1', byte: [165, 0, 96, 16, 1, 4], byteWithChecksum: [165, 0, 96, 16, 1, 4, 2, 196]}, //needs a speed high and low bit added on the end before the checksum
 };
 
-module.exports.returnDefaultMessage = function (preBuiltMessage, destination = 96, options = {name: null, logLevel: true} ) {
-  var logLevel, name;
-  if (!options) {
-    name = defaultMessages[preBuiltMessage].name;
-    logLevel = true;
-  } else {
-    name = options.name || defaultMessages[preBuiltMessage].name;
-    (options.logLevel !== undefined && typeof options.logLevel === 'boolean') ? logLevel = options.logLevel : logLevel = true;
+var addresses = {
+  Chlorinator: [2, 16], // 	Chlorinator (This is a different type of packet)
+  Broadcast: 15,
+  Pool_controller: 16, // 	Pool controller (EasyTouch, intellicom, et al)
+  RemoteWiredController: 32,
+  RemoteWirelessController: 34, 	//(Screen Logic, or any apps that connect to it, like this one)
+  Pump1: 96,
+  Pump2: 97,
+  Pump3: 98,
+  Pump4: 99,
+  Pump5: 100,
+  Pump6: 101,
+  Pump7: 102,
+  Pump8: 103,
+  Pump9: 104,
+  Pump10: 105,
+  Pump11: 106,
+  Pump12: 107,
+  Pump13: 108,
+  Pump14: 109,
+  Pump15: 110,
+  Pump16: 111,
+};
+
+module.exports = {
+  defaultMessages,
+  Message,
+  addresses,
+
+  returnDefaultMessage(preBuiltMessage, destination = 96, options = {name: null, logLevel: true} ) {
+    var logLevel, name;
+    if (!options) {
+      name = defaultMessages[preBuiltMessage].name;
+      logLevel = true;
+    } else {
+      name = options.name || defaultMessages[preBuiltMessage].name;
+      (options.logLevel !== undefined && typeof options.logLevel === 'boolean') ? logLevel = options.logLevel : logLevel = true;
+    }
+    var message = defaultMessages[preBuiltMessage].byte.slice();
+    message[2] = destination;
+    return new Message (message, name, {logLevel});
+  },
+
+  defaultStatusMessage(destination = 96, callback) {
+    var message = new Message (defaultMessages.pumpGetStatus.byte, defaultMessages.pumpGetStatus.name, {logLevel: 'debug'}, callback);
+    message.setDestination(destination);
+    return message;
+  },
+
+  defaultPumpPowerMessage (powerState, callback) {
+    var defaultMessage;
+    if (powerState === 'on') {
+      defaultMessage = defaultMessages.pump_PowerOn;
+    } else if (powerState === 'off') {
+      defaultMessage = defaultMessages.pump_PowerOff;
+    } else {
+      throw new Error('Error: In order to change the pump Power state, you need to enter true/false or on/off');
+    }
+    return new Message(defaultMessage.byte, defaultMessage.name, callback);
+  },
+
+  defaultPumpControlPanelMessage (powerState, callback) {
+    var defaultMessage;
+    if (powerState.toLowerCase() === 'remote') {
+      return new Message (defaultMessages.pumpToRemote.byte, defaultMessages.pumpToRemote.name, callback);
+      defaultMessage = defaultMessages.pumpToRemote;
+    } else if (powerState.toLowerCase() === 'local') {
+      return new Message (defaultMessages.pumpToLocal.byte, defaultMessages.pumpToLocal.name, callback);
+      defaultMessage = defaultMessages.pumpToLocal;
+    } else {
+      throw new Error('Error: In order to change the pump Power state, you need to enter local or remote');
+    }
+  },
+
+  defaultIntellicomMessage (speed = 0, callback = ()=>{}) {
+    if (speed === 0) {
+      return new Message (defaultMessages.pumpExternal_Off.byte, defaultMessages.pumpExternal_Off.name, callback);
+    } else if (speed > 0 && speed < 5) {
+      var speedname = 'pumpExternal_Speed' + speed;
+      return new Message (defaultMessages[speedname].byte, defaultMessages[speedname].name, callback);
+    }
   }
-  var message = defaultMessages[preBuiltMessage].byte.slice();
-  message[2] = destination;
-  return new Message (message, name, {logLevel});
-};
 
-module.exports.defaultStatusMessage = function(destination = 96, callback) {
-  var message = new Message (defaultMessages.pumpGetStatus.byte, defaultMessages.pumpGetStatus.name, {logLevel: 'debug'}, callback);
-  message.setDestination(destination);
-  return message;
-};
-
-module.exports.defaultPumpPowerMessage = function (powerState, callback) {
-  var defaultMessage;
-  if (powerState === 'on') {
-    defaultMessage = defaultMessages.pump_PowerOn;
-  } else if (powerState === 'off') {
-    defaultMessage = defaultMessages.pump_PowerOff;
-  } else {
-    throw new Error('Error: In order to change the pump Power state, you need to enter true/false or on/off');
-  }
-  return new Message(defaultMessage.byte, defaultMessage.name, callback);
-};
-
-module.exports.defaultPumpControlPanelMessage = function (powerState, callback) {
-  var defaultMessage;
-  if (powerState.toLowerCase() === 'remote') {
-    return new Message (defaultMessages.pumpToRemote.byte, defaultMessages.pumpToRemote.name, callback);
-    defaultMessage = defaultMessages.pumpToRemote;
-  } else if (powerState.toLowerCase() === 'local') {
-    return new Message (defaultMessages.pumpToLocal.byte, defaultMessages.pumpToLocal.name, callback);
-    defaultMessage = defaultMessages.pumpToLocal;
-  } else {
-    throw new Error('Error: In order to change the pump Power state, you need to enter local or remote');
-  }
 };
 
 
-module.exports.defaultIntellicomMessage = function (speed = 0, callback = ()=>{}) {
-  if (speed === 0) {
-    return new Message (defaultMessages.pumpExternal_Off.byte, defaultMessages.pumpExternal_Off.name, callback);
-  } else if (speed > 0 && speed < 5) {
-    var speedname = 'pumpExternal_Speed' + speed;
-    return new Message (defaultMessages[speedname].byte, defaultMessages[speedname].name, callback);
-  }
-};
+
+
 
 //not working
-module.exports.messagePumpSpeed = function (rpm, program, destination = 96, callback = ()=>{}) {
+var messagePumpSpeed = function (rpm, program, destination = 96, callback = ()=>{}) {
   var possibleSubcommands = {
     0: 33,
     1: 39,
@@ -430,3 +471,6 @@ var convertToDefaultMessage = function (message) {
   }
   return convertedMessage;
 };
+
+
+
