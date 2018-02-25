@@ -12,9 +12,10 @@ module.exports = class ActionQueue extends TwinLinkedStack {
   }
 
   runAction(name, context = this) {
-    var action = this_actions[name];
+    var action = this._actions[name];
     if (typeof action === 'function') {
-      return action().bind(this);
+      return action.apply(this);
+      // return action().bind(this);
     }
     return action;
   }
@@ -33,7 +34,7 @@ module.exports = class ActionQueue extends TwinLinkedStack {
       return undefined;
     } else if (!this._InUse) {
       this._InUse = true;
-      return this.runAction('start', this);
+      return this.runAction('start', this) || this.shift();
     }
     return null;
   }

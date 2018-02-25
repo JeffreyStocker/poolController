@@ -17,6 +17,8 @@
       // "smartStep": true,
       "skipFiles": [
         "${workspaceFolder}/node_modules/**/*.js",
+        // "${workspaceFolder}/node_modules/**/*",
+        // "${workspaceFolder}/node_modules/**/*.*",
         "${workspaceFolder}/lib/**/*.js",
         "<node_internals>/**/*.js"
       ]
@@ -27,12 +29,12 @@
       "request": "launch",
       "program": "${workspaceFolder}/app.js",
       "outputCapture": "std",
-      // "smartStep": true,
       "skipFiles": [
         "${workspaceFolder}/node_modules/**/*.js",
         "${workspaceFolder}/lib/**/*.js",
         "<node_internals>/**/*.js"
       ]
+      // "smartStep": true,
     },
     {
       "name": "Launch Debug via NPM",

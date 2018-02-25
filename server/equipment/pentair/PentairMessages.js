@@ -1,5 +1,5 @@
 class Message {
-  constructor(packet, name = 'unknown', options = {
+  constructor(packet, name = 'unknown', queueName, options = {
     timer: 250,
     logLevel: 'info'
   }) {
@@ -17,9 +17,10 @@ class Message {
     }
 
     this.logLevel = options.logLevel || 'info';
-    this.timer = options.timer || null;
-    this.originalPacket = packet.slice();
     this.name = name;
+    this.originalPacket = packet.slice();
+    this.queueName = queueName;
+    this.timer = options.timer || null;
   }
 
   get packet () {
@@ -46,16 +47,16 @@ class Message {
     var startPos;
     if (!destination && typeof destination !== 'number') { return undefined; }
     startPos = this.findStart(this.originalPacket);
-    this.packet[startPos + 2] = destination;
-    return this.packet;
+    this.originalPacket[startPos + 2] = destination;
+    // return this.packet;
   }
 
   setSource (source) {
     var startPos;
     if (!source && typeof source !== 'number') { return undefined; }
     startPos = this.findStart(this.originalPacket);
-    this.packet[startPos + 3] = source;
-    return this.packet;
+    this.originalPacket[startPos + 3] = source;
+    // return this.packet;
   }
 
   endMessage (err, data) {
@@ -364,8 +365,11 @@ module.exports = {
     return new Message (message, name, {logLevel});
   },
 
-  defaultStatusMessage(destination = 96, callback) {
-    var message = new Message (defaultMessages.pumpGetStatus.byte, defaultMessages.pumpGetStatus.name, {logLevel: 'debug'}, callback);
+  defaultStatusMessage(destination = 96, options = {}, callback) {
+    if (!options || typeof options !== 'object') {
+      options = {};
+    }
+    var message = new Message (defaultMessages.pumpGetStatus.byte, defaultMessages.pumpGetStatus.name, {timer: options.timer, logLevel: 'debug'}, callback);
     message.setDestination(destination);
     return message;
   },
@@ -374,12 +378,13 @@ module.exports = {
     var defaultMessage;
     if (powerState === 'on') {
       defaultMessage = defaultMessages.pump_PowerOn;
+      return new Message(defaultMessage.byte, defaultMessage.name, callback);
     } else if (powerState === 'off') {
       defaultMessage = defaultMessages.pump_PowerOff;
+      return new Message(defaultMessage.byte, defaultMessage.name, {timer: 'off'}, callback);
     } else {
       throw new Error('Error: In order to change the pump Power state, you need to enter true/false or on/off');
     }
-    return new Message(defaultMessage.byte, defaultMessage.name, callback);
   },
 
   defaultPumpControlPanelMessage (powerState, callback) {
@@ -392,6 +397,13 @@ module.exports = {
       defaultMessage = defaultMessages.pumpToLocal;
     } else {
       throw new Error('Error: In order to change the pump Power state, you need to enter local or remote');
+    }
+  },
+
+  defaultPumpSpeedMessage (programNumber) {
+    if (speed > 0 && speed < 5) {
+      var speedname = 'pumpSpeed' + speed;
+      return new Message (defaultMessages[speedname].byte, defaultMessages[speedname].name, callback);
     }
   },
 
@@ -436,14 +448,14 @@ var convertPacket = function() {
   if (typeof packet === 'string') {
     let defaultlPacket = this.returnDefaults(packet);
     if (!!defaultPacket) {
-      this.packet = defaultPacket.packet;
+      this.originalPacket = defaultPacket.packet;
       this.name = defaultPacket.name;
       this.originalPacket = defaultPacket.packet;
     } else {
 
     }
   } else if (Array.isArray(packet)) {
-    this.packet = this.convertToDefaultlPacket(packet);
+    this.originalPacket = this.convertToDefaultlPacket(packet);
     this.name = name;
     this.originalPacket = packet;
   }

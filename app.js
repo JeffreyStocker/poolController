@@ -3,7 +3,7 @@ var configureFile = require(process.env.NODE_PATH + '/server/configureFile').ini
 var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging('system', logger);
 
-require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
+var glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
 // console.log(requireGlob('PentairMessages.js'));
 
 //temp
@@ -12,12 +12,16 @@ var useModular = true;
 if (useModular) {
   // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
   // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
-  require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init();
+  var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init();
   var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
   var groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues').init(
-    configureFile.config.equipment.pumps,
-    configureFile.config.system.communications.rs485,
-    logger);
+    configureFile.config.system.communications,
+    serialPorts,
+    logger
+  );
+  groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
+
+  requireGlob('pentairPumpCommands.js').runRepeatingStatus();
 } else {
   // var config = require('./server/configureFile').init('./config.json');
 
@@ -31,17 +35,19 @@ if (useModular) {
   var timeBetweenQueueSending = 250; //intervel beteen when the queue sends off another message
 
 
+
   ////start main program
-  setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending, configureFile.config.system.communications);
-  ////starts routine pump status updates
-  addToQueue(defaultStatusMessage());
+
+  // setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending, configureFile.config.system.communications);
+  // ////starts routine pump status updates
+  // addToQueue(defaultStatusMessage());
 
 
-  statusTimers = setInterval( ()=> {
-    addToQueue(defaultStatusMessage());
-    // console.log (pumpToLocal);
-    // addToQueue(pumpToLocal);
-  }, statusRequestUpdateInverval); //gets pump status once every mintute
+  // statusTimers = setInterval( ()=> {
+  //   addToQueue(defaultStatusMessage());
+  //   // console.log (pumpToLocal);
+  //   // addToQueue(pumpToLocal);
+  // }, statusRequestUpdateInverval); //gets pump status once every mintute
 }
 
 

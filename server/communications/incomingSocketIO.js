@@ -45,7 +45,7 @@ var endMessage = function () {
 
 
 socketServer.on('connection', function (socket) { // WebSocket Connection
-  logger('event', 'verbose', 'socket connected:' + socket.id);
+  logger('events', 'verbose', 'socket connected:' + socket.id);
 
   socket.on('Trial_intellicom', function (speed, callback) {
     var message = new Message (defaultMsg.pumpToLocal, 'Trial_intellicom, pumpToLocal', null, callback);
@@ -61,13 +61,13 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
       if (err) {
         return console.log('Error on write: ', err.message);
       }
-      logger('event', 'verbose', 'Sent Command:', ': [' + [...message] + ']');
+      logger('events', 'verbose', 'Sent Command:', ': [' + [...message] + ']');
     });
     callback(0);
   });
 
   socket.on ('pumpDataForceUpdate', function (callback) {
-    logger('event', 'debug', 'pump data requested and Pump Information');
+    logger('events', 'debug', 'pump data requested and Pump Information');
 
     addToQueue (pumpGetStatus);
     socket.emit('pumpDataReturn', pumpData);

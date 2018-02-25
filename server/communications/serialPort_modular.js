@@ -2,40 +2,55 @@ var SerialPort = require('serialport');
 var ports = module.exports.ports = {};
 var logger = () => {};
 
-var init = exports.init = function (portNames = [], newLogger = logger) {
+var setPortPromise = function (err, data) {
+  return new Promise ((resolve, revoke) => {
+    if (err) {
+      logger('system', 'warn', name + ': Serial Port Was Not Created' + err);
+      revoke(err);
+    } else {
+      logger('system', 'info', name + ': Serial Port Created');
+      resolve();
+    }
+  });
+};
+
+
+var init = exports.init = function (ports = [], newLogger = logger) {
   //////// server, serial Port Functions //////////////////////
   module.exports.setLogger(newLogger);
   // if (logger !== newLogger && typeof newLogger === 'function') { logger = newLogger; }
 
-  for (var name of portNames) {
-    if (typeof name === 'string') {
-      ports[name] = new SerialPort(name, function (err) {
+  for (var port of ports) {
+    if (typeof port === 'string') {
+      module.exports.ports[port] = new SerialPort(name, function (err) {
         if (err) {
           logger('system', 'warn', name + ': Serial Port Was Not Created' + err);
         } else {
           logger('system', 'info', name + ': Serial Port Created');
         }
       });
-    } else if (typeof name === 'object') {
-      let nameObj = name;
-      if (nameObj.hasOwnProperty('name')) {
-        ports[nameObj.name] = new SerialPort(nameObj.name, function (err) {
-          if (err) {
-            logger('system', 'warn', nameObj.name + ': Serial Port Was Not Created' + err);
-          } else {
-            logger('system', 'info', nameObj.name + ': Serial Port Created');
-          }
-        });
+    } else if (typeof port === 'object') {
+      let newPort = new SerialPort(port.hardwareAddress, function (err) {
+        if (err) {
+          logger('system', 'warn', port.name + ': Serial Port Was Not Created' + err);
+        } else {
+          logger('system', 'info', port.name + ': Serial Port Created');
+        }
+      });
+      module.exports.ports[port.hardwareAddress] = newPort;
+      if (port.hasOwnProperty('name')) {
+        module.exports.ports[port.name] = newPort;
       } else {
-        logger('system', 'warn', name + ': is missing either a property: Name');
+        logger('system', 'warn', port.name + ': is missing either a property: Name');
       }
-      if (nameObj.hasOwnProperty('triggers')) {
-        var keys = Object.keys (nameObj.tiggers);
+      if (port.hasOwnProperty('triggers')) {
+        var keys = Object.keys (port.tiggers);
         for (var key of keys) {
-          module.exports.setTrigger(nameObj.name, key, nameObj.triggers[key]);
+          module.exports.setTrigger(port.name, key, port.triggers[key]);
+          logger('system', 'debug', port.name + ': trigger set');
         }
       } else {
-        logger('system', 'warn', name + ': is missing a property: triggers');
+        logger('system', 'debug', port.name + ': is missing a property: triggers');
       }
     }
 
@@ -48,7 +63,7 @@ var init = exports.init = function (portNames = [], newLogger = logger) {
   return module.exports;
 };
 
-var returnPortByName = function (portName) {
+module.exports.returnPortByName = function (portName) {
   if (!!ports[portName]) {
     return ports[portName];
   } else {
@@ -58,7 +73,7 @@ var returnPortByName = function (portName) {
 
 module.exports.sendData = function (portName, message) {
   return new Promise ((resolve, revoke) => {
-    var port = returnPortByName(portName);
+    var port = module.exports.returnPortByName(portName);
     port.pause();
     port.write(Buffer.from(message.packet), function (err) {
       if (err) {

@@ -2,9 +2,10 @@ process.env.NODE_PATH = process.env.NODE_PATH || __dirname + '/../../..';
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 var Message = msg.Message;
-var processIncomingSerialPortData = require(process.env.NODE_PATH + '/server/communications/serialPort.js').processIncomingSerialPortData;
+var { processIncomingSerialPortData } = require(process.env.NODE_PATH + '/server/communications/serialPort.js');
+var serialPort = requireGlob('serialPort_modular');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
-
+var ports = requireGlob('serialPort_modular');
 
 module.exports = class PentairQueue extends ActionQueue {
   constructor (
@@ -16,68 +17,33 @@ module.exports = class PentairQueue extends ActionQueue {
       numberOfRetries: 3,
       source: 16
     }) {
-    super ({
+
+    super ({actions: {
       empty: function (context) {
         return msg.defaultPumpControlPanelMessage('local');
       }
-    });
-    if (!options) { options = {}; }
-    this.serialPort = serialPort || (() => {});
+    }});
+    this.name = name;
     this.timers = {};
+    this.options = options || {};
+
+    this.serialPort = serialPort || (() => {});
     this.source = options.source || 16;
     this.logger = options.logger || (function () {});
     this.running = false;
     this.messageTimeoutLength = options.messageTimeoutLength || 100;
     this.numberOfRetries = options.numberOfRetries || 3;
+    this.hardwareAddress = options.hardwareAddress || undefined;
+
     this.currentRetries = 0;
     this.timeout;
     this.currentMessage;
 
     if (serialPort) {
-      serialPort.on('data', function (data) {
-        data = Message.prototype.stripPacketOfHeaderAndChecksum(data);
-        if (this.checkQueueForAcknowledgment(data) === true) {
-          if (Message.prototype.isStatusMessage(data)) {
-            var pumpData = parsePumpStatus(data);
-            logger('status', 'verbose', 'Data Received:  [' + [... data] + ']');
-            try {
-              socketServer.emit('pumpDataReturn', pumpData);
-            } catch (err) {
-              logger('system', 'error', 'Error sending pump data via socketIO' + err);
-            }
-          } else {
-
-          }
-          this.currentMessage.callback(null);
-        } else {
-          logger('events', 'verbose', 'Packet was not an acknowledgment' + data);
-        }
-
-      //   if (isStatusMessage(data)) {
-      //     var pumpData = parsePumpStatus(data);
-      //     logger('status', 'verbose', 'Data Received:  [' + [... data] + ']');
-      //     try {
-      //       socketServer.emit('pumpDataReturn', pumpData);
-      //     } catch (err) {
-      //       logger('system', 'error', 'Error sending pump data via socketIO' + err);
-      //     }
-      //     acknowledgment.status = 'found';
-      //   } else if (acknowledgment.status === 'waiting For') {
-      //     var check = acknowledgment.isAcknowledgment(data);
-      //     acknowledgment.status = 'found';
-      //     logger('events', 'verbose', 'Acknowledged:  [' + [... data] + ']');
-      //   } else if (Array.isArray(data) === false) {
-      //     logger('events', 'debug', 'Data raw: ' + data);
-
-      //   } else {
-      //     logger('events', 'verbose', 'Data Received:  [' + [... data] + ']');
-      //   }
-      //   queue.queueLoopMain();
-      });
     }
-
-    // processIncomingSerialPortData);
+    this.setPort(this.hardwareAddress);
   }
+
 
   add(message) {
     super.add(message);
@@ -86,16 +52,24 @@ module.exports = class PentairQueue extends ActionQueue {
     }
   }
 
-  sendToSerialPort(message) {
-    if (typeof this.serialPort === 'function') {
-      this.serialPort(message);
+
+  checkQueue (incomingMessage) {
+    var queuedMessage = this.currentMessage;
+    var response = queuedMessage.tryAcknowledgment(incomingMessage);
+    if (response === true) {
+      clearTimeout(this.timeout);
+      this.timeout = undefined;
+      this.currentRetries = 0;
+      this.runQueue();
+      return true;
     }
+    return false;
   }
 
   runQueue () {
     var message = this.currentMessage || this.pull();
     if (!this.currentMessage) {
-      message = this.currentMessage = this.pull();
+      // message = this.currentMessage = this.pull();
       if (!message) { return; }
 
       message.setSource (this.source);
@@ -105,7 +79,6 @@ module.exports = class PentairQueue extends ActionQueue {
     }
 
     // if (!message) { return; }
-
 
     if (!this.timeout) {
       this.timeout = setTimeout(() => {
@@ -123,18 +96,57 @@ module.exports = class PentairQueue extends ActionQueue {
     }
   }
 
-  checkQueueForAcknowledgment (incomingMessage) {
-    var queuedMessage = this.queues[queueName].peak();
-    var response = queuedMessage.tryAcknowledgment(incomingMessage);
-    if (response === true) {
-      clearTimeout(this.timeout);
-      this.timeout = undefined;
-      this.unshift();
-      this.currentRetries = 0;
-      this.logger('events', queuedMessage.logLevel, message.name + ': Received Return');
-      this.runQueue();
-      return true;
+
+  setPort (hardwareName) {
+    serialPort.setTrigger(hardwareName, 'data', function (data) {
+      data = Message.prototype.stripPacketOfHeaderAndChecksum(data);
+      if (this.checkQueue(data) === true) {
+        this.logger('events', 'info', queuedMessage.logLevel, message.name + ': Received Return');
+        if (Message.prototype.isStatusMessage(data)) {
+          var pumpData = parsePumpStatus(data);
+          this.logger('status', 'info', 'Data Received:  [' + [... data] + ']');
+          try {
+            socketServer.emit('pumpDataReturn', pumpData);
+          } catch (err) {
+            this.logger('system', 'error', 'Error sending pump data via socketIO' + err);
+          }
+        } else {
+
+        }
+        this.currentMessage.callback(null);
+      } else {
+        this.logger('events', 'warn', 'Packet was not an acknowledgment' + data);
+      }
+    });
+  }
+
+
+  setTimers(newTimers = {}, message) {
+    for (var timer of Object.keys(newTimers)) {
+      if (this.timers[timer]) {
+        clearInterval(this.timers[timer]);
+        delete this.timers[timer];
+      }
+
+      if (newTimer[timer] >= 0) {
+        this.timers[timer] = setInterval(() => {
+          this.add(message);
+        }, newTimers[timer]);
+      }
     }
-    return false;
+  }
+
+
+  sendToSerialPort(message) {
+    if (typeof this.serialPort === 'function' && this.serialPort) {
+      debugger;
+      serialPort.sendData(this.hardwareAddress, message)
+        .then(data => {
+
+        })
+        .catch(err => {
+
+        });
+    }
   }
 };

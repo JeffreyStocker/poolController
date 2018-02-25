@@ -53,11 +53,16 @@ var defaultsFunction = function () {
         rs485: [
           {
             name: 'serialPort',
+            type: 'rs485',
             hardwareAddress: '/dev/ttyUSB0'
-          }
+          },
+
         ],
-        GPIO: {
-        }
+        gpio: [
+          {
+            name: 'GPIOTest',
+          }
+        ]
       },
     },
     equipment: {

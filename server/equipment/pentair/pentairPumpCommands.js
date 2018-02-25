@@ -1,63 +1,51 @@
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages');
-var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
-var { exteralTimer, timerIntellicom } = require (process.env.NODE_PATH + '/server/variables');
-var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
+var addToQueue2 = require (process.env.NODE_PATH + '/server/equipment/pentair/queue').addToQueue2;
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
+var queues = requireGlob('GroupOfQueues');
+var queues2 = requireGlob('GroupOfQueues').queues;
+
+var addToQueue = function (message) {
+  // addToQueue2(message);
+  // debugger;
+  queues.addMessageToQueue('Pump1', message);
+};
 
 module.exports = {
-  runIntellicomPumpSpeed (speed = 0, interval = 10000) {
-  //   if (speed === 0) {
-  //     addToQueue(externalVariable['pumpExternal_Off']);
-  //     clearInterval(timerIntellicom);
-  //     logger('events', 'info', 'Running Intellicom External Pump Speed: Stop');
-  //   } else if (speed > 0 && speed < 5) {
-  //     addToQueue(externalVariable['pumpExternal_Speed' + speed]);
-  //     logger('events', 'info', 'Running Intellicom External Pump Speed: ' + speed);
-
-  //     timerIntellicom = setInterval( function() {
-  //       addToQueue(externalVariable[speed]);
-  //       logger('events', 'verbose', 'Running Intellicom in interval with External Pump Speed: ' + speed);
-  //     }, interval);
-  //   }
-    var message = msg.defaultIntellicomMessage(speed, {timer: intervals});
-
-
+  runIntellicomPumpSpeed (speed = 0, queueName, interval = 10000) {
+    var message = msg.defaultIntellicomMessage(speed, {timer: interval});
+    addToQueue(message);
   },
 
-
-  pumpControlPanelState (powerState) {
+  pumpControlPanelState (powerState, queueName = 'pump1') {
     if (powerState === 'toggle') {
-      clearInterval(exteralTimer);
-      addToQueue(msg.pumpToRemote);
-      addToQueue(msg.pumpToLocal);
-    } else if (powerState === 'remote') {
-      addToQueue(msg.pumpToRemote);
-    } else if (powerState === 'local') {
-      clearInterval(exteralTimer);
-      addToQueue(msg.pumpToLocal);
+      addToQueue(msg.defaultPumpControlPanelMessage('remote'));
+      addToQueue(msg.defaultPumpControlPanelMessage('local'));
+
+    } else if (powerState === 'remote' || powerState === 'local') {
+      addToQueue(msg.defaultPumpControlPanelMessage(powerState));
     } else {
       return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
     }
   },
 
 
-  pumpPower (powerState) {
+  pumpPower (powerState, queueName) {
     if (powerState === 'toggle') {
-      clearInterval(exteralTimer);
-      addToQueue(msg.pump_PowerOff);
-      addToQueue(msg.pump_PowerOn);
-    } else if (powerState === 'on') {
-      addToQueue(msg.pump_PowerOn);
-    } else if (powerState === 'off') {
-      clearInterval(exteralTimer);
-      addToQueue(msg.pump_PowerOff);
+      addToQueue(msg.defaultPumpPowerMessage('off'));
+      addToQueue(msg.defaultPumpPowerMessage('on'));
+    } else if (powerState === 'on' || powerState === 'off') {
+      addToQueue(msg.defaultPumpPowerMessage(powerState));
     } else {
       return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
     }
   },
 
+  runRepeatingStatus() {
+    msg.defaultStatusMessage(undefined, {timer: 1000});
+  },
 
-  runPumpAtSpeed (rpm) {
+
+  runPumpAtSpeed (rpm, queueName) {
     // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
     var message = {};
     var destination = 96; //96 pump 1
@@ -75,21 +63,24 @@ module.exports = {
     message.packet = [165, 0, destination, source, action, length, command, subcommand, commandHighBit, commandLowBit];
     // console.log (packet.byte)
     message.name = 'Run Pump at ' + rpm;
-    addToQueue (message);
+
+    addToQueue (new Message (message.packet, message.name));
   },
 
-  runPumpProgram (speed, destination = 96, source = 16, callback) {
+
+  runPumpProgram (speed, queueName, callback) {
     if (speed === 0) {
       pumpPower('toogle');
       callback (null);
     } else if (speed >= 1 || speed <= 4) {
-      addToQueue(msg.returnDefaultMessageByte('pumpSpeed' + speed, destination, source));
+      addToQueue(msg.defaultPumpSpeedMessage(speed, destination, source));
       callback (null);
     } else {
       callback ('Speed outside Correct Range (0-4)');
     }
   },
 
+  //wip
   setPumpSpeed (rpm, program, destination = 96, source = 16) {
     var message = {};
     var action = 1; //1= set speed mode, unsure if other modes
@@ -183,8 +174,8 @@ module.exports = {
     // packet['byte']= [165, 0, destination, source, action, length, command, subcommand, commandHighBit, commandLowBit]
     message.packet = [165, 0, destination, source, action, 6, command, subcommand, commandHighBit, commandLowBit, timerHighBit, timerLowBit];
     // packet['byte']= [165, 0, destination, source, action, 2, command, subcommand, ]
-    message.name = 'Run Pump at ' + rpm;
+    message.name = 'Manual Pump Control ' + rpm;
 
-    addToQueue (message);
+    addToQueue (new Message(message.packet, message.name));
   }
 };

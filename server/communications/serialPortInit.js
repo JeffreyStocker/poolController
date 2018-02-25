@@ -6,10 +6,11 @@ const { convertToDecArray, parsePumpStatus, isStatusMessage } = require(process.
 var processIncomingSerialPortData = require(process.env.NODE_PATH + '/server/communications/serialPort.js').processIncomingSerialPortData;
 
 module.exports.init = function () {
-  var serialPaths = configureFile.system.communications && configureFile.system.communications.rs485.ports;
+  var serialPaths = configureFile.system.communications && configureFile.system.communications.rs485;
   var sp = require(process.env.NODE_PATH + '/server/communications/serialPort_modular.js');
-  var wait = sp.init(serialPaths, logger);
-  sp.setGroupOfTriggers('/dev/ttyUSB0', {
-    'data': processIncomingSerialPortData
-  });
+  var waitTOFinish = sp.init(serialPaths, logger);
+  // sp.setGroupOfTriggers('/dev/ttyUSB0', {
+  //   'data': processIncomingSerialPortData
+  // });
+  return sp;
 };

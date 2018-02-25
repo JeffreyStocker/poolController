@@ -2,13 +2,12 @@ var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPort_modular').ports;
 var helpers = require(process.env.NODE_PATH + '/server/helpers');
-
 var PentairQueue = requireGlob('PentairQueue');
 
-var logger = () => {};
+var _ = require ('lodash');
 
 var empty = function (context) {
-  return pumpToLocal.byte;
+  return msg.defaultPumpControlPanelMessage('local');
 };
 
 var start = function () {
@@ -25,91 +24,64 @@ var add = function (context) {
 };
 
 
-module.exports.init = function (pumps = {}, queueTypes = {}, logger = ()=>{}) {
-  module.exports.setLogger(logger);
-  var queues = module.exports.PentairGroupOfQueues = new PentairGroupOfQueues(logger);
-
-  // var pumpsNames = Object.keys(pumps);
-  // for (var pump of pumps) {
-  //   try {
-  //     if (pump.enabled === true) {
-  //       queues.createQueue(pump);
-  //     }
-  //   } catch (err) {
-  //     logger ('system', 'warn', err);
-  //   }
-  // }
-  var names = {};
-  var queueT = {};
-
-  Object.keys(queueTypes).forEach(queueName => {
-    queues.createQueue(queueTypes[queueName]);
-  });
-
-  for (var pump of pumps) {
-    try {
-      if (pump.enabled === true && pump.communications.type === 'rs485') {
-        queues.addQueueName(pump.name, pump.communications.hardwareAddress);
-        // queues.createQueue(pump);
-      }
-    } catch (err) {
-      logger ('system', 'warn', err);
-    }
-  }
-  return module.exports;
-};
-
-
-class PentairGroupOfQueues {
+class QueueGroup {
   constructor (logger = ()=>{}) {
+    this.equipment = {};
+    this.logger = logger;
     this.names = {};
     this.queues = {};
-    this.source = 16;
-    this.logger = logger;
+  }
+
+  init(queueNames = {}, output = {}, logger = ()=>{}) {
+    this.setLogger(logger);
+    _.each(queueNames, (group) => {
+      _.each(group, (newQueueInfo) => {
+        newQueueInfo.serialPort = output.returnPortByName(newQueueInfo.hardwareAddress);
+        this.createQueue(newQueueInfo);
+      });
+    });
+    return module.exports;
   }
 
   checkIfQueueExists (queueName) {
-    if (!this.queues[port]) {
+    if (!this.queues[queueName]) {
       return false;
     }
     return true;
   }
 
   addQueueName (name, hardwareAddress) {
-    if (this.checkIfQueueExists(hardwareAddress)) {
-      this.equipment[name] = this.queues[hardwareAddress];
-    } else {
-      throw new Error (port + ' address is not a valid queue port');
+    this.names[name] = this.queues[hardwareAddress];
+    // if (this.checkIfQueueExists(name)) {
+    // } else {
+    //   throw new Error (port + ' address is not a valid queue port');
+    // }
+  }
+
+  associateEquipment (unitsToAdd = {}) {
+    for (let unit of unitsToAdd) {
+      this.addQueueName(unit.name, unit.communications.hardwareAddress);
     }
   }
 
   createQueue (queueInfo) {
     var name, address;
-    if (!queueInfo.name || !queueInfo.hardwareAddress) {
-      logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name);
+    if (!queueInfo.name) {
+      this.logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name);
       return;
     }
-    this.names[queueInfo.name] = this.queues[queueInfo.hardwareAddress] = new PentairQueue();
+    this.names[queueInfo.name] = this.queues[queueInfo.hardwareAddress] = new PentairQueue(queueInfo.name, undefined, queueInfo);
+    this.logger ('system', 'info', queueInfo.name + ': queue created');
     return this.names[queueInfo.name];
   }
 
-  createQueue2 (queueInfo) {
-    var name, protocol, address;
-    if (!queueInfo.name || !queueInfo.communications) {
-      logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name);
-      return;
+  eachQueue (callback) {
+    for (let queue of Object.keys(this.queues)) {
+      callback(queue);
     }
-    try {
-      name = queueInfo.name;
-      protocol = queueInfo.communications.protocol;
-      address = msg.addresses['pump' + queueInfo.communications.address];
-    } catch (err) {
-      logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name + ' | ' + err);
-    }
+  }
 
-    if (!this.queues[queueInfo.name]) {
-      this.queues[queueName] = new ActionQueue ({empty, start, add});
-    }
+  returnQueue (uueueName) {
     return this.queues[queueName];
   }
 
@@ -121,29 +93,15 @@ class PentairGroupOfQueues {
   }
 
   addMessageToQueue(queueName, message, callback = ()=>{}) {
-
     if (!this.names[queueName]) { return null; }
 
     this.names[queueName].add(message);
-    callback();
+    callback(message);
   }
 
-  checkQueueForAcknowledgment (queueName, incomingMessage) {
-    if (!this.queues[queueName]) {
-      return null;
-    }
-    var queuedMessage = this.queues[queueName].peak();
-    var response = queuedMessage.tryAcknowledgment(incomingMessage);
-    if (response) {
-      this.unshift();
-      this.logger('event', queuedMessage.logLevel, message.name + ': Received Return');
-      return true;
-    } else if (response === -1) {
-      this.logger('event', 'info', message.name + ': timedout');
-    } else if (!response) {
-      this.logger('event', 'verbose', message.name + ': Received Return');
-      return false;
-    }
+  checkQueue(queueName, message) {
+    if (!this.names[queueName]) { return null; }
+    return this.names[queueName].checkQueue(message);
   }
 
   listQueueNamesAndTypes () {
@@ -165,11 +123,11 @@ class PentairGroupOfQueues {
     }
   }
 
+  setLogger (newLogger = logger) {
+    if (this.logger !== newLogger && typeof newLogger === 'function') {
+      this.logger = newLogger;
+    }
+  }
 }
 
-
-module.exports.setLogger = function (newLogger = logger) {
-  if (logger !== newLogger && typeof newLogger === 'function') {
-    logger = newLogger;
-  }
-};
+module.exports = new QueueGroup();
