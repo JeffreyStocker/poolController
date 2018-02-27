@@ -2,15 +2,15 @@ process.env.NODE_PATH = process.env.NODE_PATH || __dirname + '/../../..';
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 var Message = msg.Message;
-var { processIncomingSerialPortData } = require(process.env.NODE_PATH + '/server/communications/serialPort.js');
+// var { processIncomingSerialPortData } = require(process.env.NODE_PATH + '/server/communications/serialPort.js');
 var serialPort = requireGlob('serialPort_modular');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
-var ports = requireGlob('serialPort_modular');
+// var ports = requireGlob('serialPort_modular');
+logger = requireGlob ('winston').sendToLogs;
 
 module.exports = class PentairQueue extends ActionQueue {
   constructor (
     name,
-    serialPort,
     options = {
       logger: () => {},
       messageTimeoutLength: 100,
@@ -27,7 +27,7 @@ module.exports = class PentairQueue extends ActionQueue {
     this.timers = {};
     this.options = options || {};
 
-    this.serialPort = serialPort || (() => {});
+    this.serialPort = (() => {});
     this.source = options.source || 16;
     this.logger = options.logger || (function () {});
     this.running = false;
@@ -39,23 +39,25 @@ module.exports = class PentairQueue extends ActionQueue {
     this.timeout;
     this.currentMessage;
 
-    if (serialPort) {
+    if (this.hardwareAddress) {
+      this.setPort(this.hardwareAddress);
     }
-    this.setPort(this.hardwareAddress);
   }
 
 
   add(message) {
     super.add(message);
-    if (this.length === 1) {
-      this.runQueue();
-    }
+    // if (this.length === 1) {
+    //   this.runQueue();
+    // }
+    this.runQueue();
   }
 
 
   checkQueue (incomingMessage) {
     var queuedMessage = this.currentMessage;
-    var response = queuedMessage.tryAcknowledgment(incomingMessage);
+    if (!queuedMessage) { return false; }
+    var response = this.currentMessage.tryAcknowledgment(incomingMessage);
     if (response === true) {
       clearTimeout(this.timeout);
       this.timeout = undefined;
@@ -69,7 +71,7 @@ module.exports = class PentairQueue extends ActionQueue {
   runQueue () {
     var message = this.currentMessage || this.pull();
     if (!this.currentMessage) {
-      // message = this.currentMessage = this.pull();
+      this.currentMessage = message;
       if (!message) { return; }
 
       message.setSource (this.source);
@@ -98,12 +100,17 @@ module.exports = class PentairQueue extends ActionQueue {
 
 
   setPort (hardwareName) {
+    // debugger;
+    this.serialPort = serialPort.returnPortByName(this.hardwareAddress);
     serialPort.setTrigger(hardwareName, 'data', function (data) {
-      data = Message.prototype.stripPacketOfHeaderAndChecksum(data);
+      data = Message.prototype.processIncomingPacket(data);
+      console.log('Message Recieved: ', data);
+      logger('event', 'info', 'Message Recieved: ' + data);
+      debugger;
       if (this.checkQueue(data) === true) {
         this.logger('events', 'info', queuedMessage.logLevel, message.name + ': Received Return');
         if (Message.prototype.isStatusMessage(data)) {
-          var pumpData = parsePumpStatus(data);
+          var pumpData = requireGlob('helperFunctions').parsePumpStatus(data);
           this.logger('status', 'info', 'Data Received:  [' + [... data] + ']');
           try {
             socketServer.emit('pumpDataReturn', pumpData);
@@ -117,7 +124,7 @@ module.exports = class PentairQueue extends ActionQueue {
       } else {
         this.logger('events', 'warn', 'Packet was not an acknowledgment' + data);
       }
-    });
+    }.bind(this));
   }
 
 
@@ -138,7 +145,7 @@ module.exports = class PentairQueue extends ActionQueue {
 
 
   sendToSerialPort(message) {
-    if (typeof this.serialPort === 'function' && this.serialPort) {
+    if (this.serialPort) {
       debugger;
       serialPort.sendData(this.hardwareAddress, message)
         .then(data => {
