@@ -197,7 +197,7 @@ class Message {
 
   stripHeader (packet) {
     if (!Array.isArray(packet)) { return undefined; }
-    var StartOfPacket = packetArray.indexOf(165);
+    var StartOfPacket = this.findStart(packet);
     if (StartOfPacket === -1) {
       return packet;
     } else {
@@ -210,6 +210,10 @@ class Message {
     return packet.slice (0, packet.length - 2);
   }
 
+  processIncomingPacket(packet) {
+    return this.stripPacketOfHeaderAndChecksum(packet, 'array');
+  }
+
   stripPacketOfHeaderAndChecksum (packet, returnArrayOrBuffer = 'default') {
     //removes the HEADER and high and low bit checksum
     //converts either Buffer or array, and returns same
@@ -217,13 +221,13 @@ class Message {
     if (Buffer.isBuffer(packet) === false && Array.isArray (packet) === true) {
       var packetArray = packet;
       buffer = false;
-    } else if (Buffer.isBuffer(message) === true) {
+    } else if (Buffer.isBuffer(packet) === true) {
       buffer = true;
       var packetArray = [...packet]; //convert to a normal array
     }
 
-    strippedPacket = this.stripchecksum(message);
-    strippedPacket = this.stripHeader(message);
+    strippedPacket = this.stripchecksum(packetArray);
+    strippedPacket = this.stripHeader(packetArray);
 
     if (returnArrayOrBuffer.toLowerCase() === 'array') {
       return strippedPacket;
@@ -235,7 +239,6 @@ class Message {
   }
 
   sumOfBytes (packet) {
-    // if (this.findType(message) !== 'Array') { return undefined;}
     var sum = packet.reduce((accumulator, element) => {
       return accumulator + element;
     }, 0);
