@@ -36,7 +36,7 @@ class QueueGroup {
     this.setLogger(logger);
     _.each(queueNames, (group) => {
       _.each(group, (newQueueInfo) => {
-        newQueueInfo.serialPort = output.returnPortByName(newQueueInfo.hardwareAddress);
+        // newQueueInfo.serialPort = serialPorts.returnPortByName(newQueueInfo.hardwareAddress);
         this.createQueue(newQueueInfo);
       });
     });
@@ -70,7 +70,7 @@ class QueueGroup {
       this.logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name);
       return;
     }
-    this.names[queueInfo.name] = this.queues[queueInfo.hardwareAddress] = new PentairQueue(queueInfo.name, undefined, queueInfo);
+    this.names[queueInfo.name] = this.queues[queueInfo.hardwareAddress] = new PentairQueue(queueInfo.name, queueInfo);
     this.logger ('system', 'info', queueInfo.name + ': queue created');
     return this.names[queueInfo.name];
   }
