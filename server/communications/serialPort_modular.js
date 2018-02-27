@@ -14,6 +14,21 @@ var setPortPromise = function (err, data) {
   });
 };
 
+exports.newSerialPort = function (portName, address) {
+  return new Promise((resolve, revoke) => {
+    module.exports.ports[address] = new SerialPort(address, function (err) {
+      if (err) {
+        logger('system', 'warn', portName + ': Serial Port Was Not Created' + err);
+        revoke (err);
+      } else {
+        logger('system', 'info', portName + ': Serial Port Created');
+        resolve();
+      }
+    });
+    module.exports.ports[portName] = module.exports.ports[address];
+  });
+};
+
 
 var init = exports.init = function (ports = [], newLogger = logger) {
   //////// server, serial Port Functions //////////////////////
@@ -74,7 +89,7 @@ module.exports.returnPortByName = function (portName) {
 module.exports.sendData = function (portName, message) {
   return new Promise ((resolve, revoke) => {
     var port = module.exports.returnPortByName(portName);
-    port.pause();
+    // port.pause();
     port.write(Buffer.from(message.packet), function (err) {
       if (err) {
         logger('events', 'error', 'sendData: Error writing' + message.outputInfo + ' to serialPort:' + err);
@@ -83,7 +98,7 @@ module.exports.sendData = function (portName, message) {
       logger('events', message.logLevel, 'sendData: Success writing ' + message.outputInfo + ' to serialPort');
       resolve();
     });
-    port.resume();
+    // port.resume();
   });
 };
 
@@ -94,8 +109,8 @@ module.exports.setLogger = function (newLogger = logger) {
 };
 
 module.exports.setTrigger = function (portName, trigger, callback) {
-  if (!ports.portName) {
-    logger('system', 'warn', 'Error: setTrigger for Serial Port: ' + portName + ' does not exist');
+  if (!ports[portName]) {
+    logger('system', 'info', 'Error: setTrigger for Serial Port: ' + portName + ' does not exist');
   } else {
     logger('system', 'info', 'setTrigger for Serial Port: ' + portName + ' now Set');
     ports[portName].on(trigger, callback);
@@ -105,7 +120,7 @@ module.exports.setTrigger = function (portName, trigger, callback) {
 module.exports.setGroupOfTriggers = function (portName, triggers = {}) {
   ports;
   if (!ports[portName]) {
-    logger('system', 'warn', 'Error: Set Triggers for Serial Port: ' + portName + ' does not exist');
+    logger('system', 'info', 'Error: Set Triggers for Serial Port: ' + portName + ' does not exist');
   } else {
     let keys = Object.keys(triggers);
     for (var key of keys) {
@@ -119,7 +134,7 @@ module.exports.setGroupOfTriggers = function (portName, triggers = {}) {
 module.exports.setPort = function (portName) {
   ports[portName] = new SerialPort(portName, function (err) {
     if (err) {
-      logger('system', 'warn', ': Serial Port: ' + name + 'Was Not Created | ' + err);
+      logger('system', 'info', ': Serial Port: ' + name + 'Was Not Created | ' + err);
     } else {
       logger('system', 'info', name + ': Serial Port Created');
     }
@@ -127,10 +142,10 @@ module.exports.setPort = function (portName) {
 };
 
 module.exports.deletePort = function (portName) {
-  if (!ports.portName) {
-    logger('system', 'warn', 'Error: Delete Serial Port: ' + portName + ' does not exist');
+  if (!ports[portName]) {
+    logger('system', 'info', 'Error: Delete Serial Port: ' + portName + ' does not exist');
   } else {
     logger('system', 'info', 'Deleted Serial Port: ' + portName);
-    delete ports.portName;
+    delete ports[portName];
   }
 };
