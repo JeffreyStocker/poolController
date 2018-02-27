@@ -1,4 +1,6 @@
 process.env.NODE_PATH = __dirname;
+
+var Promise = require('bluebird');
 var configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
 var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging('system', logger);
@@ -9,10 +11,7 @@ var glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules',
 //temp
 var useModular = true;
 
-if (useModular) {
-  // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
-  // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
-  var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init();
+var stuffToRun = function (serialPorts) {
   var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
   var groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues').init(
     configureFile.config.system.communications,
@@ -20,8 +19,32 @@ if (useModular) {
     logger
   );
   groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
+};
 
-  requireGlob('pentairPumpCommands.js').runRepeatingStatus();
+
+if (useModular) {
+  // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
+  // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
+  require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init()
+    .then(serialPorts => {
+      // stuffToRun(serialPorts);
+      return serialPorts;
+    })
+    .catch(serialPorts => {
+      // stuffToRun(serialPorts);
+      return serialPorts;
+    })
+    .then((serialPorts) => {
+      var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
+      var groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues').init(
+        configureFile.config.system.communications,
+        serialPorts,
+        logger
+      );
+      groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
+      requireGlob('pentairPumpCommands.js').runRepeatingStatus();
+    });
+
 } else {
   // var config = require('./server/configureFile').init('./config.json');
 
