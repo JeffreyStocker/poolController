@@ -41,6 +41,7 @@ module.exports = {
   },
 
   runRepeatingStatus() {
+    debugger;
     msg.defaultStatusMessage(undefined, {timer: 1000});
   },
 
