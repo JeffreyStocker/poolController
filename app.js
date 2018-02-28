@@ -11,27 +11,14 @@ var glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules',
 //temp
 var useModular = true;
 
-var stuffToRun = function (serialPorts) {
-  var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
-  var groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues').init(
-    configureFile.config.system.communications,
-    serialPorts,
-    logger
-  );
-  groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
-};
-
-
 if (useModular) {
   // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
   // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
   require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init()
     .then(serialPorts => {
-      // stuffToRun(serialPorts);
       return serialPorts;
     })
     .catch(serialPorts => {
-      // stuffToRun(serialPorts);
       return serialPorts;
     })
     .then((serialPorts) => {
