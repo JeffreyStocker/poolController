@@ -20,7 +20,7 @@ class Message {
     this.name = name;
     this.originalPacket = packet.slice();
     this.queueName = queueName;
-    this.timer = options.timer || null;
+    this.timers = options.timers || null;
   }
 
   get packet () {
@@ -195,9 +195,10 @@ class Message {
     }
   }
 
-  stripHeader (packet) {
+  stripHeader (packet, StartOfPacket) {
     if (!Array.isArray(packet)) { return undefined; }
-    var StartOfPacket = this.findStart(packet);
+    StartOfPacket = StartOfPacket || this.findStart(packet);
+
     if (StartOfPacket === -1) {
       return packet;
     } else {
@@ -205,9 +206,20 @@ class Message {
     }
   }
 
-  stripchecksum (packet) {
+  stripchecksum (packet, start) {
     if (!Array.isArray(packet)) { return undefined; }
-    return packet.slice (0, packet.length - 2);
+
+    start = start || this.findStart(packet);
+    if (start !== -1) {
+      // console.log ('packet: ', packet);
+      // console.log ('start: ', start);
+      // console.log ('startPacket: ', packet[start + 5]);
+      // console.log ('endPacket: ', packet[start + 5] + start + 6);
+      let results = packet.slice (0, packet[start + 5] + start + 6);
+      // console.log ('results: ', results);
+      // return packet.slice (0, packet.length - 2);
+      return results;
+    }
   }
 
   processIncomingPacket(packet) {
@@ -217,7 +229,7 @@ class Message {
   stripPacketOfHeaderAndChecksum (packet, returnArrayOrBuffer = 'default') {
     //removes the HEADER and high and low bit checksum
     //converts either Buffer or array, and returns same
-    var strippedPacket, buffer;
+    var strippedPacket, buffer, startOfPacket;
     if (Buffer.isBuffer(packet) === false && Array.isArray (packet) === true) {
       var packetArray = packet;
       buffer = false;
@@ -225,9 +237,9 @@ class Message {
       buffer = true;
       var packetArray = [...packet]; //convert to a normal array
     }
-
-    strippedPacket = this.stripchecksum(packetArray);
-    strippedPacket = this.stripHeader(packetArray);
+    startOfPacket = this.findStart(packetArray);
+    strippedPacket = this.stripchecksum(packetArray, startOfPacket);
+    strippedPacket = this.stripHeader(strippedPacket, startOfPacket);
 
     if (returnArrayOrBuffer.toLowerCase() === 'array') {
       return strippedPacket;

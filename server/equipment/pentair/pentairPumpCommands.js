@@ -12,7 +12,7 @@ var addToQueue = function (message) {
 
 module.exports = {
   runIntellicomPumpSpeed (speed = 0, queueName, interval = 10000) {
-    var message = msg.defaultIntellicomMessage(speed, {timer: interval});
+    var message = msg.defaultIntellicomMessage(speed, {timers: interval});
     addToQueue(message);
   },
 
@@ -42,7 +42,7 @@ module.exports = {
 
   runRepeatingStatus() {
     debugger;
-    msg.defaultStatusMessage(undefined, {timer: 1000});
+    msg.defaultStatusMessage(undefined, {timers: 1000});
   },
 
 
