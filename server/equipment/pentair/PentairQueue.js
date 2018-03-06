@@ -19,6 +19,9 @@ module.exports = class PentairQueue extends ActionQueue {
     }) {
 
     super ({actions: {
+      start: function (context) {
+        return msg.defaultPumpControlPanelMessage('remote');
+      },
       empty: function (context) {
         return msg.defaultPumpControlPanelMessage('local');
       }
@@ -31,7 +34,7 @@ module.exports = class PentairQueue extends ActionQueue {
     this.source = options.source || 16;
     this.logger = options.logger || logger;
     this.running = false;
-    this.messageTimeoutLength = options.messageTimeoutLength || 100;
+    this.messageTimeoutLength = options.messageTimeoutLength || 500;
     this.numberOfRetries = options.numberOfRetries || 3;
     this.hardwareAddress = options.hardwareAddress || undefined;
 
@@ -64,6 +67,7 @@ module.exports = class PentairQueue extends ActionQueue {
 
 
   checkQueue (incomingMessage) {
+    debugger;
     var queuedMessage = this.currentMessage;
     if (!queuedMessage) { return false; }
     var response = this.currentMessage.tryAcknowledgment(incomingMessage);
@@ -71,6 +75,7 @@ module.exports = class PentairQueue extends ActionQueue {
       clearTimeout(this.timeout);
       this.timeout = undefined;
       this.currentRetries = 0;
+      this.currentMessage = undefined;
       return true;
     }
     return false;
@@ -79,17 +84,17 @@ module.exports = class PentairQueue extends ActionQueue {
 
   runQueue (resend = false) {
     var message = this.currentMessage || this.pull();
-    if (!this.currentMessage) {
-      this.currentMessage = message;
-      if (!message) { return; }
 
+    if (!this.currentMessage) {
+      if (!message) { return; }
+      this.currentMessage = message;
       message.setSource (this.source);
       this.sendToSerialPort(message);
-    } else {
-      message = this.currentMessage;
+    } else if (resend) {
+      this.sendToSerialPort(message);
     }
 
-    if (!message.timers) { this.setTimers(this.currentMessage); }
+    if (message.timers) { this.setTimers(this.currentMessage); }
 
     if (!this.timeout) {
       this.timeout = setInterval(() => {
@@ -97,7 +102,7 @@ module.exports = class PentairQueue extends ActionQueue {
           this.logger('events', 'debug', 'Message timedout waiting for acknowledgment: ', message.name);
           this.currentRetries++;
         } else {
-          this.logger('events', 'warn', 'Message timeout ' + this.currentRetries + ': ', message.name + '/n Removing message from queue');
+          this.logger('events', 'warn', 'Message timeout ' + this.currentRetries + ': ' + message.name + '/n Removing message from queue');
           this.currentRetries = 0;
           this.currentMessage.callback('Message failed to send to pump');
           this.currentMessage = undefined;
@@ -112,13 +117,13 @@ module.exports = class PentairQueue extends ActionQueue {
 
   setPort (hardwareName) {
     this.serialPort = serialPort.returnPortByName(this.hardwareAddress);
-    serialPort.setTrigger(hardwareName, 'data', function (data) {
+    serialPort.setTrigger(hardwareName, 'data', (data) => {
       data = Message.prototype.processIncomingPacket(data);
       console.log('Message Recieved: ', data);
       logger('events', 'debug', 'Message Recieved: ' + data);
       debugger;
       if (this.checkQueue(data) === true) {
-        this.logger('events', 'info', this.currentMessage.logLevel, this.currentMessage.name + ': Received Return');
+        this.logger('events', this.currentMessage.logLevel, this.currentMessage.name + ': Received Return #%@#%#%');
         if (Message.prototype.isStatusMessage(data)) {
           var pumpData = requireGlob('helperFunctions').parsePumpStatus(data);
           this.logger('status', 'info', 'Data Received:  [' + [... data] + ']');
@@ -135,7 +140,7 @@ module.exports = class PentairQueue extends ActionQueue {
         this.logger('events', 'warn', 'Packet was not an acknowledgment: ' + data);
       }
       this.runQueue();
-    }.bind(this));
+    });
   }
 
 
@@ -159,8 +164,11 @@ module.exports = class PentairQueue extends ActionQueue {
   setTimers(message) {
     debugger;
     var newTimers = message.timers;
-    if (!Array.isArray(newTimers)) {
-      for (var timer of newTimers) {
+    if (!newTimers) {
+      return;
+    } else if (!Array.isArray(newTimers)) {
+      for (var timerName of Object.keys(newTimers)) {
+        let timer = newTimers[timerName];
         let name = timer.name;
         let duration = timer.interval;
         this.clearTimer(name);
