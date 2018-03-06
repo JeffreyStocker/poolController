@@ -45,13 +45,14 @@ module.exports = class PentairQueue extends ActionQueue {
   }
 
 
-  add(message) {
+  add(message, destination) {
     super.add(message);
     // if (this.length === 1) {
     //   this.runQueue();
     // }
     this.runQueue();
   }
+
 
   continueQueue() {
     this.currentMessage = null;
@@ -75,6 +76,7 @@ module.exports = class PentairQueue extends ActionQueue {
     return false;
   }
 
+
   runQueue (resend = false) {
     var message = this.currentMessage || this.pull();
     if (!this.currentMessage) {
@@ -91,7 +93,6 @@ module.exports = class PentairQueue extends ActionQueue {
 
     if (!this.timeout) {
       this.timeout = setInterval(() => {
-        debugger;
         if (this.currentRetries < this.numberOfRetries) {
           this.logger('events', 'debug', 'Message timedout waiting for acknowledgment: ', message.name);
           this.currentRetries++;
@@ -110,7 +111,6 @@ module.exports = class PentairQueue extends ActionQueue {
 
 
   setPort (hardwareName) {
-    // debugger;
     this.serialPort = serialPort.returnPortByName(this.hardwareAddress);
     serialPort.setTrigger(hardwareName, 'data', function (data) {
       data = Message.prototype.processIncomingPacket(data);
@@ -138,6 +138,7 @@ module.exports = class PentairQueue extends ActionQueue {
     }.bind(this));
   }
 
+
   clearTimer (timerName) {
     if (this.timers[timerName]) {
       clearInterval(this.timers[timerName]);
@@ -146,12 +147,14 @@ module.exports = class PentairQueue extends ActionQueue {
     }
   }
 
+
   setIndivTimer (timerName, duration, message) {
     this.timers[name] = setInterval(() => {
       this.add(message);
     }, duration);
     logger('events', 'debug', 'New timer set: ' + timerName + ' for ' + duration + ' in ' + message.name);
   }
+
 
   setTimers(message) {
     debugger;
@@ -181,14 +184,9 @@ module.exports = class PentairQueue extends ActionQueue {
 
   sendToSerialPort(message) {
     if (this.serialPort) {
-      debugger;
       serialPort.sendData(this.hardwareAddress, message)
-        .then(data => {
-
-        })
-        .catch(err => {
-
-        });
+        .then(data => {})
+        .catch(err => {});
     }
   }
 };

@@ -42,7 +42,7 @@ module.exports = {
 
   runRepeatingStatus() {
     debugger;
-    msg.defaultStatusMessage(undefined, {timers: 1000});
+    addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}));
   },
 
 
