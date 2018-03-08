@@ -29,6 +29,8 @@ if (useModular) {
         logger
       );
       groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
+    })
+    .then(() => {
       requireGlob('pentairPumpCommands.js').runRepeatingStatus();
     });
 
