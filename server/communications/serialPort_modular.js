@@ -95,7 +95,7 @@ module.exports.sendData = function (portName, message) {
         logger('events', 'error', 'sendData: Error writing' + message.outputInfo + ' to serialPort:' + err);
         revoke(err);
       }
-      logger('events', message.logLevel, 'sendData: Success writing ' + message.outputInfo + ' to serialPort');
+      logger('events', 'debug', 'sendData: Success writing ' + message.outputInfo + ' to serialPort');
       resolve();
     });
     // port.resume();
