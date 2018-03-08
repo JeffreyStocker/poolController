@@ -1,7 +1,10 @@
 class Message {
-  constructor(packet, name = 'unknown', queueName, options = {
+  constructor(packet, name = 'unknown', options = {
     timer: 250,
-    logLevel: 'info'
+    logLevel: 'info',
+    source: 16,
+    destination: 96,
+    acknowledgment: null
   }) {
 
     if (!Array.isArray(packet)) { throw Error('packet must be a array'); }
@@ -18,9 +21,16 @@ class Message {
 
     this.logLevel = options.logLevel || 'info';
     this.name = name;
+    if (options.timers === undefined || options.timers < 0) {
+      this.timers = null;
+    } else {
+      this.timers = options.timers;
+    }
+
+    this.source = options.source || 16;
+    this.destination = options.destination || 96;
     this.originalPacket = packet.slice();
-    this.queueName = queueName;
-    this.timers = options.timers || null;
+    this.acknowledgment = options.acknowledgment || null;
   }
 
   get packet () {
@@ -28,7 +38,7 @@ class Message {
   }
 
   get outputInfo() {
-    return this.name + '(' + this.originalPacket + ')';
+    return this.name + ' [' + this.originalPacket + ']';
   }
 
   isPacket (packet) {
@@ -38,23 +48,24 @@ class Message {
     return false;
   }
 
-  setDestAndSource (destination, source) {
-    this.setDestination(destination);
-    this.setSource(source);
+  setDestAndSource (destination, source, startPos) {
+    this.setDestination(destination, startPos);
+    this.setSource(source, startPos);
   }
 
-  setDestination (destination) {
-    var startPos;
+  setDestination (destination, startPos) {
     if (!destination && typeof destination !== 'number') { return undefined; }
-    startPos = this.findStart(this.originalPacket);
+    this.destination = destination;
+    startPos = startPos || this.findStart(this.originalPacket);
     this.originalPacket[startPos + 2] = destination;
     // return this.packet;
   }
 
-  setSource (source) {
+  setSource (source, startPos) {
     var startPos;
     if (!source && typeof source !== 'number') { return undefined; }
-    startPos = this.findStart(this.originalPacket);
+    this.source = source;
+    startPos = startPos || this.findStart(this.originalPacket);
     this.originalPacket[startPos + 3] = source;
     // return this.packet;
   }
@@ -79,13 +90,21 @@ class Message {
   }
 
   tryAcknowledgment (packet) {
-    if (this.isAcknowledgment(packet) === true) {
-      return true;
-    } else if (this.retryAttempts <= this.numberOfRetries) {
-      this.retryAttempts++;
-      return this.retryAttempts;
+    if (!packet) {
+      return false;
     }
-    this.retryAttempts = 0;
+    var ackType = typeof this.acknowledgment;
+    if (ackType === 'function') {
+      var test = ackType(packet);
+      if (test === true || test === false) {
+        return test;
+      }
+    }
+    if (this.acknowledgment && this.acknowledgment.toString() === packet.toString()) {
+      return true;
+    } else if (this.isAcknowledgment(packet) === true) {
+      return true;
+    }
     return false;
   }
 
@@ -291,6 +310,8 @@ class Message {
   preparePacketForSending (packet) {
     //prepares a packet ie: [2,4,3,2] for sending by adding a header and checksum high & lowbit
     // packet = packet.slice();
+    packet[2] = this.destination;
+    packet[3] = this.source;
     packet = this.appendCheckSum(packet);
     packet = this.prependBuffer (packet);
     return packet;
@@ -319,11 +340,11 @@ var defaultMessages = {
   start: [165, 0],
   pumpToRemote:        {name: 'Set Pump to Remote', byte: [165, 0, 96, 16, 4, 1, 255],          buffer: Buffer.from('a50060100401ff0219', 'hex'),       hex: 'a50060100401ff0219'},       byteWithChecksum: [165, 0, 96, 16, 4, 1, 255, 2, 25], //intellicom set pump to remote  //works
   pumpToLocal:         {name: 'Set Pump to Local',  byte: [165, 0, 96, 16, 4, 1, 0],            buffer: Buffer.from('a5006010040100011a', 'hex'),       hex: 'a5006010040100011a'},       byteWithChecksum: [165, 0, 96, 16, 4, 1, 0, 1, 26],
-  pumpExternal_Speed4: {name: 'Exteral Speed 4',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 32], buffer: Buffer.from('a5006010010403210020015e', 'hex'), hex: 'a5006010010403210020015e'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 32, 1, 94], //intellicom use external command i think 4 (highest his is solar  priority) (possibley with 1 min timer?)
-  pumpExternal_Speed3: {name: 'Exteral Speed 3',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 24], buffer: Buffer.from('a50060100104032100180156', 'hex'), hex: 'a50060100104032100180156'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 24, 1, 86], //slow Speed
-  pumpExternal_Speed2: {name: 'Exteral Speed 2',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 16], buffer: Buffer.from('a5006010010403210010014e', 'hex'), hex: 'a5006010010403210010014e'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 16, 1, 78], //waterfall
-  pumpExternal_Speed1: {name: 'Exteral Speed 1',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 8],  buffer: Buffer.from('a50060100104032100080146', 'hex'), hex: 'a50060100104032100080146'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 8, 1, 70], //spa
-  pumpExternal_Off:    {name: 'Exteral OFF',        byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 0],  buffer: Buffer.from('a5006010010403210000013e', 'hex'), hex: 'a5006010010403210000013e'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 0, 1, 62],
+  pumpExternal_Speed4: {name: 'Exteral Speed 4',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 32], ack: [165, 0, 16, 96, 1, 2, 0, 32], buffer: Buffer.from('a5006010010403210020015e', 'hex'), hex: 'a5006010010403210020015e'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 32, 1, 94], //intellicom use external command i think 4 (highest his is solar  priority) (possibley with 1 min timer?)
+  pumpExternal_Speed3: {name: 'Exteral Speed 3',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 24], ack: [165, 0, 16, 96, 1, 2, 0, 24], buffer: Buffer.from('a50060100104032100180156', 'hex'), hex: 'a50060100104032100180156'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 24, 1, 86], //slow Speed
+  pumpExternal_Speed2: {name: 'Exteral Speed 2',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 16], ack: [165, 0, 16, 96, 1, 2, 0, 16], buffer: Buffer.from('a5006010010403210010014e', 'hex'), hex: 'a5006010010403210010014e'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 16, 1, 78], //waterfall
+  pumpExternal_Speed1: {name: 'Exteral Speed 1',    byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 8],  ack: [165, 0, 16, 96, 1, 2, 0, 8],  buffer: Buffer.from('a50060100104032100080146', 'hex'), hex: 'a50060100104032100080146'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 8, 1, 70], //spa
+  pumpExternal_Off:    {name: 'Exteral OFF',        byte: [165, 0, 96, 16, 1, 4, 3, 33, 0, 0],  ack: [165, 0, 16, 96, 1, 2, 0, 0],  buffer: Buffer.from('a5006010010403210000013e', 'hex'), hex: 'a5006010010403210000013e'}, byteWithChecksum: [165, 0, 96, 16, 1, 4, 3, 33, 0, 0, 1, 62],
   pumpGetStatus:       {name: 'Get Pump Status',    byte: [165, 0, 96, 16, 7, 0],               buffer: Buffer.from([165, 0, 96, 16, 7, 0, 1, 28]),     hex: 'A50961670128'},             byteWithChecksum: [165, 0, 96, 16, 7, 0, 1, 28],
   pump_PowerOn:        {name: 'Set Power On',       byte: [165, 0, 96, 16, 6, 1, 10],           buffer: Buffer.from('A500601006010A0126', 'hex'),       hex: 'A500601006010A0126',        byteWithChecksum:[165, 0, 96, 16, 6, 1, 10, 1, 38]},
   pump_PowerOff:       {name: 'Set Power Off',      byte: [165, 0, 96, 16, 6, 1, 4],            buffer: Buffer.from('A50060100601040120', 'hex'),       hex: 'A50060100601040120',        byteWithChecksum:[165, 0, 96, 16, 6, 1, 4, 1, 32]},
@@ -366,14 +387,18 @@ module.exports = {
   Message,
   addresses,
 
-  returnDefaultMessage(preBuiltMessage, destination = 96, options = {name: null, logLevel: true} ) {
+  returnDefaultMessage(preBuiltMessage, destination = 96, options = {name: null, logLevel: 'debug'} ) {
     var logLevel, name;
     if (!options) {
       name = defaultMessages[preBuiltMessage].name;
       logLevel = true;
     } else {
       name = options.name || defaultMessages[preBuiltMessage].name;
-      (options.logLevel !== undefined && typeof options.logLevel === 'boolean') ? logLevel = options.logLevel : logLevel = true;
+      if (options.logLevel !== undefined) {
+        logLevel = options.logLevel;
+      } else {
+        logLevel = 'debug';
+      }
     }
     var message = defaultMessages[preBuiltMessage].byte.slice();
     message[2] = destination;
@@ -381,10 +406,19 @@ module.exports = {
   },
 
   defaultStatusMessage(destination = 96, options = {}, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+    }
     if (!options || typeof options !== 'object') {
       options = {};
     }
-    var message = new Message (defaultMessages.pumpGetStatus.byte, defaultMessages.pumpGetStatus.name, {timer: options.timer, logLevel: 'debug'}, callback);
+    options.logLevel = options.logLevel || 'debug';
+    var message = new Message (
+      defaultMessages.pumpGetStatus.byte,
+      defaultMessages.pumpGetStatus.name,
+      {timers: options.timers, logLevel: options.logLevel},
+      callback
+    );
     message.setDestination(destination);
     return message;
   },
@@ -402,14 +436,23 @@ module.exports = {
     }
   },
 
-  defaultPumpControlPanelMessage (powerState, callback) {
+  defaultPumpControlPanelMessage (powerState, options = {}, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+    }
+    if (!options || typeof options !== 'object') {
+      options = {};
+    }
+
+    options.logLevel = options.logLevel || 'debug';
+
     var defaultMessage;
     if (powerState.toLowerCase() === 'remote') {
-      return new Message (defaultMessages.pumpToRemote.byte, defaultMessages.pumpToRemote.name, callback);
-      defaultMessage = defaultMessages.pumpToRemote;
+      return new Message (defaultMessages.pumpToRemote.byte, defaultMessages.pumpToRemote.name, options, callback);
+      // defaultMessage = defaultMessages.pumpToRemote;
     } else if (powerState.toLowerCase() === 'local') {
-      return new Message (defaultMessages.pumpToLocal.byte, defaultMessages.pumpToLocal.name, callback);
-      defaultMessage = defaultMessages.pumpToLocal;
+      return new Message (defaultMessages.pumpToLocal.byte, defaultMessages.pumpToLocal.name, options, callback);
+      // defaultMessage = defaultMessages.pumpToLocal;
     } else {
       throw new Error('Error: In order to change the pump Power state, you need to enter local or remote');
     }
@@ -424,10 +467,20 @@ module.exports = {
 
   defaultIntellicomMessage (speed = 0, options, callback = ()=>{}) {
     if (speed === 0) {
-      return new Message (defaultMessages.pumpExternal_Off.byte, defaultMessages.pumpExternal_Off.name, callback);
+      return new Message (
+        defaultMessages.pumpExternal_Off.byte,
+        defaultMessages.pumpExternal_Off.name,
+        {acknowledgment: defaultMessages.pumpExternal_Off.ack, timers: 0},
+        callback
+      );
     } else if (speed > 0 && speed < 5) {
-      var speedname = 'pumpExternal_Speed' + speed;
-      return new Message (defaultMessages[speedname].byte, defaultMessages[speedname].name, callback);
+      var speedMsg = defaultMessages['pumpExternal_Speed' + speed];
+      return new Message (
+        speedMsg.byte,
+        speedMsg.name,
+        {acknowledgment: speedMsg.ack, timers: 10000},
+        callback
+      );
     }
   }
 
