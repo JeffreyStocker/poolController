@@ -49,31 +49,32 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
   socket.on('Trial_intellicom', function (speed, callback) {
     var message = new Message (defaultMsg.pumpToLocal, 'Trial_intellicom, pumpToLocal', null, callback);
-
   });
 
+
   socket.on('manualPacket', function (message, callback) {
-    logger('events', 'info', 'emitting: ' + message);
     message = Message.prototype.prepareMessageForSending(message);
 
     logger('events', 'info', 'emitting: ' + message);
     port.write(message, function(err) {
       if (err) {
         return console.log('Error on write: ', err.message);
+        callback(err, null);
+      } else {
+        callback(null);
+        logger('events', 'verbose', 'Sent Command:', ': [' + [...message] + ']');
       }
-      logger('events', 'verbose', 'Sent Command:', ': [' + [...message] + ']');
     });
-    callback(0);
   });
+
 
   socket.on ('pumpDataForceUpdate', function (callback) {
     logger('events', 'debug', 'pump data requested and Pump Information');
-
     addToQueue (pumpGetStatus);
     socket.emit('pumpDataReturn', pumpData);
-    // socket.emit('confirm');
     callback(0);
   });
+
 
   socket.on ('pumpData', function (callback) {
     // logger.debug('pumpData');
@@ -82,23 +83,11 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   });
 
 
-  socket.on('pump off', function(callback) {
-    // logger.debug('pump off');
-    clearInterval(exteralTimer); //clear external timers
-    clearInterval(timerIntellicom);
-    // addToQueue(pumpToRemote);
-    addToQueue(pump_Off);
-    // addToQueue(pumpToLocal);
-    // socket.emit('confirm');
-    callback(0);
-  });
-
-
   socket.on('intellicom', function (speed, callback) {
     // logger.debug('intellicom');
-    runIntellicomPumpSpeed(speed);
+    runIntellicomPumpSpeed(speed, callback);
     // socket.emit('confirm');
-    callback(0);
+    // callback(0);
   });
 
 
@@ -111,59 +100,53 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
   socket.on('runSpeed', function (speed, callback) {
     console.log ('run speed', speed);
-    runPumpProgram(speed, undefined, undefined, (err, val) => {
-      if (err) {
-        callback (err, null);
-      } else {
-        callback(0);
-      }
-    });
+    runPumpProgram(speed, undefined, undefined, callback);
   });
 
 
   socket.on('setPumpExternalspeed', function (speed, callback) {
     // logger.debug('setPumpExternalspeed');
-    runIntellicomPumpSpeed(speed);
+    runIntellicomPumpSpeed(speed, callback);
     // socket.emit('confirm');
-    callback(0);
+    // callback(0);
   });
 
 
   socket.on ('pumpPower', function (powerState, callback) {
     // logger.debug('pumpPower');
-    pumpPower(powerState);
+    pumpPower(powerState, callback);
     // socket.emit('confirm');
-    callback(0);
+    // callback(0);
   });
 
 
   socket.on ('runPumpAtSpeed', function (rpm, callback) {
     // logger.debug('runPumpAtSpeed');
-    runPumpAtSpeed(rpm);
+    runPumpAtSpeed(rpm, callback);
     // socket.emit('confirm');
-    callback(0);
+    // callback(0);
   });
 
 
   socket.on ('setPumpTimer', function (time, callback) {
     // logger.debug('setPumpTimer');
-    setPumpTimer(time);
+    setPumpTimer(time, callback);
     // socket.emit('confirm');
-    callback(0);
+    // callback(0);
   });
 
 
   socket.on ('manualPumpControl', function (time, callback) {
     // logger.debug('manualPumpControl');
-    manualPumpControl(time);
+    manualPumpControl(time, callback);
     // socket.emit('confirm');
-    callback(0);
+    // callback(0);
   });
 
 
   socket.on ('pumpControlPanelState', function (state, callback) {
-    pumpControlPanelState(state);
-    callback(0);
+    pumpControlPanelState(state, callback);
+    // callback(0);
   });
 
   socket.on ('pumpControlSetToLocalOverride', function (state, callback) {
@@ -172,6 +155,9 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
     port.write(packet, function(err) {
       if (err) {
         console.log('Error on write: ', err.message);
+        callback ('error with writing pumpControlSetToLocalOverride', null);
+      } else {
+        callback (null);
       }
     });
   });
