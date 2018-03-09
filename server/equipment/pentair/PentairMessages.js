@@ -387,7 +387,7 @@ module.exports = {
   Message,
   addresses,
 
-  returnDefaultMessage(preBuiltMessage, destination = 96, options = {name: null, logLevel: 'debug'} ) {
+  returnDefaultMessage(preBuiltMessage, destination = 96, options = {name: null, logLevel: 'debug'}, callback = () => {} ) {
     var logLevel, name;
     if (!options) {
       name = defaultMessages[preBuiltMessage].name;
@@ -402,10 +402,10 @@ module.exports = {
     }
     var message = defaultMessages[preBuiltMessage].byte.slice();
     message[2] = destination;
-    return new Message (message, name, {logLevel});
+    return new Message (message, name, {logLevel}, callback);
   },
 
-  defaultStatusMessage(destination = 96, options = {}, callback) {
+  defaultStatusMessage(destination = 96, options = {}, callback = () => {}) {
     if (typeof options === 'function') {
       callback = options;
     }
@@ -423,7 +423,7 @@ module.exports = {
     return message;
   },
 
-  defaultPumpPowerMessage (powerState, callback) {
+  defaultPumpPowerMessage (powerState, callback = () => {}) {
     var defaultMessage;
     if (powerState === 'on') {
       defaultMessage = defaultMessages.pump_PowerOn;
@@ -436,7 +436,7 @@ module.exports = {
     }
   },
 
-  defaultPumpControlPanelMessage (powerState, options = {}, callback) {
+  defaultPumpControlPanelMessage (powerState, options = {}, callback = () => {}) {
     if (typeof options === 'function') {
       callback = options;
     }
@@ -458,9 +458,9 @@ module.exports = {
     }
   },
 
-  defaultPumpSpeedMessage (programNumber) {
-    if (speed > 0 && speed < 5) {
-      var speedname = 'pumpSpeed' + speed;
+  defaultPumpSpeedMessage (programNumber, callback = () => {}) {
+    if (programNumber > 0 && programNumber < 5) {
+      var speedname = 'pumpSpeed' + programNumber;
       return new Message (defaultMessages[speedname].byte, defaultMessages[speedname].name, callback);
     }
   },

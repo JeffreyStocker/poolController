@@ -192,11 +192,15 @@ module.exports = class PentairQueue extends ActionQueue {
   }
 
 
-  sendToSerialPort(message) {
+  sendToSerialPort(message, callback = () => {}) {
     if (this.serialPort) {
       serialPort.sendData(this.hardwareAddress, message)
-        .then(data => {})
-        .catch(err => {});
+        .then(data => {
+          callback (null, data);
+        })
+        .catch(err => {
+          callback (err, null);
+        });
     }
   }
 };

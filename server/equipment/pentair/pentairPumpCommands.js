@@ -12,30 +12,29 @@ var addToQueue = function (message) {
 
 module.exports = {
 
-  runIntellicomPumpSpeed (speed = 0, queueName, interval = 10000) {
-    var message = msg.defaultIntellicomMessage(speed, {timers: interval});
+  runIntellicomPumpSpeed (speed = 0, queueName, interval = 10000, callback = () => {}) {
+    var message = msg.defaultIntellicomMessage(speed, {timers: interval}, callback);
     addToQueue(message);
   },
 
-  pumpControlPanelState (powerState, queueName = 'pump1') {
+  pumpControlPanelState (powerState, queueName = 'pump1', callback = () => {}) {
     if (powerState === 'toggle') {
       addToQueue(msg.defaultPumpControlPanelMessage('remote'));
       addToQueue(msg.defaultPumpControlPanelMessage('local'));
-
     } else if (powerState === 'remote' || powerState === 'local') {
-      addToQueue(msg.defaultPumpControlPanelMessage(powerState));
+      addToQueue(msg.defaultPumpControlPanelMessage(powerState, callback));
     } else {
       return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
     }
   },
 
 
-  pumpPower (powerState, queueName) {
+  pumpPower (powerState, queueName, callback = () => {}) {
     if (powerState === 'toggle') {
       addToQueue(msg.defaultPumpPowerMessage('off'));
       addToQueue(msg.defaultPumpPowerMessage('on'));
     } else if (powerState === 'on' || powerState === 'off') {
-      addToQueue(msg.defaultPumpPowerMessage(powerState));
+      addToQueue(msg.defaultPumpPowerMessage(powerState), callback);
     } else {
       return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
     }
@@ -47,7 +46,7 @@ module.exports = {
   },
 
 
-  runPumpAtSpeed (rpm, queueName) {
+  runPumpAtSpeed (rpm, queueName, callback = () => {}) {
     // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
     var message = {};
     var destination = 96; //96 pump 1
@@ -70,20 +69,18 @@ module.exports = {
   },
 
 
-  runPumpProgram (speed, queueName, callback) {
+  runPumpProgram (speed, queueName, callback = () => {}) {
     if (speed === 0) {
       pumpPower('toogle');
-      callback (null);
     } else if (speed >= 1 || speed <= 4) {
-      addToQueue(msg.defaultPumpSpeedMessage(speed, destination, source));
-      callback (null);
+      addToQueue(msg.defaultPumpSpeedMessage(speed));
     } else {
       callback ('Speed outside Correct Range (0-4)');
     }
   },
 
   //wip
-  setPumpSpeed (rpm, program, destination = 96, source = 16) {
+  setPumpSpeed (rpm, program, destination = 96, source = 16, callback = () => {}) {
     var message = {};
     var action = 1; //1= set speed mode, unsure if other modes
     var length = 4; //for speed, i don't think this changes from 4,
@@ -119,7 +116,7 @@ module.exports = {
   },
 
   //wip
-  setPumpTimer (min) {
+  setPumpTimer (min, callback = () => {}) {
     // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
     console.log('time: ', min);
     var message = {};
@@ -150,7 +147,7 @@ module.exports = {
   },
 
 
-  manualPumpControl (rpm, time = 1, action = 1, command = 3, subcommand = 33, destination = 96, source = 16) {
+  manualPumpControl (rpm, time = 1, action = 1, command = 3, subcommand = 33, destination = 96, source = 16, callback = () => {}) {
     // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
     console.log('time: ', time);
     var message = {};
