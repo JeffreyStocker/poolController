@@ -1,4 +1,70 @@
 // var socket=io('http://localhost:8181');
+var setPumpData = function (data) {
+  data = data || {
+    rpm: '--',
+    state: '--',
+    timer: '--',
+    watt: '--',
+    source: '--',
+    destination: '--',
+    action: '--',
+    driveState: '--',
+    ppc: '--',
+    watt: '--',
+    unknown1: '--',
+    unknown2: '--',
+    unknown3: '--',
+    unknown4: '--',
+    timeCurrent: '--',
+  };
+  // data.rpm = data.rpm || '-';
+  // data.state = data.state || '-';
+  // data.timer = data.timer || '-';
+  // data.watt = data.watt || '-';
+  // data.source = data.source || '-';
+  // data.destination = data.destination || '-';
+  // data.action = data.action || '-';
+  // data.driveState = data.driveState || '-';
+  // data.ppc = data.ppc || '-';
+  // data.watt = data.watt || '-';
+  // data.unknown1 = data.unknown1 || '-';
+  // data.unknown2 = data.unknown2 || '-';
+  // data.unknown3 = data.unknown3 || '-';
+  // data.unknown4 = data.unknown4 || '-';
+  // data.timeCurrent = data.timeCurrent || '-';
+
+  if (data.state === 4) {
+    $('.pumpState').text('No');
+  } else if (data.state === 10) {
+    $('.pumpState').text('yes');
+  } else {
+    $('.pumpState').text('--');
+  }
+  data.timer === '0:0' ? $('.PumpTimers').text('Off') : $('.PumpTimers').text(data.timer);
+  $('.pumpRPM').text(data.rpm);
+  $('.pumpWatt').text(data.watt);
+
+  $('.pumpSource').text(data.source);
+  $('.pumpDestination').text(data.destination);
+  $('.pumpAction').text(data.action);
+  $('.pumpLength').text(data.length);
+  $('.pumpDriveState').text(data.driveState);
+  $('.pumpPpc').text(data.ppc);
+
+  $('.pumpWatt').text(data.watt);
+
+  $('.unknown1').text(data.unknown1);
+  $('.unknown2').text(data.unknown2);
+  $('.unknown3').text(data.unknown3);
+  $('.unknown4').text(data.unknown4);
+
+  $('.timeCurrent').text(data.timeCurrent);
+
+  // $('.timeHours').text(data.timeHours);
+  // $('.timeMin').text(data.timeMin);
+  // $('.unknown4').text(data.unknown4);
+  // $('.unknown4').text(data.unknown4);
+};
 
 
 
@@ -47,6 +113,12 @@ var confirmMessage = function () {
 
 $('document').ready(function () {
   socket = io.connect();
+
+  socket.on('disconnect', function () {
+    setPumpData();
+  });
+
+
   $('.powerOn').click(function () {
     socket.emit('pumpPower', 'on', confirmMessage);
     showMessage();
@@ -167,37 +239,38 @@ $('document').ready(function () {
   // ('http://localhost');
 
   socket.on('pumpDataReturn', function (data) {
-    // console.log(data);
-    // alert(JSON.stringify(data))
-    data.state === 4 ? $('.pumpState').text('No') : $('.pumpState').text('Yes');
-    // $('.pumpState').text(data.state)
-    data.timer === '0:0' ? $('.PumpTimers').text('Off') : $('.PumpTimers').text(data.timer);
-    // $('.PumpTimers').text(data.timer)
-    $('.pumpRPM').text(data.rpm);
-    $('.pumpWatt').text(data.watt);
+    setPumpData(data);
+    // // console.log(data);
+    // // alert(JSON.stringify(data))
+    // data.state === 4 ? $('.pumpState').text('No') : $('.pumpState').text('Yes');
+    // // $('.pumpState').text(data.state)
+    // data.timer === '0:0' ? $('.PumpTimers').text('Off') : $('.PumpTimers').text(data.timer);
+    // // $('.PumpTimers').text(data.timer)
+    // $('.pumpRPM').text(data.rpm);
+    // $('.pumpWatt').text(data.watt);
 
 
-    $('.pumpSource').text(data.source);
-    $('.pumpDestination').text(data.destination);
-    $('.pumpAction').text(data.action);
-    $('.pumpLength').text(data.length);
-    $('.pumpDriveState').text(data.driveState);
-    $('.pumpPpc').text(data.ppc);
+    // $('.pumpSource').text(data.source);
+    // $('.pumpDestination').text(data.destination);
+    // $('.pumpAction').text(data.action);
+    // $('.pumpLength').text(data.length);
+    // $('.pumpDriveState').text(data.driveState);
+    // $('.pumpPpc').text(data.ppc);
 
-    $('.pumpWatt').text(data.watt);
+    // $('.pumpWatt').text(data.watt);
 
 
-    $('.unknown1').text(data.unknown1);
-    $('.unknown2').text(data.unknown2);
-    $('.unknown3').text(data.unknown3);
-    $('.unknown4').text(data.unknown4);
-
-    $('.timeCurrent').text(data.timeCurrent);
-
-    // $('.timeHours').text(data.timeHours);
-    // $('.timeMin').text(data.timeMin);
+    // $('.unknown1').text(data.unknown1);
+    // $('.unknown2').text(data.unknown2);
+    // $('.unknown3').text(data.unknown3);
     // $('.unknown4').text(data.unknown4);
-    // $('.unknown4').text(data.unknown4);
+
+    // $('.timeCurrent').text(data.timeCurrent);
+
+    // // $('.timeHours').text(data.timeHours);
+    // // $('.timeMin').text(data.timeMin);
+    // // $('.unknown4').text(data.unknown4);
+    // // $('.unknown4').text(data.unknown4);
   });
 
   // var pumpData = {
