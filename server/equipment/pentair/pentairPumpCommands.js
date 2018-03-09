@@ -13,14 +13,27 @@ var addToQueue = function (message) {
 module.exports = {
 
   runIntellicomPumpSpeed (speed = 0, queueName, interval = 10000, callback = () => {}) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+    }
+    if (typeof queueName === 'function') {
+      queueName = null;
+    }
+    if (typeof interval === 'function') {
+      interval = 10000;
+    }
+
     var message = msg.defaultIntellicomMessage(speed, {timers: interval}, callback);
     addToQueue(message);
   },
 
   pumpControlPanelState (powerState, queueName = 'pump1', callback = () => {}) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+    }
     if (powerState === 'toggle') {
       addToQueue(msg.defaultPumpControlPanelMessage('remote'));
-      addToQueue(msg.defaultPumpControlPanelMessage('local'));
+      addToQueue(msg.defaultPumpControlPanelMessage('local', callback));
     } else if (powerState === 'remote' || powerState === 'local') {
       addToQueue(msg.defaultPumpControlPanelMessage(powerState, callback));
     } else {
@@ -30,19 +43,22 @@ module.exports = {
 
 
   pumpPower (powerState, queueName, callback = () => {}) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+    }
     if (powerState === 'toggle') {
       addToQueue(msg.defaultPumpPowerMessage('off'));
-      addToQueue(msg.defaultPumpPowerMessage('on'));
+      addToQueue(msg.defaultPumpPowerMessage('on', callback));
     } else if (powerState === 'on' || powerState === 'off') {
-      addToQueue(msg.defaultPumpPowerMessage(powerState), callback);
+      addToQueue(msg.defaultPumpPowerMessage(powerState, callback));
     } else {
       return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
     }
   },
 
-  runRepeatingStatus() {
+  runRepeatingStatus(callback = () => {}) {
     // debugger;
-    addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}));
+    addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}, callback));
   },
 
 
@@ -65,15 +81,19 @@ module.exports = {
     // console.log (packet.byte)
     message.name = 'Run Pump at ' + rpm;
 
-    addToQueue (new Message (message.packet, message.name));
+    addToQueue (new Message (message.packet, message.name, callback));
   },
 
 
   runPumpProgram (speed, queueName, callback = () => {}) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+    }
+
     if (speed === 0) {
-      pumpPower('toogle');
+      pumpPower('toogle', callback);
     } else if (speed >= 1 || speed <= 4) {
-      addToQueue(msg.defaultPumpSpeedMessage(speed));
+      addToQueue(msg.defaultPumpSpeedMessage(speed, callback));
     } else {
       callback ('Speed outside Correct Range (0-4)');
     }

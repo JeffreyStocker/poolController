@@ -74,11 +74,11 @@ module.exports = class PentairQueue extends ActionQueue {
     return false;
   }
 
-  clearCurrentMessage(callbackMessage) {
+  clearCurrentMessage(callbackError, callbackMessage) {
     clearInterval(this.timeout);
     this.timeout = undefined;
     this.currentRetries = 0;
-    this.currentMessage.callback(callbackMessage);
+    this.currentMessage.callback(callbackError, callbackMessage);
     this.currentMessage = undefined;
   }
 
@@ -127,11 +127,11 @@ module.exports = class PentairQueue extends ActionQueue {
           this.logger('system', 'error', 'Error sending pump data via socketIO' + err);
         }
         if (this.currentMessage.name === 'Get Pump Status') {
-          this.clearCurrentMessage();
+          this.clearCurrentMessage(null, 'success');
         }
       } else if (results === true) {
         this.logger('events', this.currentMessage.logLevel, 'Acknowledged: ' + this.currentMessage.name + ': [' + data + ']');
-        this.clearCurrentMessage();
+        this.clearCurrentMessage(null, 'success');
       } else if (results === false) {
         this.logger('events', 'warn', 'Packet was not an acknowledgment: ' + data);
       } else if (results === null) {

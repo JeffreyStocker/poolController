@@ -49,6 +49,7 @@ class Message {
   }
 
   setDestAndSource (destination, source, startPos) {
+    startPos = startPos || this.findStart(this.originalPacket);
     this.setDestination(destination, startPos);
     this.setSource(source, startPos);
   }
@@ -406,8 +407,8 @@ module.exports = {
   },
 
   defaultStatusMessage(destination = 96, options = {}, callback = () => {}) {
-    if (typeof options === 'function') {
-      callback = options;
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
     }
     if (!options || typeof options !== 'object') {
       options = {};
@@ -425,6 +426,10 @@ module.exports = {
 
   defaultPumpPowerMessage (powerState, callback = () => {}) {
     var defaultMessage;
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+    }
+
     if (powerState === 'on') {
       defaultMessage = defaultMessages.pump_PowerOn;
       return new Message(defaultMessage.byte, defaultMessage.name, callback);
@@ -432,14 +437,17 @@ module.exports = {
       defaultMessage = defaultMessages.pump_PowerOff;
       return new Message(defaultMessage.byte, defaultMessage.name, {timer: 'off'}, callback);
     } else {
-      throw new Error('Error: In order to change the pump Power state, you need to enter true/false or on/off');
+      let errorMessage = 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
+      callback (errorMessage);
+      throw new Error(errorMessage);
     }
   },
 
   defaultPumpControlPanelMessage (powerState, options = {}, callback = () => {}) {
-    if (typeof options === 'function') {
-      callback = options;
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
     }
+
     if (!options || typeof options !== 'object') {
       options = {};
     }
@@ -454,11 +462,17 @@ module.exports = {
       return new Message (defaultMessages.pumpToLocal.byte, defaultMessages.pumpToLocal.name, options, callback);
       // defaultMessage = defaultMessages.pumpToLocal;
     } else {
-      throw new Error('Error: In order to change the pump Power state, you need to enter local or remote');
+      let errorMessage = 'Error: In order to change the pump Power state, you need to enter local or remote';
+      callback(errorMessage);
+      throw new Error(errorMessage);
     }
   },
 
   defaultPumpSpeedMessage (programNumber, callback = () => {}) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+    }
+
     if (programNumber > 0 && programNumber < 5) {
       var speedname = 'pumpSpeed' + programNumber;
       return new Message (defaultMessages[speedname].byte, defaultMessages[speedname].name, callback);
@@ -466,6 +480,10 @@ module.exports = {
   },
 
   defaultIntellicomMessage (speed = 0, options, callback = ()=>{}) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+    }
+
     if (speed === 0) {
       return new Message (
         defaultMessages.pumpExternal_Off.byte,
