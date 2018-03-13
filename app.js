@@ -1,14 +1,11 @@
 process.env.NODE_PATH = __dirname;
 
-var Promise = require('bluebird');
+// var Promise = require('bluebird');
+var glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
 var configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
 var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging('system', logger);
 
-var glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
-// console.log(requireGlob('PentairMessages.js'));
-
-//temp
 var useModular = true;
 
 if (useModular) {
@@ -37,14 +34,14 @@ if (useModular) {
 } else {
   // var config = require('./server/configureFile').init('./config.json');
 
-  var { statusRequestUpdateInverval, statusTimers } = require (process.env.NODE_PATH + '/server/variables');
-  // var { timeBetweenQueueSending } = require (process.env.NODE_PATH + '/server/server');
-  var {defaultStatusMessage} = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
-  var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
-  var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
+  // var { statusRequestUpdateInverval, statusTimers } = require (process.env.NODE_PATH + '/server/variables');
+  // // var { timeBetweenQueueSending } = require (process.env.NODE_PATH + '/server/server');
+  // var {defaultStatusMessage} = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
+  // var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
+  // var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
 
 
-  var timeBetweenQueueSending = 250; //intervel beteen when the queue sends off another message
+  // var timeBetweenQueueSending = 250; //intervel beteen when the queue sends off another message
 
 
 
