@@ -1,12 +1,9 @@
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages');
-var addToQueue2 = require (process.env.NODE_PATH + '/server/equipment/pentair/queue').addToQueue2;
+// var addToQueue2 = require (process.env.NODE_PATH + '/server/equipment/pentair/queue').addToQueue2;
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 var queues = requireGlob('GroupOfQueues');
-var queues2 = requireGlob('GroupOfQueues').queues;
 
 var addToQueue = function (message) {
-  // addToQueue2(message);
-  // debugger;
   queues.addMessageToQueue('Pump1', message);
 };
 
