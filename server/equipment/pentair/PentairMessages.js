@@ -41,7 +41,13 @@ class Message {
 
   combineHighPlusLowBit (highBit, lowBit) {
     //returns the checksum, calculated from the high Bit and Low bit
-    return highBit * 256 + lowBit;
+    if (typeof highBit !== 'number' && typeof lowBit !== 'number') {
+      throw new Error('highBit and lowBit should be a numbers');
+    }
+    if (lowBit >= 0 && lowBit <= 255 && highBit >= 0) {
+      return highBit * 256 + lowBit;
+    }
+    throw new Error('highBit should be a number greater than zero, and lowBit should be between 0 and 255');
   }
 
 
@@ -57,11 +63,11 @@ class Message {
   }
 
 
-  endMessage (err, data) {
-    if (err) {
-    }
-    this.callback(err, data);
-  }
+  // endMessage (err, data) {
+  //   if (err) {
+  //   }
+  //   this.callback(err, data);
+  // }
 
 
   findStart (packet) {
@@ -76,13 +82,13 @@ class Message {
   }
 
 
-  findType(packet) {
-    var type = typeof packet;
-    if (type !== 'Object') {
-      return type;
-    }
-    return packet.constructor.name;
-  }
+  // findType(packet) {
+  //   var type = typeof packet;
+  //   if (type !== 'Object') {
+  //     return type;
+  //   }
+  //   return packet.constructor.name;
+  // }
 
 
   flipSourceAndDestination (packet) {
@@ -103,32 +109,12 @@ class Message {
   }
 
 
-  hasHeader(message) {
-    var indexOfStart = message.findStart();
-    if (indexOfStart === -1) {
-      console.log ('hasHeader: Error: Message does not have a 165 bit');
-    } else if (indexOfStart === 0) {
-      return false;
-    } else if (indexOfStart >= 1) {
+  hasStart(message) {
+    var indexOfStart = this.findStart();
+    if (indexOfStart >= 0) {
       return true;
-    } else {
-      console.log ('hasHeader: Error: 165 Bit location caused an Error');
     }
-  }
-
-
-  hasStartByte (packet) {
-    if (Array.isArray(packet) !== true) { throw new Error ('hasStartByte: packet must be an array'); }
-    var indexOfStart = packet.indexOf(165);
-
-    if (indexOfStart === -1) {
-      return false;
-    } else if (indexOfStart >= 0 ) {
-      return true;
-    } else {
-      return null;
-      throw new Error ('hasStartByte: Error: 165 Bit location caused an Error');
-    }
+    return false;
   }
 
 
@@ -212,7 +198,7 @@ class Message {
 
 
   parsePumpStatus(data) {
-    if (this.hasHeader(data) === true) {
+    if (this.hasStart(data) === true) {
       try {
         data = this.stripMessageOfHeaderAndChecksum (data);
       } catch (err) {
@@ -303,12 +289,18 @@ class Message {
 
 
   returnHighBit (value) {
-    return parseInt(value / 256);
+    if (value >= 0 && typeof value === 'number') {
+      return parseInt(value / 256);
+    }
+    return null;
   }
 
 
   returnLowBit (value) {
-    return value % 256;
+    if (value >= 0 && typeof value === 'number') {
+      return value % 256;
+    }
+    return null;
   }
 
 
@@ -416,10 +408,16 @@ class Message {
 
 
   sumOfBytes (packet) {
+    if (!Array.isArray(packet)) {
+      return null;
+    }
     var sum = packet.reduce((accumulator, element) => {
       return accumulator + element;
     }, 0);
-    return sum;
+    if (typeof sum === 'number') {
+      return sum;
+    }
+    return null;
   }
 
 
