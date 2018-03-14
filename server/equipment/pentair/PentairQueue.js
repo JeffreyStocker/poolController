@@ -119,7 +119,7 @@ module.exports = class PentairQueue extends ActionQueue {
       debugger;
       var results = this.checkQueue(data);
       if (Message.prototype.isStatusMessage(data)) {
-        var pumpData = requireGlob('helperFunctions').parsePumpStatus(data);
+        var pumpData = Message.prototype.parsePumpStatus(data);
         this.logger('status', 'info', 'Status Received:  [' + [... data] + ']');
         try {
           socketServer.emit('pumpDataReturn', pumpData);
@@ -137,7 +137,6 @@ module.exports = class PentairQueue extends ActionQueue {
       } else if (results === null) {
         logger('events', 'info', 'Message Received: ' + data);
       } else {
-        console.log ('someFunny Packet');
       }
       this.runQueue();
     });

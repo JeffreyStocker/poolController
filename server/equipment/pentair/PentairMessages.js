@@ -41,7 +41,31 @@ class Message {
     return this.name + ' [' + this.originalPacket + ']';
   }
 
-  isPacket (packet) {
+  isValidPacket (packet) {
+    var start, length, lowBit, highBit;
+    let sum = 0;
+    start = this.findStart(packet);
+
+    if (!Array.isArray(packet) && !packet[0 + start] === 165 && !packet[1 + start] === 0) {
+      return false;
+    }
+
+    length = this.returnLengthByte(packet, start);
+
+    for (var i = start + 2; i < packet.length - 3; i++) {
+      sum += packet[i];
+    }
+    highBit = packet[packet.length - 2];
+    lowBit = packet[packet.length - 1];
+    if (highBit !== this.highBit(sum) && lowBit !== this.lowBit(sum)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  isValidStrippedPacket (packet) {
+    var start;
     if (Array.isArray(packet) && packet[0] === 165 && packet[1] === 0) {
       return true;
     }
@@ -73,7 +97,6 @@ class Message {
 
   endMessage (err, data) {
     if (err) {
-
     }
     this.callback(err, data);
   }
@@ -184,7 +207,7 @@ class Message {
   }
 
   isStatusMessage(packet) {
-    if (this.isPacket(packet) && packet[4] === 7) {
+    if (this.isValidStrippedPacket(packet) && packet[4] === 7) {
       return true;
     }
     return false;
@@ -226,18 +249,22 @@ class Message {
     }
   }
 
+  returnLengthByte(packet, start) {
+    if (!packet || !Array.isArray(packet)) {
+      return -1;
+    }
+    if (!start || start !== 0) {
+      start = this.findStart(packet);
+    }
+    return packet[5];
+  }
+
   stripchecksum (packet, start) {
     if (!Array.isArray(packet)) { return undefined; }
 
     start = start || this.findStart(packet);
     if (start !== -1) {
-      // console.log ('packet: ', packet);
-      // console.log ('start: ', start);
-      // console.log ('startPacket: ', packet[start + 5]);
-      // console.log ('endPacket: ', packet[start + 5] + start + 6);
       let results = packet.slice (0, packet[start + 5] + start + 6);
-      // console.log ('results: ', results);
-      // return packet.slice (0, packet.length - 2);
       return results;
     }
   }
@@ -322,6 +349,61 @@ class Message {
     var strippedPacket = this.stripPacketOfHeaderAndChecksum(packet, 'array');
 
     return strippedPacket;
+  }
+
+  hasHeader(message) {
+    var indexOfStart = message.indexOf(165);
+    if (indexOfStart === -1) {
+      console.log ('hasHeader: Error: Message does not have a 165 bit');
+    } else if (indexOfStart === 0) {
+      return false;
+    } else if (indexOfStart >= 1) {
+      return true;
+    } else {
+      console.log ('hasHeader: Error: 165 Bit location caused an Error');
+    }
+  }
+
+  parsePumpStatus(data) {
+    if (this.hasHeader(data) === true) {
+      try {
+        data = this.stripMessageOfHeaderAndChecksum (data);
+      } catch (err) {
+        console.log (err);
+      }
+    }
+    //return an object with pump status
+    //input a stripped array, NO BUFFER //may work with buffer, not tested
+    //165,0,16,96,7,15,10,0,0,0,198,5,120,0,0,0,0,0,1,22,4
+    var indexAdjust = 0;
+    var pumpData = {
+      destination: data[2],
+      source: data[3],
+      action: data[4],
+      length: data[5],
+      state: data[6], //4= off, 10 = on //power i think
+      driveState: data[7],
+      ppc: data[8],
+      wattHighBit: data[9],
+      wattLowBit: data[10],
+      rpmHighBit: data[11],
+      rpmLowBit: data[12],
+      unknown1: data[13],
+      unknown2: data[14],
+      unknown3: data[15],
+      unknown4: data[16],
+      timerHighBit: data[17],
+      timerLowBit: data[18],
+      timeHours: data[19],
+      timeMin: data[20]
+    };
+
+    pumpData.watt = this.combineHighPlusLowBit(pumpData.wattHighBit, pumpData.wattLowBit );
+    pumpData.rpm = this.combineHighPlusLowBit(pumpData.rpmHighBit, pumpData.rpmLowBit );
+    pumpData.timer = pumpData.timerHighBit + ':' + pumpData.timerLowBit;
+    pumpData.timeCurrent = pumpData.timeHours + ':' + pumpData.timeMin;
+
+    return pumpData;
   }
 
 }
