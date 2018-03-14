@@ -33,13 +33,140 @@ class Message {
     this.acknowledgment = options.acknowledgment || null;
   }
 
-  get packet () {
-    return this.preparePacketForSending(this.originalPacket);
+
+  appendCheckSum (packet) {
+    return packet.concat(this.returnChecksum(packet));
   }
 
-  get outputInfo() {
-    return this.name + ' [' + this.originalPacket + ']';
+
+  combineHighPlusLowBit (highBit, lowBit) {
+    //returns the checksum, calculated from the high Bit and Low bit
+    return highBit * 256 + lowBit;
   }
+
+
+  convertHexArrayToByteArray (hexarray, transformIntoArray = false) {
+    //https://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
+    //converts an array/buffer of hex into numeric
+    //this is a lot easier to manipulate
+    var output = hexarray.map(function(element) {
+      return parseInt(element, 16);
+    });
+    //if transform into a array, converts to a standard array via [...output]
+    return transformIntoArray === false ? output : [...output];
+  }
+
+
+  endMessage (err, data) {
+    if (err) {
+    }
+    this.callback(err, data);
+  }
+
+
+  findStart (packet) {
+    if (Array.isArray(packet) !== true) { throw new Error ('findStart: packet must be an array'); }
+
+    var indexOfStart = packet.indexOf(165);
+    if (packet[indexOfStart + 1] === 0) {
+      return indexOfStart;
+    } else {
+      return -1;
+    }
+  }
+
+
+  findType(packet) {
+    var type = typeof packet;
+    if (type !== 'Object') {
+      return type;
+    }
+    return packet.constructor.name;
+  }
+
+
+  flipSourceAndDestination (packet) {
+    //flips the destination and source bits
+    if (Array.isArray(packet) !== true) {
+      throw Error ('flipSourceAndDestinationFromStrippedPacket: Input is not an Array');
+    }
+    var startByte = this.findStart(packet);
+    var destination = startByte + 2;
+    var source = startByte + 3;
+
+    var output = packet.slice(); //needed this or the orginal array was changed
+    var temp = output[destination];
+    output[destination] = output[source];
+    output[source] = temp;
+
+    return output;
+  }
+
+
+  hasHeader(message) {
+    var indexOfStart = message.findStart();
+    if (indexOfStart === -1) {
+      console.log ('hasHeader: Error: Message does not have a 165 bit');
+    } else if (indexOfStart === 0) {
+      return false;
+    } else if (indexOfStart >= 1) {
+      return true;
+    } else {
+      console.log ('hasHeader: Error: 165 Bit location caused an Error');
+    }
+  }
+
+
+  hasStartByte (packet) {
+    if (Array.isArray(packet) !== true) { throw new Error ('hasStartByte: packet must be an array'); }
+    var indexOfStart = packet.indexOf(165);
+
+    if (indexOfStart === -1) {
+      return false;
+    } else if (indexOfStart >= 0 ) {
+      return true;
+    } else {
+      return null;
+      throw new Error ('hasStartByte: Error: 165 Bit location caused an Error');
+    }
+  }
+
+
+  isAcknowledgment(packetToCheck) {
+    if (this.returnAcknowledgmentFromPacket(this.originalPacket).toString() === packetToCheck.toString()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+
+  isStatusMessage(packet) {
+    if (this.isValidStrippedPacket(packet) && packet[4] === 7) {
+      return true;
+    }
+    return false;
+  }
+
+
+  isHexString(str) {
+    var expression = new RegExp('^([0-7A-F][0-7A-F])+$', 'i');
+    return expression.test(str);
+  }
+
+
+  isHexArray (array) {
+    if (this.findType(array) !== 'Array') {
+      return false;
+    }
+    array.forEach(element => {
+      if (!this.isHexString(element)) {
+        return false;
+      }
+    });
+    return true;
+  }
+
 
   isValidPacket (packet) {
     var start, length, lowBit, highBit;
@@ -64,6 +191,7 @@ class Message {
     return true;
   }
 
+
   isValidStrippedPacket (packet) {
     var start;
     if (Array.isArray(packet) && packet[0] === 165 && packet[1] === 0) {
@@ -72,297 +200,16 @@ class Message {
     return false;
   }
 
-  setDestAndSource (destination, source, startPos) {
-    startPos = startPos || this.findStart(this.originalPacket);
-    this.setDestination(destination, startPos);
-    this.setSource(source, startPos);
+
+  get outputInfo() {
+    return this.name + ' [' + this.originalPacket + ']';
   }
 
-  setDestination (destination, startPos) {
-    if (!destination && typeof destination !== 'number') { return undefined; }
-    this.destination = destination;
-    startPos = startPos || this.findStart(this.originalPacket);
-    this.originalPacket[startPos + 2] = destination;
-    // return this.packet;
+
+  get packet () {
+    return this.preparePacketForSending(this.originalPacket);
   }
 
-  setSource (source, startPos) {
-    var startPos;
-    if (!source && typeof source !== 'number') { return undefined; }
-    this.source = source;
-    startPos = startPos || this.findStart(this.originalPacket);
-    this.originalPacket[startPos + 3] = source;
-    // return this.packet;
-  }
-
-  endMessage (err, data) {
-    if (err) {
-    }
-    this.callback(err, data);
-  }
-
-  returnAcknowledgmentFromPacket (packet) {
-    return this.flipSourceAndDestination(packet);
-  }
-
-  isAcknowledgment(packetToCheck) {
-    if (this.returnAcknowledgmentFromPacket(this.originalPacket).toString() === packetToCheck.toString()) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  tryAcknowledgment (packet) {
-    if (!packet) {
-      return false;
-    }
-    var ackType = typeof this.acknowledgment;
-    if (ackType === 'function') {
-      var test = ackType(packet);
-      if (test === true || test === false) {
-        return test;
-      }
-    }
-    if (this.acknowledgment && this.acknowledgment.toString() === packet.toString()) {
-      return true;
-    } else if (this.isAcknowledgment(packet) === true) {
-      return true;
-    }
-    return false;
-  }
-
-  flipSourceAndDestination (packet) {
-    //flips the destination and source bits
-    if (Array.isArray(packet) !== true) {
-      throw Error ('flipSourceAndDestinationFromStrippedPacket: Input is not an Array');
-    }
-    var startByte = this.findStart(packet);
-    var destination = startByte + 2;
-    var source = startByte + 3;
-
-    var output = packet.slice(); //needed this or the orginal array was changed
-    var temp = output[destination];
-    output[destination] = output[source];
-    output[source] = temp;
-
-    return output;
-  }
-
-  findType(packet) {
-    var type = typeof packet;
-    if (type !== 'Object') {
-      return type;
-    }
-    return packet.constructor.name;
-  }
-
-  sliceStringByRecurringAmounts (str = '', val = 1) {
-    var output = [];
-    if (typeof str !== 'string') { throw 'Incoming value must be a string'; }
-    var numberOfTimesToSlice = Math.ceil(str.length / val);
-    for (var i = 0; i < numberOfTimesToSlice; i++) {
-      let position = i * val;
-      if (i === numberOfTimesToSlice) {
-        output.push(str.slice(position, str.length - 1));
-      } else {
-        output.push(str.slice(position, position + val));
-      }
-    }
-    return output;
-  }
-
-  isHexString(str) {
-    var expression = new RegExp('^([0-7A-F][0-7A-F])+$', 'i');
-    return expression.test(str);
-  }
-
-  isHexArray (array) {
-    if (this.findType(array) !== 'Array') {
-      return false;
-    }
-    array.forEach(element => {
-      if (!this.isHexString(element)) {
-        return false;
-      }
-    });
-    return true;
-  }
-
-  convertHexArrayToByteArray (hexarray, transformIntoArray = false) {
-    //https://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
-    //converts an array/buffer of hex into numeric
-    //this is a lot easier to manipulate
-    var output = hexarray.map(function(element) {
-      return parseInt(element, 16);
-    });
-    //if transform into a array, converts to a standard array via [...output]
-    return transformIntoArray === false ? output : [...output];
-  }
-
-  returnArrayFromBuffer(buffer) {
-    //https://stackoverflow.com/questions/18148827/convert-buffer-to-array
-    return Array.prototype.slice.call(buffer, 0);
-    //or [...exampleBuffer]
-  }
-
-  isStatusMessage(packet) {
-    if (this.isValidStrippedPacket(packet) && packet[4] === 7) {
-      return true;
-    }
-    return false;
-  }
-
-  findStart (packet) {
-    if (Array.isArray(packet) !== true) { throw new Error ('findStart: packet must be an array'); }
-
-    var indexOfStart = packet.indexOf(165);
-    if (packet[indexOfStart + 1] === 0) {
-      return indexOfStart;
-    } else {
-      return -1;
-    }
-  }
-
-  hasStartByte (packet) {
-    if (Array.isArray(packet) !== true) { throw new Error ('hasStartByte: packet must be an array'); }
-    var indexOfStart = packet.indexOf(165);
-
-    if (indexOfStart === -1) {
-      return false;
-    } else if (indexOfStart >= 0 ) {
-      return true;
-    } else {
-      return null;
-      throw new Error ('hasStartByte: Error: 165 Bit location caused an Error');
-    }
-  }
-
-  stripHeader (packet, StartOfPacket) {
-    if (!Array.isArray(packet)) { return undefined; }
-    StartOfPacket = StartOfPacket || this.findStart(packet);
-
-    if (StartOfPacket === -1) {
-      return packet;
-    } else {
-      return packet.slice (StartOfPacket, packet.length); //removes the high and low checksum bytes in back and the HEADER
-    }
-  }
-
-  returnLengthByte(packet, start) {
-    if (!packet || !Array.isArray(packet)) {
-      return -1;
-    }
-    if (!start || start !== 0) {
-      start = this.findStart(packet);
-    }
-    return packet[5];
-  }
-
-  stripchecksum (packet, start) {
-    if (!Array.isArray(packet)) { return undefined; }
-
-    start = start || this.findStart(packet);
-    if (start !== -1) {
-      let results = packet.slice (0, packet[start + 5] + start + 6);
-      return results;
-    }
-  }
-
-  processIncomingPacket(packet) {
-    return this.stripPacketOfHeaderAndChecksum(packet, 'array');
-  }
-
-  stripPacketOfHeaderAndChecksum (packet, returnArrayOrBuffer = 'default') {
-    //removes the HEADER and high and low bit checksum
-    //converts either Buffer or array, and returns same
-    var strippedPacket, buffer, startOfPacket;
-    if (Buffer.isBuffer(packet) === false && Array.isArray (packet) === true) {
-      var packetArray = packet;
-      buffer = false;
-    } else if (Buffer.isBuffer(packet) === true) {
-      buffer = true;
-      var packetArray = [...packet]; //convert to a normal array
-    }
-    startOfPacket = this.findStart(packetArray);
-    strippedPacket = this.stripchecksum(packetArray, startOfPacket);
-    strippedPacket = this.stripHeader(strippedPacket, startOfPacket);
-
-    if (returnArrayOrBuffer.toLowerCase() === 'array') {
-      return strippedPacket;
-    } else if ( returnArrayOrBuffer.toLowerCase() === 'buffer') {
-      return Buffer.from (strippedPacket);
-    } else {
-      return buffer === true ? Buffer.from (strippedPacket) : strippedPacket;
-    }
-  }
-
-  sumOfBytes (packet) {
-    var sum = packet.reduce((accumulator, element) => {
-      return accumulator + element;
-    }, 0);
-    return sum;
-  }
-
-  combineHighPlusLowBit (highBit, lowBit) {
-    //returns the checksum, calculated from the high Bit and Low bit
-    return highBit * 256 + lowBit;
-  }
-
-  returnHighBit (value) {
-    return parseInt(value / 256);
-  }
-
-  returnLowBit (value) {
-    return value % 256;
-  }
-
-  returnChecksum (packet) {
-    //returns an array [highBit, lowBit] calculated by taking the sum of the packet
-    var checksum = this.sumOfBytes(packet);
-    return [this.returnHighBit (checksum), this.returnLowBit (checksum)];
-  }
-
-  appendCheckSum (packet) {
-    return packet.concat(this.returnChecksum(packet));
-  }
-
-  prependBuffer (packet) {
-    return defaultMessages.shortPrefix.concat(packet);
-  }
-
-  prependStart (packet) {
-    return defaultMessages.prefix.concat(packet);
-  }
-
-  preparePacketForSending (packet) {
-    //prepares a packet ie: [2,4,3,2] for sending by adding a header and checksum high & lowbit
-    // packet = packet.slice();
-    packet[2] = this.destination;
-    packet[3] = this.source;
-    packet = this.appendCheckSum(packet);
-    packet = this.prependBuffer (packet);
-    return packet;
-  }
-
-  stripPacket (packet) {
-    var strippedPacket = this.stripPacketOfHeaderAndChecksum(packet, 'array');
-
-    return strippedPacket;
-  }
-
-  hasHeader(message) {
-    var indexOfStart = message.indexOf(165);
-    if (indexOfStart === -1) {
-      console.log ('hasHeader: Error: Message does not have a 165 bit');
-    } else if (indexOfStart === 0) {
-      return false;
-    } else if (indexOfStart >= 1) {
-      return true;
-    } else {
-      console.log ('hasHeader: Error: 165 Bit location caused an Error');
-    }
-  }
 
   parsePumpStatus(data) {
     if (this.hasHeader(data) === true) {
@@ -406,6 +253,194 @@ class Message {
     return pumpData;
   }
 
+
+  prependBuffer (packet) {
+    return defaultMessages.shortPrefix.concat(packet);
+  }
+
+
+  prependStart (packet) {
+    return defaultMessages.prefix.concat(packet);
+  }
+
+
+  preparePacketForSending (packet) {
+    //prepares a packet ie: [2,4,3,2] for sending by adding a header and checksum high & lowbit
+    // packet = packet.slice();
+    packet[2] = this.destination;
+    packet[3] = this.source;
+    packet = this.appendCheckSum(packet);
+    packet = this.prependBuffer (packet);
+    return packet;
+  }
+
+  processIncomingPacket(packet) {
+    return this.stripPacketOfHeaderAndChecksum(packet, 'array');
+  }
+
+
+  returnAcknowledgmentFromPacket (packet) {
+    return this.flipSourceAndDestination(packet);
+  }
+
+
+  returnArrayFromBuffer(buffer) {
+    //https://stackoverflow.com/questions/18148827/convert-buffer-to-array
+    return Array.prototype.slice.call(buffer, 0);
+    //or [...exampleBuffer]
+  }
+
+
+  returnLengthByte(packet, start) {
+    if (!packet || !Array.isArray(packet)) {
+      return -1;
+    }
+    if (!start || start !== 0) {
+      start = this.findStart(packet);
+    }
+    return packet[5];
+  }
+
+
+  returnHighBit (value) {
+    return parseInt(value / 256);
+  }
+
+
+  returnLowBit (value) {
+    return value % 256;
+  }
+
+
+  returnChecksum (packet) {
+    //returns an array [highBit, lowBit] calculated by taking the sum of the packet
+    var checksum = this.sumOfBytes(packet);
+    return [this.returnHighBit (checksum), this.returnLowBit (checksum)];
+  }
+
+
+  setDestAndSource (destination, source, startPos) {
+    startPos = startPos || this.findStart(this.originalPacket);
+    this.setDestination(destination, startPos);
+    this.setSource(source, startPos);
+  }
+
+
+  setDestination (destination, startPos) {
+    if (!destination && typeof destination !== 'number') { return undefined; }
+    this.destination = destination;
+    startPos = startPos || this.findStart(this.originalPacket);
+    this.originalPacket[startPos + 2] = destination;
+    // return this.packet;
+  }
+
+
+  setSource (source, startPos) {
+    var startPos;
+    if (!source && typeof source !== 'number') { return undefined; }
+    this.source = source;
+    startPos = startPos || this.findStart(this.originalPacket);
+    this.originalPacket[startPos + 3] = source;
+    // return this.packet;
+  }
+
+
+  sliceStringByRecurringAmounts (str = '', val = 1) {
+    var output = [];
+    if (typeof str !== 'string') { throw 'Incoming value must be a string'; }
+    var numberOfTimesToSlice = Math.ceil(str.length / val);
+    for (var i = 0; i < numberOfTimesToSlice; i++) {
+      let position = i * val;
+      if (i === numberOfTimesToSlice) {
+        output.push(str.slice(position, str.length - 1));
+      } else {
+        output.push(str.slice(position, position + val));
+      }
+    }
+    return output;
+  }
+
+
+  stripPacketOfHeaderAndChecksum (packet, returnArrayOrBuffer = 'default') {
+    //removes the HEADER and high and low bit checksum
+    //converts either Buffer or array, and returns same
+    var strippedPacket, buffer, startOfPacket;
+    if (Buffer.isBuffer(packet) === false && Array.isArray (packet) === true) {
+      var packetArray = packet;
+      buffer = false;
+    } else if (Buffer.isBuffer(packet) === true) {
+      buffer = true;
+      var packetArray = [...packet]; //convert to a normal array
+    }
+    startOfPacket = this.findStart(packetArray);
+    strippedPacket = this.stripchecksum(packetArray, startOfPacket);
+    strippedPacket = this.stripHeader(strippedPacket, startOfPacket);
+
+    if (returnArrayOrBuffer.toLowerCase() === 'array') {
+      return strippedPacket;
+    } else if ( returnArrayOrBuffer.toLowerCase() === 'buffer') {
+      return Buffer.from (strippedPacket);
+    } else {
+      return buffer === true ? Buffer.from (strippedPacket) : strippedPacket;
+    }
+  }
+
+
+  stripPacket (packet) {
+    var strippedPacket = this.stripPacketOfHeaderAndChecksum(packet, 'array');
+
+    return strippedPacket;
+  }
+
+
+  stripHeader (packet, StartOfPacket) {
+    if (!Array.isArray(packet)) { return undefined; }
+    StartOfPacket = StartOfPacket || this.findStart(packet);
+
+    if (StartOfPacket === -1) {
+      return packet;
+    } else {
+      return packet.slice (StartOfPacket, packet.length); //removes the high and low checksum bytes in back and the HEADER
+    }
+  }
+
+  stripchecksum (packet, start) {
+    if (!Array.isArray(packet)) { return undefined; }
+
+    start = start || this.findStart(packet);
+    if (start !== -1) {
+      let results = packet.slice (0, packet[start + 5] + start + 6);
+      return results;
+    }
+  }
+
+
+  sumOfBytes (packet) {
+    var sum = packet.reduce((accumulator, element) => {
+      return accumulator + element;
+    }, 0);
+    return sum;
+  }
+
+
+  tryAcknowledgment (packet) {
+    if (!packet) {
+      return false;
+    }
+    var ackType = typeof this.acknowledgment;
+    if (ackType === 'function') {
+      var test = ackType(packet);
+      if (test === true || test === false) {
+        return test;
+      }
+    }
+    if (this.acknowledgment && this.acknowledgment.toString() === packet.toString()) {
+      return true;
+    } else if (this.isAcknowledgment(packet) === true) {
+      return true;
+    }
+    return false;
+  }
 }
 
 /////// packet Information /////////////////////////
