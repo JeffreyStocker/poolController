@@ -353,7 +353,7 @@ class Message {
   }
 
 
-  stripPacketOfHeaderAndChecksum (packet, returnArrayOrBuffer = 'default') {
+  stripPacketOfHeaderAndChecksum (packet, returnArrayOrBuffer = 'array') {
     //removes the HEADER and high and low bit checksum
     //converts either Buffer or array, and returns same
     var strippedPacket, buffer, startOfPacket;
@@ -378,15 +378,8 @@ class Message {
   }
 
 
-  stripPacket (packet) {
-    var strippedPacket = this.stripPacketOfHeaderAndChecksum(packet, 'array');
-
-    return strippedPacket;
-  }
-
-
   stripHeader (packet, StartOfPacket) {
-    if (!Array.isArray(packet)) { return undefined; }
+    if (!Array.isArray(packet)) { return null; }
     StartOfPacket = StartOfPacket || this.findStart(packet);
 
     if (StartOfPacket === -1) {
@@ -395,6 +388,7 @@ class Message {
       return packet.slice (StartOfPacket, packet.length); //removes the high and low checksum bytes in back and the HEADER
     }
   }
+
 
   stripchecksum (packet, start) {
     if (!Array.isArray(packet)) { return undefined; }
