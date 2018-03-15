@@ -205,17 +205,51 @@ describe('Should be a Message Class', function () {
     // it('should contain method "sliceStringByRecurringAmounts"', function () {
     // });
 
-    // it('should contain method "stripPacketOfHeaderAndChecksum"', function () {
-    // });
+    it('should contain method "stripPacketOfHeaderAndChecksum"', function () {
+      Message.prototype.should.have.property('stripPacketOfHeaderAndChecksum');
+      Message.prototype.stripPacketOfHeaderAndChecksum([165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      Message.prototype.stripPacketOfHeaderAndChecksum([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      Message.prototype.stripPacketOfHeaderAndChecksum([0, 255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      Message.prototype.stripPacketOfHeaderAndChecksum([53, 42, 14, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
 
-    // it('should contain method "stripPacket"', function () {
-    // });
+      Message.prototype.stripPacketOfHeaderAndChecksum([165, 0, 96, 16, 4, 1, 255, 2, 25]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      Message.prototype.stripPacketOfHeaderAndChecksum([165, 0, 96, 16, 1, 4, 3, 33, 0, 32, 1, 94]).should.eql([165, 0, 96, 16, 1, 4, 3, 33, 0, 32]);
+      Message.prototype.stripPacketOfHeaderAndChecksum([255, 0, 255, 165, 0, 96, 16, 1, 4, 3, 33, 0, 24, 1, 86]).should.eql([165, 0, 96, 16, 1, 4, 3, 33, 0, 24]);
+      Message.prototype.stripPacketOfHeaderAndChecksum([255, 0, 255, 165, 0, 96, 16, 1, 4, 3, 33, 0, 8, 1, 70]).should.eql([165, 0, 96, 16, 1, 4, 3, 33, 0, 8]);
+      Message.prototype.stripPacketOfHeaderAndChecksum([165, 0, 96, 16, 1, 4, 3, 33, 0, 0, 1, 62]).should.eql([165, 0, 96, 16, 1, 4, 3, 33, 0, 0]);
 
-    // it('should contain method "stripHeader"', function () {
-    // });
+      should.throw(() => {
+        Message.prototype.stripPacketOfHeaderAndChecksum('test');
+      });
+      should.throw(() => {
+        throw(Message.prototype.stripPacketOfHeaderAndChecksum(65));
+      });
+      should.throw(() => {
+        (Message.prototype.stripPacketOfHeaderAndChecksum({test: [5, 4, 3, 2, 1]}));
+      });
+    });
 
-    // it('should contain method "stripchecksum"', function () {
-    // });
+    it('should contain method "stripHeader"', function () {
+      Message.prototype.should.have.property('stripHeader');
+      Message.prototype.stripHeader([165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      Message.prototype.stripHeader([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      Message.prototype.stripHeader([0, 255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      Message.prototype.stripHeader([53, 42, 14, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      should.not.exist(Message.prototype.stripHeader('test'))
+      should.not.exist(Message.prototype.stripHeader(65))
+      should.not.exist(Message.prototype.stripHeader({test: [5, 4, 3, 2, 1]}))
+    });
+
+    it('should contain method "stripchecksum"', function () {
+      Message.prototype.should.have.property('stripchecksum');
+    Message.prototype.stripchecksum([165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+    Message.prototype.stripchecksum([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]);
+    // Message.prototype.stripchecksum([0, 255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+    // Message.prototype.stripchecksum([53, 42,14, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+    should.not.exist(Message.prototype.stripchecksum('test'))
+    should.not.exist(Message.prototype.stripchecksum(65))
+    should.not.exist(Message.prototype.stripchecksum({test: [5, 4, 3, 2, 1]}))
+    });
 
     it('should contain method "sumOfBytes"', function () {
       Message.prototype.should.have.property('returnChecksum');
