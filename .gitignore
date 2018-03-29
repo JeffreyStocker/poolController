@@ -5,6 +5,8 @@ config/staging.json
 config/test.json
 mochawesome-report
 
+# database
+/database/*
 # OS X
 .DS_Store
 
