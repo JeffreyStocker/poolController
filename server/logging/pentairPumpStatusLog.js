@@ -1,6 +1,8 @@
-var glob = require('glob');
 var PentairMessage = require('./../equipment/pentair/PentairMessages.js');
-var winston = require('winston');
+var PouchDB = require('pouchdb');
+var db = new PouchDB('./database/power');
+// var moment = require('moment');
+PouchDB.plugin(require('pouchdb-find'));
 
 var logStatus, currentMin;
 var currentLogs = [];
@@ -10,48 +12,121 @@ var interval = 5;
 var init = function (invervalInMin = 5) {
   var now = new Date();
   currentMin = now.getHours();
-  logStatus = winston.loggers.add('pumpStatus', {file: { filename: './logs/status.logs'}});
   interval = invervalInMin || interval;
 };
 
+var shrinkAndSave = function (logDataForFiveMins) {
+  var compactedData = shrink(logDataForFiveMins);
+  insertAtTime (compactedData)
+    .then(results => {
+      console.log(results);
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+
 var shrink = function (logDataForFiveMins) {
+  var data;
   var totalWatts = 0;
   var totalRpm = 0;
-  if (logDataForFiveMins.length === 0 ) { return; }
+  if (logDataForFiveMins.length === 0 ) { return null; }
   for (let data of logDataForFiveMins) {
     totalWatts += data.watt;
     totalRpm += data.rpm;
   }
-  logStatus.info({
+  return {
     pump: logDataForFiveMins[0].pump,
     watts: ~~(totalWatts / logDataForFiveMins.length),
     rpm: ~~(totalRpm / logDataForFiveMins.length)
-  });
+  };
 };
 
-module.exports.log = function (parsedPumpData) {
+
+var log = function (parsedPumpData, pumpName = 'pump1') {
   var now = new Date();
   var hour = now.getHours();
   var day = now.getDate();
   var min = now.getMinutes();
-  if (~~currentMin / interval !== ~~min / interval) {
+  if (~~(currentMin / interval) !== ~~(min / interval)) {
     var tempCurrent = currentLogs;
-    shrink(tempCurrent);
+    shrinkAndSave(tempCurrent);
     currentLogs = [];
   }
   var { destination, watt, rpm } = parsedPumpData;
   if (!destination, !watt, !rpm) {
-    return;
+    return null;
   }
-  var data = {
+  currentLogs.push({
+    pumpName,
     pump: PentairMessage.addresses[destination],
-    watt: watt,
-    rpm: rpm
-  };
-  currentLogs.push(data);
+    watt,
+    rpm
+  });
 };
 
-var wait = glob('./logs/status');
 
-var temp = init();
-module.exports.log({destination: 96, watt: 300, rpm: 100});
+var findBetweenTime = function (startTime = new Date(), endTime = new Date()) {
+  return new Promise ((resolve, revoke) => {
+    if (startTime.constructor.name !== 'Date' || endTime.constructor.name !== 'Date') { revoke(new Error('startTime and endTime must be Date Objects')); }
+    if (startTime < endTime) {
+      let temp = endTime;
+      endTime = startTime;
+      startTime = temp;
+    }
+    db.find({
+      selector: {
+        timeStamp: { $lte: startTime, $gte: endTime }
+      }
+    }, (err, docs) => {
+      if (err) {
+        revoke (err);
+      } else { resolve(docs.docs); }
+    });
+  });
+};
+
+
+var findBetweenTimePromise = function(startTime = new Date(), endTime = new Date()) {
+  if (startTime.constructor.name !== 'Date' || endTime.constructor.name !== 'Date') {
+    return new Error('startTime and endTime must be Date Objects');
+  }
+  if (startTime < endTime) {
+    let temp = endTime;
+    endTime = startTime;
+    startTime = temp;
+  }
+  return db.find({
+    selector: {
+      timeStamp: { $lte: startTime, $gte: endTime }
+    }
+  });
+};
+
+
+var insertAtTime = function (data) {
+  if (!data || typeof data !== 'object') { return new Error ('Data to insert into database should be a object'); }
+  data.timeStamp = new Date();
+  return db.post(data);
+};
+
+
+var count = function () {
+  return db.info();
+};
+
+
+var allDocs = function () {
+  return db.allDocs({});
+};
+
+
+module.exports = {
+  insertAtTime,
+  findBetweenTimePromise,
+  findBetweenTime,
+  init,
+  shrink,
+  log
+};
