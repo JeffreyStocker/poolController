@@ -222,7 +222,7 @@ describe('Should be a Message Class', function () {
         Message.prototype.stripPacketOfHeaderAndChecksum('test');
       });
       should.throw(() => {
-        throw(Message.prototype.stripPacketOfHeaderAndChecksum(65));
+        throw (Message.prototype.stripPacketOfHeaderAndChecksum(65));
       });
       should.throw(() => {
         (Message.prototype.stripPacketOfHeaderAndChecksum({test: [5, 4, 3, 2, 1]}));
@@ -235,20 +235,20 @@ describe('Should be a Message Class', function () {
       Message.prototype.stripHeader([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
       Message.prototype.stripHeader([0, 255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
       Message.prototype.stripHeader([53, 42, 14, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
-      should.not.exist(Message.prototype.stripHeader('test'))
-      should.not.exist(Message.prototype.stripHeader(65))
-      should.not.exist(Message.prototype.stripHeader({test: [5, 4, 3, 2, 1]}))
+      should.not.exist(Message.prototype.stripHeader('test'));
+      should.not.exist(Message.prototype.stripHeader(65));
+      should.not.exist(Message.prototype.stripHeader({test: [5, 4, 3, 2, 1]}));
     });
 
     it('should contain method "stripchecksum"', function () {
       Message.prototype.should.have.property('stripchecksum');
-    Message.prototype.stripchecksum([165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
-    Message.prototype.stripchecksum([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]);
-    // Message.prototype.stripchecksum([0, 255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
-    // Message.prototype.stripchecksum([53, 42,14, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
-    should.not.exist(Message.prototype.stripchecksum('test'))
-    should.not.exist(Message.prototype.stripchecksum(65))
-    should.not.exist(Message.prototype.stripchecksum({test: [5, 4, 3, 2, 1]}))
+      Message.prototype.stripchecksum([165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      Message.prototype.stripchecksum([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([255, 0, 255, 165, 0, 96, 16, 4, 1, 255]);
+      // Message.prototype.stripchecksum([0, 255, 0, 255, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      // Message.prototype.stripchecksum([53, 42,14, 165, 0, 96, 16, 4, 1, 255]).should.eql([165, 0, 96, 16, 4, 1, 255]);
+      should.not.exist(Message.prototype.stripchecksum('test'));
+      should.not.exist(Message.prototype.stripchecksum(65));
+      should.not.exist(Message.prototype.stripchecksum({test: [5, 4, 3, 2, 1]}));
     });
 
     it('should contain method "sumOfBytes"', function () {
