@@ -1,6 +1,6 @@
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
-var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPort_modular').ports;
+var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPort').ports;
 var helpers = require(process.env.NODE_PATH + '/server/helpers');
 var PentairQueue = requireGlob('PentairQueue');
 

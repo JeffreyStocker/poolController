@@ -3,9 +3,9 @@ var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 var Message = msg.Message;
 // var { processIncomingSerialPortData } = require(process.env.NODE_PATH + '/server/communications/serialPort.js');
-var serialPort = requireGlob('serialPort_modular');
+var serialPort = requireGlob('serialPort');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
-// var ports = requireGlob('serialPort_modular');
+// var ports = requireGlob('serialPort');
 var logger = requireGlob ('winston').sendToLogs;
 
 module.exports = class PentairQueue extends ActionQueue {

@@ -10,7 +10,7 @@ var useModular = true;
 
 if (useModular) {
   // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
-  // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
+  // require(process.env.NODE_PATH + '/server/serialPort.js').init(serialPaths);
   require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init()
     .then(serialPorts => {
       return serialPorts;
