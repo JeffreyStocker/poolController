@@ -11,6 +11,7 @@
     "hjson": "^3.1.1",
     "jsonminify": "^0.4.1",
     "lodash": "^4.17.4",
+    "moment": "^2.22.0",
     "onoff": "1.2.0",
     "pouchdb": "^6.4.3",
     "pouchdb-find": "^6.4.3",
