@@ -92,7 +92,6 @@ var past = function (time, amount) {
       return findBetweenTime(moment().subtract(amount, 'years').toDate());
     } else if (time === 'days') {
       return findBetweenTime(moment().subtract(amount, 'days').toDate());
-
     } else if (time === 'hours') {
       return findBetweenTime(moment().subtract(amount, 'hours').toDate());
     } else {
@@ -100,32 +99,12 @@ var past = function (time, amount) {
   } else if (time.constructor.name === 'Moment') {
     return findBetweenTime(time.toDate());
   } else {
-    throw new Error('Time should be a string (hours, months, days, years or a Moment object and amount should be a number');
+    throw new Error('Time should be a string (hours, months, days, years) or a Moment object and amount should be a number to subtract');
   }
 };
 
-var findBetweenTime = function (startTime = new Date(), endTime = new Date()) {
-  return new Promise ((resolve, revoke) => {
-    if (startTime.constructor.name !== 'Date' || endTime.constructor.name !== 'Date') { revoke(new Error('startTime and endTime must be Date Objects')); }
-    if (startTime < endTime) {
-      let temp = endTime;
-      endTime = startTime;
-      startTime = temp;
-    }
-    db.find({
-      selector: {
-        _id: { $lte: startTime, $gte: endTime }
-      }
-    }, (err, docs) => {
-      if (err) {
-        revoke (err);
-      } else { resolve(docs.docs); }
-    });
-  });
-};
 
-
-var findBetweenTimePromise = function(startTime = new Date(), endTime = new Date()) {
+var findBetweenTime = function(startTime = new Date(), endTime = new Date()) {
   if (startTime.constructor.name !== 'Date' || endTime.constructor.name !== 'Date') {
     return new Error('startTime and endTime must be Date Objects');
   }
