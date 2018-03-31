@@ -2,7 +2,7 @@ var socket = io.connect();
 var sendDataToServer, pumpData;
 
 var message = '';
-var setPumpData = function (data) {
+var setPumpData = (function (data) {
   pumpData = data || {
     rpm: '--',
     state: '--',
@@ -20,8 +20,7 @@ var setPumpData = function (data) {
     unknown4: '--',
     timeCurrent: '--',
   };
-};
-setPumpData();
+})();
 
 
 socket.on('connect', () => {
@@ -40,6 +39,10 @@ socket.on('connect', () => {
   socket.on('pumpDataReturn', function (data) {
     console.log (data);
     setPumpData(data);
+  });
+
+  socket.on('disconnect', () => {
+    setPumpData();
   });
 
 });
