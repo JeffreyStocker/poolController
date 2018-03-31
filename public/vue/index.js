@@ -46,11 +46,20 @@ socket.on('connect', () => {
 
 
 Vue.component('buttonX', {
-  props: ['button'],
+  props: ['buttonEvent', 'name'],
   template:
   `<button
-    v-on-click="button.click"
-  > {{button}} </button>`,
+    v-on:click="button"
+  > {{name}} </button>`,
+  methods: {
+    button: function () {
+      if (this.buttonEvent && typeof this.buttonEvent === 'function') {
+        this.buttonEvent();
+      } else {
+        console.log ('button');
+      }
+    }
+  }
 });
 
 Vue.component('groupOfButtons', {
@@ -60,8 +69,8 @@ Vue.component('groupOfButtons', {
     <buttonX
       v-for="(indv, key) in group"
       v-bind:key="key"
-      v-bind:button="indv.name"
-      v-on-click
+      v-bind:name="indv.name"
+      v-bind:buttonEvent="indv.event"
       >
     </buttonX>
   </div>`
@@ -89,18 +98,19 @@ Vue.component('pumpStatusData', {
   props: ['pumpData'],
   template: `
     <div>
-			<div>Running:<b>
-				<span class="pumpState" id="pumpState"> {{ pumpData.state }}</span></b>
-				<span> Timer:<b><span class="PumpTimers" id="">{{ pumpData.timers }}</span></b>  </span>
+      <div>Running:
+        <span class="pumpState bold" id="pumpState"> {{ pumpData.state }} </span>
+        <span> Timer: <span class="PumpTimers bold" id="">{{ pumpData.timers }} </span></span>
 			</div>
 
-			<div>RPM:<b><span class="pumpRPM" id="pumpRPM"> {{ pumpData.rpm }} </span></b>
-				<span> Watts:<b><span class="pumpWatt" id="pumpWatt"> {{ pumpData.watt }} </span></b> </span>
+      <div>RPM:
+        <span class="pumpRPM bold" id="pumpRPM"> {{ pumpData.rpm }} </span>
+				<span> Watts: <span class="pumpWatt bold" id="pumpWatt"> {{ pumpData.watt }} </span> </span>
 			</div>
 
-			<div>action:<b>
-				<span class="pumpAction" id="pumpAction"> {{ pumpData.action }}</span></b>
-				<span> Time:<b><span class="timeCurrent">{{ pumpData.timeCurrent }}</span></b> </span>
+			<div>action:
+				<span class="pumpAction bold" id="pumpAction"> {{ pumpData.action }} </span>
+				<span> Time: <span class="timeCurrent bold"> {{ pumpData.timeCurrent }} </span> </span>
 			</div>
 		</div>
   `,
@@ -113,20 +123,23 @@ Vue.component('pumpStatusDataExtended', {
   props: ['pumpData'],
   template: `
     <div>
-      <div>Destination:<b>
-        <span class="pumpDestination" id="pumpDestination"> {{ pumpData.destination }}</span></b>
-        <span> Source: 	<b><span class="pumpSource" id="pumpSource"> {{ pumpData.source }} </span></b> </span>
+      <div>Destination:
+        <span class="pumpDestination bold" id="pumpDestination"> {{ pumpData.destination }}</span>
+        <span> Source: <span class="pumpSource bold" id="pumpSource"> {{ pumpData.source }} </span> </span>
       </div>
-			<div>driveState:<b><span class="pumpDriveState" id="pumpDriveState"> {{ pumpData.driveState }}</span></b>
-				<span> ppc: 	<b><span class="pumpPpc" id="pumpPpc"> {{ pumpData.ppc }}</span></b> </span>
+      <div>driveState:
+        <span class="pumpDriveState bold" id="pumpDriveState"> {{ pumpData.driveState }}</span>
+				<span> ppc: <span class="pumpPpc bold" id="pumpPpc"> {{ pumpData.ppc }}</span> </span>
 			</div>
 
-			<div>Unknown1:<b><span class="unknown1"> {{ pumpData.unknown1 }} </span></b>
-				<span> Unknown2: 	<b><span class="unknown2"> {{ pumpData.unknown2 }}</span></b> </span>
+      <div>Unknown1:
+        <span class="unknown1 bold"> {{ pumpData.unknown1 }} </span>
+				<span> Unknown2: <span class="unknown2 bold"> {{ pumpData.unknown2 }} </span></span>
 			</div>
 
-			<div>Unknown3:<b><span class="unknown3"> {{ pumpData.unknown3 }}</span></b>
-				<span> Unknown4: 	<b><span class="unknown4"> {{ pumpData.unknown4 }}</span></b> </span>
+      <div>Unknown3:
+        <span class="unknown3 bold"> {{ pumpData.unknown3 }} </span>
+				<span> Unknown4: <span class="unknown4 bold"> {{ pumpData.unknown4 }} </span> </span>
       </div>
     </div>
   `,
