@@ -111,3 +111,7 @@ button:hover{
 #blankBoxAtTop {
 	height: 0px;
 }
+
+.bold {
+	font-weight: bold;
+}
