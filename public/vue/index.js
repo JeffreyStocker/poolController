@@ -98,11 +98,6 @@ Vue.component('pumpStatusData', {
 				<span> Watts:<b><span class="pumpWatt" id="pumpWatt"> {{ pumpData.watt }} </span></b> </span>
 			</div>
 
-			<div>Destination:<b>
-				<span class="pumpDestination" id="pumpDestination"> {{ pumpData.destination }}</span></b>
-				<span> Source: 	<b><span class="pumpSource" id="pumpSource"> {{ pumpData.source }} </span></b> </span>
-			</div>
-
 			<div>action:<b>
 				<span class="pumpAction" id="pumpAction"> {{ pumpData.action }}</span></b>
 				<span> Time:<b><span class="timeCurrent">{{ pumpData.timeCurrent }}</span></b> </span>
@@ -118,6 +113,10 @@ Vue.component('pumpStatusDataExtended', {
   props: ['pumpData'],
   template: `
     <div>
+      <div>Destination:<b>
+        <span class="pumpDestination" id="pumpDestination"> {{ pumpData.destination }}</span></b>
+        <span> Source: 	<b><span class="pumpSource" id="pumpSource"> {{ pumpData.source }} </span></b> </span>
+      </div>
 			<div>driveState:<b><span class="pumpDriveState" id="pumpDriveState"> {{ pumpData.driveState }}</span></b>
 				<span> ppc: 	<b><span class="pumpPpc" id="pumpPpc"> {{ pumpData.ppc }}</span></b> </span>
 			</div>
