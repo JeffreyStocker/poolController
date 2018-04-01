@@ -14,16 +14,15 @@ module.exports.init = async function () {
 
   var results = [];
   for (var port of serialPaths) {
-    if (port.type === 'rs485'){
+    if (port.type === 'rs485') {
       results.push(sp.newSerialPort(port.name, port.hardwareAddress));
     }
   }
-  results = await Promise.all(results)
-  return sp
+  results = await Promise.all(results);
+  return sp;
 
 
   // sp.setGroupOfTriggers('/dev/ttyUSB0', {
   //   'data': processIncomingSerialPortData
   // });
-  return sp;
 };

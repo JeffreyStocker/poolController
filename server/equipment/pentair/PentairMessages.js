@@ -444,6 +444,7 @@ waterfall speed 2
 heater/spa speed 1
 */
 
+/* eslint-disable */
 var defaultMessages = {
   prefix: [255, 0, 255, 165, 0],
   shortPrefix: [255, 0, 255],
@@ -491,6 +492,7 @@ var addresses = {
   Pump15: 110,
   Pump16: 111,
 };
+/* eslint-enable */
 
 module.exports = {
   defaultMessages,
