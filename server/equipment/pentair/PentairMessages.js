@@ -468,6 +468,7 @@ var defaultMessages = {
   pumpfeature1:        {name: 'feature 1',          byte: [165, 0, 96, 16, 5, 1, 6]},
   saveAndRunExternal1: {name: 'Save & Run External 1', byte: [165, 0, 96, 16, 1, 4], byteWithChecksum: [165, 0, 96, 16, 1, 4, 2, 196]}, //needs a speed high and low bit added on the end before the checksum
 };
+/* eslint-enable */
 
 var addresses = {
   Chlorinator: [2, 16], // 	Chlorinator (This is a different type of packet)
@@ -492,7 +493,6 @@ var addresses = {
   Pump15: 110,
   Pump16: 111,
 };
-/* eslint-enable */
 
 module.exports = {
   defaultMessages,
