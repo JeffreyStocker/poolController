@@ -128,5 +128,6 @@ module.exports = {
   findBetweenTime,
   init,
   shrink,
-  log
+  log,
+  shrinkAndSave
 };
