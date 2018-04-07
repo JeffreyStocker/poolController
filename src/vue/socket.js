@@ -1,5 +1,6 @@
 var sendDataToServer, pumpData;
-export default pumpData;
+var socket = io.connect();
+
 var setPumpData = function (data) {
   pumpData = data || {
     rpm: '--',
@@ -20,6 +21,7 @@ var setPumpData = function (data) {
   };
 };
 setPumpData();
+export default pumpData;
 
 socket.on('connect', () => {
   console.log('connected');
@@ -46,6 +48,7 @@ socket.on('connect', () => {
 });
 
 socket.on('connect', () => {
+  console.log('connected2');
   socket.on('disconnect', () => {
     // setPumpData();
     console.log('disconnected');
