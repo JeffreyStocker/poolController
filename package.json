@@ -11,14 +11,14 @@
     "hjson": "^3.1.1",
     "jsonminify": "^0.4.1",
     "lodash": "^4.17.4",
+    "onoff": "1.2.0",
     "pouchdb": "^6.4.3",
     "pouchdb-find": "^6.4.3",
+    "serialport": "^6.1.1",
     "simon": "^0.2.3",
     "socket.io": "^2.0.4",
     "vue": "^2.5.16",
-    "winston": "^2.4.0",
-    "serialport": "^6.0.4",
-    "onoff": "1.2.0"
+    "winston": "^2.4.0"
   },
   "devDependencies": {
     "babel": "^6.23.0",
