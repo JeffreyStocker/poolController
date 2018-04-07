@@ -4,6 +4,7 @@ config/production.json
 config/staging.json
 config/test.json
 mochawesome-report
+bundle.js
 
 # database
 /database/*

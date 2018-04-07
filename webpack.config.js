@@ -86,9 +86,9 @@ var env = process.env.WEBPACK_ENV || 'development';
 var plugins = [];
 
 module.exports = {
-  entry: './public/vue/index.js',
+  entry: './src/vue/index.js',
   output: {
-    path: path.resolve(__dirname, './public/vue/build'),
+    path: path.resolve(__dirname, './public/vue'),
     filename: 'bundle.js'
   },
   module: {
