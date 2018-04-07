@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 Vue.component('buttonX', {
   props: ['buttonEvent', 'name'],
   template:

@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 Vue.component('pumpStatus', {
   data: function () {
     return {

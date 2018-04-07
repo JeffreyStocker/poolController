@@ -165,7 +165,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
   var pumpGetStatus = true;
 
-  socket.on ('toggleStatusUpdate', function (state, callback) {
+  socket.on ('toggleStatusUpdate', function (state, queueName, callback) {
     // logger.debug('toggleStatusUpdate');
     if (pumpGetStatus) {
       clearInterval (statusTimers);
