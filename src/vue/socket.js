@@ -22,6 +22,7 @@ var setPumpData = function (data) {
 };
 setPumpData();
 export default pumpData;
+export { socket };
 
 socket.on('connect', () => {
   console.log('connected');
@@ -41,17 +42,7 @@ socket.on('connect', () => {
     setPumpData(data);
   });
 
-  // socket.on('disconnect', () => {
-  //   setPumpData();
-  // });
-
-});
-
-socket.on('connect', () => {
-  console.log('connected2');
   socket.on('disconnect', () => {
-    // setPumpData();
-    console.log('disconnected');
+    setPumpData();
   });
-
 });
