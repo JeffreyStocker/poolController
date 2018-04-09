@@ -20,7 +20,7 @@
       return {
       }
     },
-    props: ['buttons', 'setMessage', 'title'],
+    props: ['buttons', 'setMessage'],
     methods: {
       send: function () {
       }
@@ -30,8 +30,7 @@
 </script>
 
 <template>
-  <div class="col-sm-2 center">
-    {{title || 'Unknown'}}
+  <div>
     <ButtonPump
       v-for="(data, name) in buttons"
       v-bind:key="name"
