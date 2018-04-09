@@ -1,12 +1,12 @@
 <script>
   export default {
-    props: ['buttonEvent', 'name'],
+    props: ['onClick', 'name'],
     methods: {
       button: function () {
-        if (this.buttonEvent && typeof this.buttonEvent === 'function') {
-          this.buttonEvent();
+        if (this.onClick && typeof this.onClick === 'function') {
+          this.onClick();
         } else {
-          console.log ('button');
+          console.log ('Button Clicked but No Event');
         }
       }
     }
@@ -15,6 +15,7 @@
 
 <template>
   <button
+    class="btn"
     v-on:click="button"
   > {{name}}
   </button>
