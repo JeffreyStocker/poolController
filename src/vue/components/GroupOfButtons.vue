@@ -1,5 +1,5 @@
 <script>
-  import buttonX from './buttonX.vue'
+  import buttonX from './buttonX.vue';
 
   export default {
     computed: {},
