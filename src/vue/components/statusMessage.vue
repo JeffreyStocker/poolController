@@ -12,7 +12,7 @@
 </script>
 
 <template>
-  <div class="message center" id="message"> {{ message }}</div>
+  <div class="message center" id="message"> &nbsp; {{ message }}</div>
 </template>
 
 <style>
