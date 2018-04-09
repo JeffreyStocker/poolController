@@ -98,7 +98,7 @@ module.exports = class PentairQueue extends ActionQueue {
 
     if (!this.timeout) {
       this.timeout = setInterval(() => {
-        debugger;
+        // debugger;
         if (this.currentRetries < this.numberOfRetries) {
           this.currentRetries++;
           this.logger('events', 'debug', this.currentRetries + ': Message timed out waiting for acknowledgment: ', message.name);
@@ -116,7 +116,7 @@ module.exports = class PentairQueue extends ActionQueue {
     this.serialPort = serialPort.returnPortByName(this.hardwareAddress);
     serialPort.setTrigger(hardwareName, 'data', (data) => {
       data = Message.prototype.processIncomingPacket(data);
-      debugger;
+      // debugger;
       var results = this.checkQueue(data);
       if (Message.prototype.isStatusMessage(data)) {
         var pumpData = Message.prototype.parsePumpStatus(data);
@@ -163,7 +163,6 @@ module.exports = class PentairQueue extends ActionQueue {
 
 
   setTimers(message) {
-    debugger;
     var newTimers = message.timers;
     if (!newTimers && newTimers !== 0) {
       return;
