@@ -112,7 +112,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   });
 
 
-  socket.on ('pumpPower', function (powerState, callback) {
+  socket.on ('pumpPower', function (powerState, pumpName = 'pump1', callback) {
     // logger.debug('pumpPower');
     pumpPower(powerState, callback);
     // socket.emit('confirm');
@@ -179,6 +179,11 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
     // socket.emit('confirm');
     // callback(0);
   });
+
+  socket.on ('test', function (...data) {
+    var callback = data.pop();
+    callback(null, data)
+  })
 });
 
 
