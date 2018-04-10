@@ -8,7 +8,7 @@
   <div>
     <div>Running:
       <span class="pumpState bold" id="pumpState"> {{ pumpData.state }} </span>
-      <span> Timer: <span class="PumpTimers bold" id="">{{ pumpData.timers }} </span></span>
+      <span> Timer: <span class="PumpTimers bold" id="">{{ pumpData.timer }} </span></span>
     </div>
 
     <div>RPM:

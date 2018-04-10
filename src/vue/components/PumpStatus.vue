@@ -1,7 +1,7 @@
 <script>
   import PumpStatusData from './PumpStatusData.vue';
   import PumpStatusDataExtended from './PumpStatusDataExtended.vue';
-  import pumpData from '../socket.js';
+  import { pumpData } from '../socket.js';
 
   export default {
     components: {
@@ -14,7 +14,6 @@
         pumpData
       };
     },
-    props: [],
   }
 </script>
 
