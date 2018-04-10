@@ -71,7 +71,7 @@ class Message {
 
 
   findStart (packet) {
-    if (Array.isArray(packet) !== true) { throw new Error ('findStart: packet must be an array'); }
+    if (Array.isArray(packet) !== true) { return null; }
 
     var indexOfStart = packet.indexOf(165);
     if (packet[indexOfStart + 1] === 0) {
@@ -198,9 +198,10 @@ class Message {
 
 
   parsePumpStatus(data) {
+    debugger;
     if (this.hasStart(data) === true) {
       try {
-        data = this.stripMessageOfHeaderAndChecksum (data);
+        data = Message.prototype.stripPacketOfHeaderAndChecksum (data);
       } catch (err) {
         console.log (err);
       }

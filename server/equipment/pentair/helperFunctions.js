@@ -3,7 +3,7 @@ var stripPacketOfHeaderAndChecksum = requireGlob('PentairMessages.js').Message.s
 module.exports = {
   processBufferMessage(message) {
     message = module.exports.convertToDecArray(message);
-    return stripMessageOfHeaderAndChecksum(message);
+    return stripPacketOfHeaderAndChecksum(message);
   },
 
   convertToDecArray(bufferArray) {
