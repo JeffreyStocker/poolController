@@ -23,22 +23,24 @@ var app = new Vue({
     buttonData: {
       "Pump Controls": {
         'Power On': ['pumpPower', 'on'],
-        'Power Off': ['pumpPower', 'on'],
+        'Power Off': ['pumpPower', 'off'],
         "Toggle Power": ['pumpPower', 'toggle'],
         "Local": ['pumpControlPanelState', 'local'],
         "Remote": ['pumpControlPanelState', 'remote'],
       },
       "External Controls" : {
-        '1: SPA': ['intellicom', '1'],
-        '2: Waterfall': ['intellicom', '2'],
-        "3: Slow": ['intellicom', '3'],
-        "4: Solar": ['intellicom', '4']
+        '1: SPA': ['intellicom', 1],
+        '2: Waterfall': ['intellicom', 2],
+        "3: Slow": ['intellicom', 3],
+        "4: Solar": ['intellicom', 4],
+        "External: Off": ['intellicom', 0]
       },
       "Speed Controls" : {
-        'Program 1': ['runSpeed', '1'],
-        'Program 2': ['runSpeed', '2'],
-        "Program 3": ['runSpeed', '3'],
-        "Program 4": ['runSpeed', '4']
+        'Program 1': ['runSpeed', 1],
+        'Program 2': ['runSpeed', 2],
+        "Program 3": ['runSpeed', 3],
+        "Program 4": ['runSpeed', 4],
+        "Speed: Off": ['pumpPower', 'toggle'],
       }
     },
     savePumpSpeedButtons: {
