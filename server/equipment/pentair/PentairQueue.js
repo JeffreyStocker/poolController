@@ -189,6 +189,12 @@ module.exports = class PentairQueue extends ActionQueue {
     }
   }
 
+  hasStatusTimer() {
+    if (this.timers.status) {
+      return true;
+    }
+    return false;
+  }
 
   sendToSerialPort(message, callback = () => {}) {
     if (this.serialPort) {

@@ -39,7 +39,7 @@ module.exports = {
   },
 
 
-  pumpPower (powerState, queueName, callback = () => {}) {
+  pumpPower (powerState, queueName = 'pump1', callback = () => {}) {
     if (typeof arguments[arguments.length - 1] === 'function') {
       callback = arguments[arguments.length - 1];
     }
@@ -53,13 +53,20 @@ module.exports = {
     }
   },
 
-  runRepeatingStatus(callback = () => {}) {
-    // debugger;
-    addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}, callback));
+  runRepeatingStatus(state = 'toggle', queueName = 'Pump1', callback = () => {}) {
+    if (state === 'toggle'){
+      state = queues.returnQueue(queueName).hasStatusTimer() ? 'off' : 'on';
+    }
+
+    if (state === 'on') {
+      addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}, callback));
+    } else if (state === 'off') {
+      addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 0}}, callback));
+    }
   },
 
 
-  runPumpAtSpeed (rpm, queueName, callback = () => {}) {
+  runPumpAtSpeed (rpm, queueName = 'pump1', callback = () => {}) {
     // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
     var message = {};
     var destination = 96; //96 pump 1
@@ -82,7 +89,7 @@ module.exports = {
   },
 
 
-  runPumpProgram (speed, queueName, callback = () => {}) {
+  runPumpProgram (speed, queueName = 'pump1', callback = () => {}) {
     if (typeof arguments[arguments.length - 1] === 'function') {
       callback = arguments[arguments.length - 1];
     }

@@ -81,8 +81,8 @@ class QueueGroup {
     }
   }
 
-  returnQueue (uueueName) {
-    return this.queues[queueName];
+  returnQueue (queueName) {
+    return this.names[queueName];
   }
 
   removeQueueName(queueName) {
