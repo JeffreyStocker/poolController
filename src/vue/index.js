@@ -86,18 +86,25 @@ var app = new Vue({
       <StatusMessage v-bind:message='message'></StatusMessage>
     </div>
     <div class="row">
-      <PumpPower  equipmentName="pump1"  v-bind:setMessage="setMessageCallback"></PumpPower>
       <OnlyButtons v-for="(data, title) in buttonData"
         v-bind:buttons="data"
         v-bind:setMessage="setMessageCallback"
         v-bind:key="title"
         v-bind:title='title'>
       </OnlyButtons>
-      <SelectedPumpControl v-bind:title="returnFirstObjectKey(savePumpSpeedButtons)" v-bind:setMessage="setMessageCallback" v-bind:buttons="savePumpSpeedButtons"></SelectedPumpControl>
+      <SelectedPumpControl v-for="(data, title) in savePumpSpeedButtons"
+        v-bind:buttons="data"
+        v-bind:setMessage="setMessageCallback"
+        v-bind:key="title"
+        v-bind:title='title'>
+      </SelectedPumpControl>
     </div>
   </div>
   `
 });
 
 {/* <GroupOfPumpButtons v-bind:buttons="data1" v-bind:setMessage="setMessageCallback" title='Pump Controls'></GroupOfPumpButtons> */}
+//
+
+{/* <PumpPower  equipmentName="pump1"  v-bind:setMessage="setMessageCallback"></PumpPower> */}
 //
