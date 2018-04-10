@@ -1,70 +1,7 @@
-/* ul {
-	position: fixed;
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-	background-color: #333;
-	width: 100%;
-	top: 0;
-}
-
-
-li {
-
-	float: left;
-}
-
-li a {
-	display: block;
-	color: white;
-	text-align: center;
-	padding: 14px 16px;
-	text-decoration: none;
-}
-
-li div {
-	display: block;
-	color: white;
-	text-align: center;
-	padding: 14px 16px;
-	text-decoration: none;
-	background-color: black;
-}
-
-
-li a:hover {
-	background-color: #333;
-}
- */
  *, *:before, *:after {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-}
-
-
-
-
-button {
-	display: block;
-	color: white;
-	text-align: center;
-	padding: 14px 16px;
-	text-decoration: none;
-	background-color: #333;
-	border:none;
-}
-
-button:hover{
-	background-color: #5C5C5C;
-	text-decoration-color: white;
-	color: white;
-}
-
-
-.table {
-	display:table;
 }
 
 
@@ -89,8 +26,22 @@ button:hover{
 
 
 .btn {
-	width: 100%;
+	background-color: #333;
+	border:none;
+	color: white;
 	margin: 2px 0px;
+	padding: 7px;
+	white-space: pre-wrap;
+	width: 100%;
+}
+.btn:hover {
+	background-color: #5C5C5C;
+	/* text-decoration-color: white; */
+	color: white;
+}
+.btn:focus {
+	background-color: #5C5C5C;
+	color: white;
 }
 
 .top {
