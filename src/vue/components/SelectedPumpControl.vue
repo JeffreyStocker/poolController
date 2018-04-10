@@ -1,5 +1,6 @@
 <script>
   import GroupOfPumpButtons from './GroupOfPumpButtons.vue';
+  import ButtonPump from './ButtonPump.vue';
 
   export default {
     computed: {
@@ -10,9 +11,12 @@
           range.push (i);
         }
         return range;
+      },
+      selectedAndName() {
+        return 'save & Run: ' +  this.selected + ' RPMs';
       }
     },
-    components: { GroupOfPumpButtons },
+    components: { GroupOfPumpButtons, ButtonPump },
     data: function () {
       return {
         selected: 1600
@@ -27,18 +31,18 @@
 <template>
   <div class="col-sm-2 center">
     <Label for="speedInput">{{title || 'Unknown'}}</Label>
-    <!-- <label for="speedInput">Speed in RPM & Save Prog 1:</label> -->
-    {{selected}}
     <select id= "speedInput" class="form-control speedInput" v-model="selected">
       <option v-for="(speed, index) in range"
         v-bind:key="index"
         v-text="speed"
       ></option>
     </select>
-    <GroupOfPumpButtons
+    <ButtonPump :onClick="setMessage" :name="selectedAndName" :onClickData="[selected]">
+    </ButtonPump>
+    <!-- <GroupOfPumpButtons
       v-bind:setMessage="setMessage"
       v-bind:buttons="buttons">
-    </GroupOfPumpButtons>
+    </GroupOfPumpButtons> -->
   </div>
 </template>
 
