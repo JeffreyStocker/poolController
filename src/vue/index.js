@@ -27,13 +27,6 @@ var app = new Vue({
     items: [[{name: 'test'}], [{name: 'test2'}], [{name: 'test3'}]],
     showExtended: false,
     buttonData: {
-      "Pump Controls": {
-        'Power On': ['pumpPower', 'on'],
-        'Power Off': ['pumpPower', 'off'],
-        "Toggle Power": ['pumpPower', 'toggle'],
-        "Local": ['pumpControlPanelState', 'local'],
-        "Remote": ['pumpControlPanelState', 'remote'],
-      },
       "External Controls" : {
         '1: SPA': ['intellicom', 1],
         '2: Waterfall': ['intellicom', 2],
@@ -109,16 +102,6 @@ var app = new Vue({
         v-bind:key="title"
         v-bind:title='title'>
       </SelectedPumpControl>
-      <div v-for="(data, title) in {test: {}, test2: {}}">
-        <button>test1</button>
-        test
-      </div>
-      <div>
-      <DoubleButton
-        :button1="{ name:'test1', data: [1,2,3] }"
-        :button2="{ name:'test2', data: [4,5,6] }"
-        :setMessage="setMessageCallback"/>
-      </div>
     </div>
   </div>
   `
