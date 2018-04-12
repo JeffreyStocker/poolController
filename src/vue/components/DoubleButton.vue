@@ -1,26 +1,39 @@
 <script>
   import ButtonPump from './ButtonPump.vue';
+  import DoubleButton from './DoubleButton.vue';
+  import Box from './box.vue'
   export default {
-    computed: {},
-    components: { ButtonPump },
+    components: { ButtonPump, DoubleButton, Box },
     data: function () {
       return {}
     },
-    props: ['buttons', 'setMessage'],
-
+    props: ['button1', 'button2', 'setMessage']
   }
 </script>
 
 <template>
-  <span>
-    <ButtonPump :onClick="setMessage">
-
-    </ButtonPump>
-    <ButtonPump>
-
-    </ButtonPump>
-  </span>
+  <div class='test'>
+    <ButtonPump class="btnSplit testContainer"
+      :name="button1.name"
+      :onClick="setMessage"
+      :onClickData="button1.data"
+      />
+    <ButtonPump class="btnSplit"
+      :name="button2.name"
+      :onClick="setMessage"
+      :onClickData="button2.data"
+      />
+  </div>
 </template>
 
-<style>
+<style scoped>
+  .test {
+    display: flex;
+    justify-content: space-between;
+  }
+  .testContainer {
+    flex-grow: 1;
+    margin-right: 0.25em;
+  }
+
 </style>

@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import GroupOfButtons from './components/GroupOfButtons.vue';
+import DoubleButton from './components/DoubleButton.vue';
 import OnlyButtons from './components/OnlyButtons.vue';
 import PumpStatus from './components/PumpStatus.vue';
 import PumpPower from './components/PumpPower.vue';
@@ -11,7 +12,12 @@ var sendDataToServer;
 var messageTimer;
 var message = ' ';
 
-var tests = {"Pump Control": ['test', 'test2', 'test3'], name2: ['test', 'test2', 'test3']};
+var exampleData = {
+  'groupName': [
+  {name: "Pump Control", data: ['test', 'test2', 'test3'], type: 'button'},
+  {name: "name2", data: ['test', 'test2', 'test3']}
+  ]
+};
 
 
 var app = new Vue({
@@ -55,7 +61,8 @@ var app = new Vue({
     PumpStatus,
     PumpPower,
     StatusMessage,
-    SelectedPumpControl
+    SelectedPumpControl,
+    DoubleButton
   },
   methods: {
     setMessage(message) {
@@ -72,7 +79,7 @@ var app = new Vue({
       results = results ? ': ' + results : '';
 
       if (err) {
-        this.setMessage('Message Failed' + results);
+        this.setMessage('Message Failed' + err);
       } else {
         this.setMessage('Message Confirmed' + results);
       }
@@ -88,6 +95,8 @@ var app = new Vue({
       <StatusMessage v-bind:message='message'></StatusMessage>
     </div>
     <div class="row">
+      <PumpPower  equipmentName="pump1" v-bind:setMessageCallback="setMessageCallback" v-bind:setMessage="setMessage" />
+
       <OnlyButtons v-for="(data, title) in buttonData"
         v-bind:buttons="data"
         v-bind:setMessage="setMessageCallback"
@@ -100,6 +109,16 @@ var app = new Vue({
         v-bind:key="title"
         v-bind:title='title'>
       </SelectedPumpControl>
+      <div v-for="(data, title) in {test: {}, test2: {}}">
+        <button>test1</button>
+        test
+      </div>
+      <div>
+      <DoubleButton
+        :button1="{ name:'test1', data: [1,2,3] }"
+        :button2="{ name:'test2', data: [4,5,6] }"
+        :setMessage="setMessageCallback"/>
+      </div>
     </div>
   </div>
   `

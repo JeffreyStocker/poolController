@@ -54,6 +54,12 @@ module.exports = {
   },
 
   runRepeatingStatus(state = 'toggle', queueName = 'Pump1', callback = () => {}) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+      queueName = typeof queueName === 'function' ? 'Pump1' : queueName;
+      state = typeof state === 'function' ? 'toggle' : state;
+    }
+
     if (state === 'toggle'){
       state = queues.returnQueue(queueName).hasStatusTimer() ? 'off' : 'on';
     }

@@ -100,7 +100,12 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   });
 
 
-  socket.on ('pumpPower', function (powerState, pumpName = 'pump1', callback) {
+  socket.on ('pumpPower', function (powerState, queueName = 'pump1', callback) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+      queueName = typeof queueName === 'function' ? 'pump1' : queueName;
+    }
+
     // logger.debug('pumpPower');
     pumpPower(powerState, callback);
     // socket.emit('confirm');
@@ -153,6 +158,10 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
   socket.on ('toggleStatusUpdate', function (state, queueName, callback) {
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      callback = arguments[arguments.length - 1];
+      queueName = typeof queueName === 'function' ? 'pump1' : queueName;
+    }
     runRepeatingStatus(state, callback);
   });
 

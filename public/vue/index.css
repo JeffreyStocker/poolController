@@ -19,7 +19,7 @@
 
 .col-sm-2{
 	/* width: 19%; */
-	padding: 10px;
+	padding: 7px;
 	margin: 5px;
 	border: 2px solid black;
 }
@@ -65,4 +65,8 @@
 
 .bold {
 	font-weight: bold;
+}
+
+.btnSplit {
+	width: 48%
 }

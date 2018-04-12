@@ -70,4 +70,4 @@ socket.on('connect', () => {
 });
 
 export default pumpData;
-export { socket, pumpData };
+export { socket, pumpData, setPumpData };
