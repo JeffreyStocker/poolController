@@ -169,6 +169,11 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   socket.on ('test', function (...data) {
     var callback = data.pop();
     callback(null, data)
+  });
+
+
+  socket.on ('listEquipment', function (callback) {
+    callback (null, [{name: 'Pump1', type:'Pump'}])
   })
 });
 
