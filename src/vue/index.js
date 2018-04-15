@@ -13,7 +13,7 @@ var messageTimer;
 var message = ' ';
 var equipmentTypes = {
   Pump
-}
+};
 var listEquipment = [];
 
 // var exampleData = {
@@ -28,7 +28,7 @@ const routes = [
   { path: '/', component: Pump },
   { path: '/index', component: Pump },
   { path: '/Settings', component: UserSettings },
-]
+];
 
 
 var getListOfEquipment = function () {
@@ -42,18 +42,18 @@ var getListOfEquipment = function () {
           router.addRoutes([
             { path: '/' + equipment.name, component: equipmentTypes[equipment.type] },
           ]);
-        })
+        });
       } catch (err) {
-        console.log (err)
+        console.log (err);
       }
     }
-  })
-}
+  });
+};
 
 
 const router = new VueRouter({
   routes
-})
+});
 
 getListOfEquipment();
 
@@ -71,4 +71,4 @@ const app = new Vue({
     </router-view>
   </div>
 `
-})
+});

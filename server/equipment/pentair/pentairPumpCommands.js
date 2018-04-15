@@ -60,7 +60,7 @@ module.exports = {
       state = typeof state === 'function' ? 'toggle' : state;
     }
 
-    if (state === 'toggle'){
+    if (state === 'toggle') {
       state = queues.returnQueue(queueName).hasStatusTimer() ? 'off' : 'on';
     }
 

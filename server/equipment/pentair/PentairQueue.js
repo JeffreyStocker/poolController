@@ -7,6 +7,7 @@ var serialPort = requireGlob('serialPort');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
 // var ports = requireGlob('serialPort');
 var logger = requireGlob ('winston').sendToLogs;
+var logStatus = requireGlob ('pentairPumpStatusLog.js');
 
 module.exports = class PentairQueue extends ActionQueue {
   constructor (
@@ -116,11 +117,15 @@ module.exports = class PentairQueue extends ActionQueue {
     this.serialPort = serialPort.returnPortByName(this.hardwareAddress);
     serialPort.setTrigger(hardwareName, 'data', (data) => {
       data = Message.prototype.processIncomingPacket(data);
-      // debugger;
       var results = this.checkQueue(data);
       if (Message.prototype.isStatusMessage(data)) {
         var pumpData = Message.prototype.parsePumpStatus(data);
         this.logger('status', 'info', 'Status Received:  [' + [... data] + ']');
+        logStatus.log({
+          equipment: this.name,
+          watt: pumpData.watt,
+          rpm: pumpData.rpm
+        });
         try {
           socketServer.emit('pumpDataReturn', pumpData);
         } catch (err) {

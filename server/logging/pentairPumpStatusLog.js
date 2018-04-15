@@ -1,69 +1,113 @@
 var PentairMessage = require('./../equipment/pentair/PentairMessages.js');
 var PouchDB = require('pouchdb');
-var db = new PouchDB('./database/power');
 // var moment = require('moment');
 PouchDB.plugin(require('pouchdb-find'));
 
-var logStatus, currentMin;
+var logStatus, currentMin, db;
 var currentLogs = [];
 var interval = 5;
 
 
-var init = function (invervalInMin = 5) {
+var init = function (invervalInMin = 5, location = './database/power') {
+
   var now = new Date();
-  currentMin = now.getHours();
+  currentMin = now.getMinutes();
+  db = new PouchDB(location);
+
   interval = invervalInMin || interval;
 };
 
 var shrinkAndSave = function (logDataForFiveMins) {
-  var compactedData = shrink(logDataForFiveMins);
-  insertAtTime (compactedData)
-    .then(results => {
-      console.log(results);
-    })
-    .catch(err => {
-      console.log(err);
-    });
+  return new Promise ((resolve, revoke) => {
+    debugger;
+    shrink(logDataForFiveMins)
+      .then(compactedData => {
+        return insertAtTime (compactedData);
+      })
+      .then(resultsFromInsertion => {
+        resolve (resultsFromInsertion);
+      })
+      .catch(err => {
+        revoke (err);
+      });
+  });
 };
 
 
 var shrink = function (logDataForFiveMins) {
-  var data;
-  var totalWatts = 0;
-  var totalRpm = 0;
-  if (logDataForFiveMins.length === 0 ) { return null; }
-  for (let data of logDataForFiveMins) {
-    totalWatts += data.watt;
-    totalRpm += data.rpm;
-  }
-  return {
-    pump: logDataForFiveMins[0].pump,
-    watts: ~~(totalWatts / logDataForFiveMins.length),
-    rpm: ~~(totalRpm / logDataForFiveMins.length)
-  };
+  return new Promise ((resolve, revoke) => {
+    var dataObject;
+    var totalWatts = 0;
+    var totalRpm = 0;
+
+    if (logDataForFiveMins.length === 0 ) {
+      return revoke ('No Data for timeperiod, so no need to save');
+    }
+    for (let data of logDataForFiveMins) {
+      totalWatts += data.watt;
+      totalRpm += data.rpm;
+    }
+    dataObject = {
+      pump: logDataForFiveMins[0].equipment,
+      watts: ~~(totalWatts / logDataForFiveMins.length),
+      rpm: ~~(totalRpm / logDataForFiveMins.length)
+    };
+    return resolve(dataObject);
+  });
 };
 
 
-var log = function (parsedPumpData, pumpName = 'pump1') {
+// var log_old = function (parsedPumpData, pumpName = 'pump1') {
+//   var now = new Date();
+//   var hour = now.getHours();
+//   var day = now.getDate();
+//   var min = now.getMinutes();
+//   if (~~(currentMin / interval) !== ~~(min / interval)) {
+//     var tempCurrent = currentLogs;
+//     shrinkAndSave(tempCurrent);
+//     currentLogs = [];
+//   }
+//   var { destination, watt, rpm } = parsedPumpData;
+//   if (!destination, !watt, !rpm) {
+//     return null;
+//   }
+//   currentLogs.push({
+//     pumpName,
+//     pump: PentairMessage.addresses[destination],
+//     watt,
+//     rpm
+//   });
+// };
+
+
+var log = function (parsedPumpData) {
   var now = new Date();
   var hour = now.getHours();
   var day = now.getDate();
   var min = now.getMinutes();
+  debugger;
   if (~~(currentMin / interval) !== ~~(min / interval)) {
     var tempCurrent = currentLogs;
-    shrinkAndSave(tempCurrent);
     currentLogs = [];
+    console.log ('currentMin: ' + currentMin);
+    console.log ('min: ' + min);
+    console.log ('interval: ' + interval);
+    console.log ('~~(min / interval): ' + ~~(min / interval));
+    console.log ('~~(currentMin / interval: ' + ~~(currentMin / interval));
+    shrinkAndSave(tempCurrent)
+      .then (results => {
+        console.log (results);
+      })
+      .catch(err => {
+        console.log (err);
+      });
+
+    currentLogs.push({
+      equipment: PentairMessage.addresses[parsedPumpData.equipment],
+      watt: parsedPumpData.watt,
+      rpm: parsedPumpData.rpm,
+    });
   }
-  var { destination, watt, rpm } = parsedPumpData;
-  if (!destination, !watt, !rpm) {
-    return null;
-  }
-  currentLogs.push({
-    pumpName,
-    pump: PentairMessage.addresses[destination],
-    watt,
-    rpm
-  });
 };
 
 
@@ -113,7 +157,11 @@ var insertAtTime = function (data) {
 
 
 var count = function () {
-  return db.info();
+  return new Promise ((resolve, revoke) => {
+    db.info()
+      .then(data => resolve(data.doc_count))
+      .catch(err => revoke (err));
+  });
 };
 
 
@@ -123,11 +171,13 @@ var allDocs = function () {
 
 
 module.exports = {
+  allDocs,
+  count,
   insertAtTime,
   findBetweenTimePromise,
   findBetweenTime,
   init,
   shrink,
   log,
-  shrinkAndSave
+  shrinkAndSave,
 };

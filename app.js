@@ -5,6 +5,7 @@ var glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules',
 var configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
 var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging('system', logger);
+var logStatus = requireGlob ('pentairPumpStatusLog.js');
 
 var useModular = true;
 
@@ -26,9 +27,15 @@ if (useModular) {
         logger
       );
       groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
+      logStatus.init(5, './database/power');
     })
     .then(() => {
       requireGlob('pentairPumpCommands.js').runRepeatingStatus();
+      // logStatus.allDocs()
+      //   .then(data => console.log(data));
+    })
+    .catch(err => {
+      console.log (err);
     });
 
 } else {

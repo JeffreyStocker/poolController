@@ -198,7 +198,6 @@ class Message {
 
 
   parsePumpStatus(data) {
-    debugger;
     if (this.hasStart(data) === true) {
       try {
         data = Message.prototype.stripPacketOfHeaderAndChecksum (data);
