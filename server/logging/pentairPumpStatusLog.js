@@ -3,25 +3,36 @@ var PouchDB = require('pouchdb');
 // var moment = require('moment');
 PouchDB.plugin(require('pouchdb-find'));
 
-var logStatus, currentMin, db;
+var logStatus, currentMin, db, interval;
 var currentLogs = [];
-var interval = 5;
 
 
-var init = function (invervalInMin = 5, location = './database/power') {
+var init = function (location = './database/power', invervalInMin = 5) {
 
   var now = new Date();
   currentMin = now.getMinutes();
-  db = new PouchDB(location);
+  interval = invervalInMin;
 
-  interval = invervalInMin || interval;
+  db = new PouchDB(location);
+  //only for testings currently
+  // db.destroy().then(function (response) {
+  //   // success
+  //   console.log('destroyed');
+  //   db = new PouchDB(location);
+  // }).catch(function (err) {
+  //   console.log(err);
+  // });
+  //END: only for testings currently
+
 };
 
-var shrinkAndSave = function (logDataForFiveMins) {
+var shrinkAndSave = function (logDataForFiveMins, equipment = 'Pump1') {
   return new Promise ((resolve, revoke) => {
     debugger;
     shrink(logDataForFiveMins)
       .then(compactedData => {
+        compactedData.equipment = compactedData.equipment || equipment;
+        console.log (compactedData);
         return insertAtTime (compactedData);
       })
       .then(resultsFromInsertion => {
@@ -48,7 +59,7 @@ var shrink = function (logDataForFiveMins) {
       totalRpm += data.rpm;
     }
     dataObject = {
-      pump: logDataForFiveMins[0].equipment,
+      equipment: logDataForFiveMins[0].equipment,
       watts: ~~(totalWatts / logDataForFiveMins.length),
       rpm: ~~(totalRpm / logDataForFiveMins.length)
     };
@@ -82,25 +93,32 @@ var shrink = function (logDataForFiveMins) {
 
 var log = function (parsedPumpData) {
   var now = new Date();
-  var hour = now.getHours();
-  var day = now.getDate();
   var min = now.getMinutes();
   debugger;
   if (~~(currentMin / interval) !== ~~(min / interval)) {
-    var tempCurrent = currentLogs;
-    currentLogs = [];
-    console.log ('currentMin: ' + currentMin);
-    console.log ('min: ' + min);
-    console.log ('interval: ' + interval);
-    console.log ('~~(min / interval): ' + ~~(min / interval));
-    console.log ('~~(currentMin / interval: ' + ~~(currentMin / interval));
-    shrinkAndSave(tempCurrent)
-      .then (results => {
-        console.log (results);
-      })
-      .catch(err => {
-        console.log (err);
-      });
+    if ( currentLogs.length === 0) {
+      console.log ('no data in currentLogs');
+    } else {
+      var tempCurrent = currentLogs;
+      currentLogs = [];
+      currentMin = new Date().getMinutes();
+      // try {
+      // } catch (err) {
+      //   console.log (err);
+      // }
+      // console.log ('currentMin: ' + currentMin);
+      // console.log ('min: ' + min);
+      // console.log ('interval: ' + interval);
+      // console.log ('~~(min / interval): ' + ~~(min / interval));
+      // console.log ('~~(currentMin / interval: ' + ~~(currentMin / interval));
+      shrinkAndSave(tempCurrent)
+        .then (results => {
+          console.log (results);
+        })
+        .catch(err => {
+          console.log (err);
+        });
+    }
 
     currentLogs.push({
       equipment: PentairMessage.addresses[parsedPumpData.equipment],

@@ -27,7 +27,7 @@ if (useModular) {
         logger
       );
       groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
-      logStatus.init(5, './database/power');
+      logStatus.init('./database/power', .5 );
     })
     .then(() => {
       requireGlob('pentairPumpCommands.js').runRepeatingStatus();
