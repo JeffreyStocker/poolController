@@ -27,12 +27,12 @@
       },
       setMaintenceModeCallback: function (err, results, evt) {
         this.setMessageCallback(err, results);
-        let test = evt.target.textContent.trim()
         if (err) {
           console.log (err)
         } else {
-          setPumpData();
-          this.setMaintenceMode (evt.target.textContent.trim() === 'On' ? true : false);
+          let target = evt.target.textContent.trim() === 'On' ? true : false;
+          target && setPumpData();
+          this.setMaintenceMode (target);
         }
       }
     },
