@@ -1,5 +1,18 @@
 var sendDataToServer, pumpData;
 var socket = io.connect();
+var serverConnected = { status: false };
+var alerts = {
+  'Pump1': {
+    'Maintance Mode': {
+      color: 'yellow',
+      enabled: false
+    },
+    'Disconnected': {
+      color: 'red',
+      enabled: false
+    },
+  }
+};
 
 var pumpData = {
   rpm: '--',
@@ -38,8 +51,11 @@ var pumpDataDefault = {
 
 var setPumpData = function (data) {
   if (data) {
-    if (data.state === 4) { data.state = 'No' }
-    else if (data.state === 10) { data.state = 'Yes' }
+    if (data.state === 4) {
+      data.state = 'No';
+    } else if (data.state === 10) {
+      data.state = 'Yes';
+    }
     Object.assign(pumpData, data);
   } else {
     Object.assign(pumpData, pumpDataDefault);
@@ -49,12 +65,16 @@ setPumpData();
 
 
 socket.on('connect', () => {
+  console.log ('connected');
+  serverConnected.status = true;
   socket.on('pumpDataReturn', function (data) {
     setPumpData(data);
   });
 
   socket.on('disconnect', () => {
+    console.log ('disconnected');
     setPumpData();
+    serverConnected.status = false;
   });
 
   sendDataToServer = function (socketCommand, ...data) {
@@ -70,4 +90,4 @@ socket.on('connect', () => {
 });
 
 export default pumpData;
-export { socket, pumpData, setPumpData };
+export { socket, pumpData, setPumpData, alerts, serverConnected };

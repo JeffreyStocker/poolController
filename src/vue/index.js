@@ -40,7 +40,11 @@ var getListOfEquipment = function () {
         data.forEach(equipment => {
           listEquipment.push(equipment);
           router.addRoutes([
-            { path: '/' + equipment.name, component: equipmentTypes[equipment.type] },
+            {
+              path: '/' + equipment.name, component:
+              equipmentTypes[equipment.type],
+              props: { equipmentName: equipment.name}
+            },
           ]);
         });
       } catch (err) {

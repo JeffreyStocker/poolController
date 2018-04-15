@@ -9,10 +9,10 @@
     components: { Buttonx, DoubleButton },
     data: function () {
       return {
-        pumpData
+        pumpData,
       }
     },
-    props: ['equipmentName', 'setMessageCallback', 'setMessage', 'setPumpData'],
+    props: ['setMaintenceMode', 'equipmentName', 'setMessageCallback', 'setMessage', 'setPumpData'],
     methods: {
       powerOn: function () { socket.emit('pumpPower', 'on', this.equipmentName, this.setMessageCallback) },
       powerOff: function () { socket.emit('pumpPower', 'off', this.equipmentName, this.setMessageCallback) },
@@ -24,6 +24,16 @@
       setPumpDataCallback: function (err, results) {
           setPumpData();
           this.setMessageCallback(err, results);
+      },
+      setMaintenceModeCallback: function (err, results, evt) {
+        this.setMessageCallback(err, results);
+        let test = evt.target.textContent.trim()
+        if (err) {
+          console.log (err)
+        } else {
+          setPumpData();
+          this.setMaintenceMode (evt.target.textContent.trim() === 'On' ? true : false);
+        }
       }
     },
   }
@@ -44,11 +54,11 @@
       :button2="{name: 'Remote', data: ['pumpControlPanelState', 'remote'] }"
       :setMessage="setPumpDataCallback" >
     </DoubleButton>
-    Status
+    Maintence Mode
     <DoubleButton
       :button1="{name: 'On', data: ['toggleStatusUpdate', 'off'] }"
       :button2="{name: 'Off', data: ['toggleStatusUpdate', 'on'] }"
-      v-bind:setMessage="setPumpDataCallback" >
+      v-bind:setMessage="setMaintenceModeCallback" >
     </DoubleButton>
   </div>
 </template>

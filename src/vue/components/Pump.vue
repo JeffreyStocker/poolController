@@ -1,5 +1,6 @@
 <script>
   // import GroupOfButtons from './GroupOfButtons.vue';
+  import AlertMessages from './AlertMessages.vue';
   import DoubleButton from './DoubleButton.vue';
   import OnlyButtons from './OnlyButtons.vue';
   import PumpStatus from './PumpStatus.vue';
@@ -8,18 +9,13 @@
   import StatusMessage from './statusMessage.vue';
   import { clearTimeout } from 'timers';
 
-  var socket, messageTimer;
+  var messageTimer;
   var message = ' ';
-  var exampleData = {
-  'groupName': [
-  {name: "Pump Control", data: ['test', 'test2', 'test3'], type: 'button'},
-  {name: "name2", data: ['test', 'test2', 'test3']}
-  ]
-};
 
   export default {
     computed: {},
     components: {
+      AlertMessages,
       DoubleButton,
       PumpStatus,
       OnlyButtons,
@@ -52,7 +48,8 @@
           "Speed in RPM & Save Prog 1": {
             'Save Speed': ['test_runpumpSpeedAt1000RPM']
           }
-        }
+        },
+        maintenceMode: false
       }
     },
     props: ['equipmentName'],
@@ -78,6 +75,9 @@
     },
     returnFirstObjectKey (obj) {
       return Object.keys(obj)[0];
+    },
+    setMaintenceMode (newMode = false) {
+      this.maintenceMode = newMode;
     }
   },
     watch: {}
@@ -87,12 +87,20 @@
 <template>
   <div class="">
     <div class="row">
-      <StatusMessage v-bind:message='message'></StatusMessage>
+      <AlertMessages
+        :equipmentName="equipmentName"
+        :maintenceMode="maintenceMode">
+      </AlertMessages>
       <PumpStatus></PumpStatus>
+      <StatusMessage v-bind:message='message'></StatusMessage>
     </div>
     <div class="row">
-      <PumpPower  equipmentName="pump1" v-bind:setMessageCallback="setMessageCallback" v-bind:setMessage="setMessage" />
-
+      <PumpPower
+        v-bind:equipmentName="equipmentName"
+        v-bind:setMessageCallback="setMessageCallback"
+        v-bind:setMessage="setMessage"
+        v-bind:setMaintenceMode="setMaintenceMode"
+        />
       <OnlyButtons v-for="(data, title) in buttonData"
         v-bind:buttons="data"
         v-bind:setMessage="setMessageCallback"
