@@ -10,6 +10,7 @@
     "jsonminify": "^0.4.1",
     "lodash": "^4.17.4",
     "onoff": "1.2.0",
+    "plotly.js": "^1.35.2",
     "pouchdb": "^6.4.3",
     "pouchdb-find": "^6.4.3",
     "serialport": "^6.1.1",
