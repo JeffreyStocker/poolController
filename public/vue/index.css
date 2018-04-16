@@ -25,7 +25,7 @@
 }
 
 
-.btn {
+.btn, .navBarDropdown li {
 	background-color: #333;
 	border:none;
 	color: white;
@@ -39,7 +39,7 @@
 	/* text-decoration-color: white; */
 	color: white;
 }
-.btn:focus {
+.btn:focus, .navBarDropdown li:focus {
 	background-color: #5C5C5C;
 	color: white;
 }
@@ -71,24 +71,19 @@
 	width: 48%
 }
 
-/* The navigation bar */
 .navbar {
 	overflow: hidden;
 	background-color: #333;
 	position: fixed;
 	top: 0;
 	width: 100%;
-	z-index: 999;
-	height: 50px;
+	z-index: 10;
 }
+
 .navbarSize {
 	height: 50px;
-
-	/* margin-top: 50px; */
 }
 
-
-/* Links inside the navbar */
 .navbar a {
 	float: left;
 	display: block;
@@ -98,8 +93,19 @@
 	text-decoration: none;
 }
 
-/* Change background on mouse-over */
-.navbar a:hover {
+
+.navbar a:hover, .navBarDropdown li:hover {
 	background: #ddd;
 	color: black;
 }
+
+.navBarDropdown {
+	padding-top: 30px;
+	height: 70%;
+	position: absolute;
+	width: 50%;
+	background: black;
+	z-index: 11;
+
+}
+
