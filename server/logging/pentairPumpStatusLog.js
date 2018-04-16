@@ -9,8 +9,7 @@ var currentLogs = [];
 
 var init = function (location = './database/power', invervalInMin = 5) {
 
-  var now = new Date();
-  currentMin = now.getMinutes();
+  currentMin = new Date().getMinutes();
   interval = invervalInMin;
 
   db = new PouchDB(location);
@@ -52,7 +51,10 @@ var shrink = function (logDataForFiveMins) {
     var totalRpm = 0;
 
     if (logDataForFiveMins.length === 0 ) {
-      return revoke ('No Data for timeperiod, so no need to save');
+      return revoke (new Error({
+        message: 'No Data for timeperiod, so no need to save',
+        number: 0
+      }));
     }
     for (let data of logDataForFiveMins) {
       totalWatts += data.watt;
@@ -68,32 +70,8 @@ var shrink = function (logDataForFiveMins) {
 };
 
 
-// var log_old = function (parsedPumpData, pumpName = 'pump1') {
-//   var now = new Date();
-//   var hour = now.getHours();
-//   var day = now.getDate();
-//   var min = now.getMinutes();
-//   if (~~(currentMin / interval) !== ~~(min / interval)) {
-//     var tempCurrent = currentLogs;
-//     shrinkAndSave(tempCurrent);
-//     currentLogs = [];
-//   }
-//   var { destination, watt, rpm } = parsedPumpData;
-//   if (!destination, !watt, !rpm) {
-//     return null;
-//   }
-//   currentLogs.push({
-//     pumpName,
-//     pump: PentairMessage.addresses[destination],
-//     watt,
-//     rpm
-//   });
-// };
-
-
 var log = function (parsedPumpData) {
-  var now = new Date();
-  var min = now.getMinutes();
+  var min = new Date().getMinutes();
   debugger;
   if (~~(currentMin / interval) !== ~~(min / interval)) {
     if ( currentLogs.length === 0) {
@@ -102,20 +80,14 @@ var log = function (parsedPumpData) {
       var tempCurrent = currentLogs;
       currentLogs = [];
       currentMin = new Date().getMinutes();
-      // try {
-      // } catch (err) {
-      //   console.log (err);
-      // }
-      // console.log ('currentMin: ' + currentMin);
-      // console.log ('min: ' + min);
-      // console.log ('interval: ' + interval);
-      // console.log ('~~(min / interval): ' + ~~(min / interval));
-      // console.log ('~~(currentMin / interval: ' + ~~(currentMin / interval));
       shrinkAndSave(tempCurrent)
         .then (results => {
           console.log (results);
         })
         .catch(err => {
+          if (err.number === 0) {
+            return;
+          }
           console.log (err);
         });
     }
