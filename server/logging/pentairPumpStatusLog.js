@@ -63,7 +63,8 @@ var shrink = function (logDataForFiveMins) {
     dataObject = {
       equipment: logDataForFiveMins[0].equipment,
       watts: ~~(totalWatts / logDataForFiveMins.length),
-      rpm: ~~(totalRpm / logDataForFiveMins.length)
+      rpm: ~~(totalRpm / logDataForFiveMins.length),
+      interval
     };
     return resolve(dataObject);
   });
@@ -82,7 +83,6 @@ var log = function (parsedPumpData) {
       currentMin = new Date().getMinutes();
       shrinkAndSave(tempCurrent)
         .then (results => {
-          console.log (results);
         })
         .catch(err => {
           if (err.number === 0) {
