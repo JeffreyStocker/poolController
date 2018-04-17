@@ -142,6 +142,19 @@ var allDocs = function () {
   return db.allDocs({});
 };
 
+var sumPower = function (powerLogs) {
+  var sumWatt = 0;
+  var sumRpm = 0;
+
+  for (log of powerLogs) {
+    if (log.watts && log.interval && log.rpm) {
+      sumWatt += (log.watts * log.interval) / 60;
+      sumRpm += (log.rpm * log.interval) / 60;
+    }
+  }
+  return {watt: ~~sumWatt, rpm: ~~sumRpm };
+};
+
 
 module.exports = {
   allDocs,
@@ -151,4 +164,5 @@ module.exports = {
   init,
   shrink,
   log,
+  sumPower
 };
