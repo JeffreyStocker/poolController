@@ -100,9 +100,11 @@ var log = function (parsedPumpData) {
 };
 
 
-var findBetweenTime = function (startTime = new Date(), endTime = new Date()) {
+var findBetweenTime = function(startTime = new Date(), endTime = new Date(), pumpName = 'Pump1') {
   return new Promise ((resolve, revoke) => {
-    if (startTime.constructor.name !== 'Date' || endTime.constructor.name !== 'Date') { revoke(new Error('startTime and endTime must be Date Objects')); }
+    if (startTime.constructor.name !== 'Date' || endTime.constructor.name !== 'Date') {
+      return revoke(new Error('startTime and endTime must be Date Objects'));
+    }
     if (startTime < endTime) {
       let temp = endTime;
       endTime = startTime;
@@ -110,30 +112,12 @@ var findBetweenTime = function (startTime = new Date(), endTime = new Date()) {
     }
     db.find({
       selector: {
-        timeStamp: { $lte: startTime, $gte: endTime }
+        timeStamp: { $lte: startTime, $gte: endTime },
+        equipment: { $eq: pumpName }
       }
-    }, (err, docs) => {
-      if (err) {
-        revoke (err);
-      } else { resolve(docs.docs); }
-    });
-  });
-};
-
-
-var findBetweenTimePromise = function(startTime = new Date(), endTime = new Date()) {
-  if (startTime.constructor.name !== 'Date' || endTime.constructor.name !== 'Date') {
-    return new Error('startTime and endTime must be Date Objects');
-  }
-  if (startTime < endTime) {
-    let temp = endTime;
-    endTime = startTime;
-    startTime = temp;
-  }
-  return db.find({
-    selector: {
-      timeStamp: { $lte: startTime, $gte: endTime }
-    }
+    })
+      .then (searchResults => resolve(searchResults.docs))
+      .catch (err => revoke(err));
   });
 };
 
@@ -163,10 +147,8 @@ module.exports = {
   allDocs,
   count,
   insertAtTime,
-  findBetweenTimePromise,
   findBetweenTime,
   init,
   shrink,
   log,
-  shrinkAndSave,
 };

@@ -3,6 +3,7 @@ var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToL
 var socketServer = require (process.env.NODE_PATH + '/server/server').socketServer;
 var { /* pumpData, */ port } = require (process.env.NODE_PATH + '/server/communications/serialPort');
 var Message = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages');
+var pumpLogger = require (process.env.NODE_PATH + '/server/logging/pentairPumpStatusLog.js');
 var {
   manualPumpControl,
   pumpControlPanelState,
@@ -155,6 +156,12 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   //   });
   // });
 
+  socket.on('getPumpDataBetweenTime', function (time1, time2, pumpName, callback) {
+    pumpLogger.findBetweenTime(time1, time2)
+      .then(results => callback (null, results))
+      .catch (err => callback(err, null));
+  });
+
 
 
   socket.on ('toggleStatusUpdate', function (state, queueName, callback) {
@@ -168,13 +175,13 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
   socket.on ('test', function (...data) {
     var callback = data.pop();
-    callback(null, data)
+    callback(null, data);
   });
 
 
   socket.on ('listEquipment', function (callback) {
-    callback (null, [{name: 'Pump1', type:'Pump'}])
-  })
+    callback (null, [{name: 'Pump1', type: 'Pump'}]);
+  });
 });
 
 

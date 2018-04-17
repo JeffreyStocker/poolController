@@ -112,5 +112,18 @@ socket.on('connect', () => {
   };
 });
 
+
+var findPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
+  return new Promise ((resolve, revoke) => {
+    socket.emit('getPumpDataBetweenTime', date1, date2, pumpName, (err, data) => {
+      if (err) {
+        return revoke (err);
+      }
+      resolve (data);
+    });
+  });
+};
+
+
 export default pumpData;
-export { socket, pumpData, setPumpData, alerts, serverConnected, savedPumpData };
+export { socket, pumpData, setPumpData, alerts, serverConnected, savedPumpData, findPumpDataBetweenTime };
