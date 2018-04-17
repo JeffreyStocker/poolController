@@ -57,7 +57,7 @@ var shrink = function (logDataForFiveMins) {
       }));
     }
     for (let data of logDataForFiveMins) {
-      totalWatts += data.watt;
+      totalWatts += data.watts;
       totalRpm += data.rpm;
     }
     dataObject = {
@@ -94,7 +94,7 @@ var log = function (parsedPumpData) {
   }
   currentLogs.push({
     equipment: PentairMessage.addresses[parsedPumpData.equipment],
-    watt: parsedPumpData.watt,
+    watts: parsedPumpData.watts,
     rpm: parsedPumpData.rpm,
   });
 };
@@ -102,6 +102,8 @@ var log = function (parsedPumpData) {
 
 var findBetweenTime = function(startTime = new Date(), endTime = new Date(), pumpName = 'Pump1') {
   return new Promise ((resolve, revoke) => {
+    startTime = typeof startTime === 'string' ? new Date (startTime) : startTime;
+    endTime = typeof endTime === 'string' ? new Date (endTime) : endTime;
     if (startTime.constructor.name !== 'Date' || endTime.constructor.name !== 'Date') {
       return revoke(new Error('startTime and endTime must be Date Objects'));
     }

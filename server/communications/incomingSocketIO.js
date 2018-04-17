@@ -158,8 +158,16 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
   socket.on('getPumpDataBetweenTime', function (time1, time2, pumpName, callback) {
     pumpLogger.findBetweenTime(time1, time2)
-      .then(results => callback (null, results))
-      .catch (err => callback(err, null));
+      .then(results => {
+        var data = results.map(currentDoc => {
+          return { watt: currentDoc.watts, rpm: currentDoc.rpm };
+        });
+        console.log(data);
+        callback (null, data);
+      })
+      .catch (err => {
+        callback({message: err.message}, null);
+      });
   });
 
 
