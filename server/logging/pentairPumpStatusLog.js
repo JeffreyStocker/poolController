@@ -1,6 +1,6 @@
 var PentairMessage = require('./../equipment/pentair/PentairMessages.js');
 var PouchDB = require('pouchdb');
-// var moment = require('moment');
+var moment = require('moment');
 PouchDB.plugin(require('pouchdb-find'));
 
 var logStatus, currentMin, db, interval;
@@ -47,7 +47,7 @@ var shrinkAndSave = function (logDataForFiveMins, equipment = 'Pump1') {
 var shrink = function (logDataForFiveMins) {
   return new Promise ((resolve, revoke) => {
     var dataObject;
-    var totalWatts = 0;
+    var totalWatt = 0;
     var totalRpm = 0;
 
     if (logDataForFiveMins.length === 0 ) {
@@ -57,12 +57,12 @@ var shrink = function (logDataForFiveMins) {
       }));
     }
     for (let data of logDataForFiveMins) {
-      totalWatts += data.watts;
+      totalWatt += data.watt;
       totalRpm += data.rpm;
     }
     dataObject = {
       equipment: logDataForFiveMins[0].equipment,
-      watts: ~~(totalWatts / logDataForFiveMins.length),
+      watt: ~~(totalWatt / logDataForFiveMins.length),
       rpm: ~~(totalRpm / logDataForFiveMins.length),
       interval
     };
@@ -73,7 +73,6 @@ var shrink = function (logDataForFiveMins) {
 
 var log = function (parsedPumpData) {
   var min = new Date().getMinutes();
-  debugger;
   if (~~(currentMin / interval) !== ~~(min / interval)) {
     if ( currentLogs.length === 0) {
       // console.log ('no data in currentLogs');
@@ -94,7 +93,7 @@ var log = function (parsedPumpData) {
   }
   currentLogs.push({
     equipment: PentairMessage.addresses[parsedPumpData.equipment],
-    watts: parsedPumpData.watts,
+    watt: parsedPumpData.watt,
     rpm: parsedPumpData.rpm,
   });
 };
@@ -123,11 +122,56 @@ var findBetweenTime = function(startTime = new Date(), endTime = new Date(), pum
   });
 };
 
+var past = function (time, amount) {
+  if (typeof time === 'string' && typeof amount === 'number') {
+    if (time === 'months') {
+      return findBetweenTime(moment().subtract(amount, 'months').toDate());
+    } else if (time === 'years') {
+      return findBetweenTime(moment().subtract(amount, 'years').toDate());
+    } else if (time === 'days') {
+      return findBetweenTime(moment().subtract(amount, 'days').toDate());
+    } else if (time === 'hours') {
+      return findBetweenTime(moment().subtract(amount, 'hours').toDate());
+    } else {
+    }
+  } else if (time.constructor.name === 'Moment') {
+    return findBetweenTime(time.toDate());
+  } else {
+    throw new Error('Time should be a string (hours, months, days, years) or a Moment object and amount should be a number to subtract');
+  }
+};
 
-var insertAtTime = function (data) {
+var insertAtTimeWithTimestamp = function (data) {
   if (!data || typeof data !== 'object') { return new Error ('Data to insert into database should be a object'); }
   data.timeStamp = new Date();
   return db.post(data);
+};
+
+var insertAtTime = function (data) {
+  return new Promise ((resolve, revoke) => {
+    if (!data || typeof data !== 'object') { return new Error ('Data to insert into database should be a object'); }
+    data._id = new Date();
+    console.log (data);
+    db.post(data)
+      .then(resolveData => {
+        resolve(resolveData);
+      })
+      .catch(err => {
+        if (err.code === 202) {
+          if (!errorCount) {
+            var errorCount = 0;
+          } else if (errorCount > 5) {
+            err.secondErrorMessage = 'Attempted to increase the _id count by 1 too may times';
+            revoke (err);
+          }
+          errorCount ++;
+          data._id++;
+          resolve(insertAtTime(data));
+        } else {
+          revoke (err);
+        }
+      });
+  });
 };
 
 
@@ -149,8 +193,8 @@ var sumAndAverageOfPowerLogs = function (powerLogs) {
   var sumRpm = 0;
 
   for (log of powerLogs) {
-    if (log.watts && log.interval && log.rpm) {
-      sumWatt += (log.watts * log.interval) / 60;
+    if (log.watt && log.interval && log.rpm) {
+      sumWatt += (log.watt * log.interval) / 60;
       sumRpm += (log.rpm * log.interval) / 60;
     }
   }

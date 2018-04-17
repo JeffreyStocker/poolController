@@ -9,7 +9,7 @@
       return {
       rpms: savedPumpData.rpms ,
       times: savedPumpData.times,
-      watts: savedPumpData.watts,
+      watt: savedPumpData.watt,
       timer: null
       }
     },

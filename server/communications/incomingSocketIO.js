@@ -160,7 +160,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
     pumpLogger.findBetweenTime(time1, time2)
       .then(results => {
         var data = results.map(currentDoc => {
-          return { watt: currentDoc.watts, rpm: currentDoc.rpm };
+          return { watt: currentDoc.watt, rpm: currentDoc.rpm };
         });
         console.log(data);
         callback (null, data);

@@ -70,10 +70,10 @@ setPumpData();
 
 var storePumpData = function (pumpData) {
   if (typeof pumpData.watt === 'number' && typeof pumpData.rpm === 'number') {
-    if (savedPumpData.watt.length > 3000) {
-      savedPumpData.watts.splice(1500, 3000);
-      savedPumpData.rpms.splice(1500, 3000);
-      savedPumpData.times.splice(1500, 3000);
+    if (savedPumpData.watts.length > 2000) {
+      savedPumpData.watts.splice(1500);
+      savedPumpData.rpms.splice(1500);
+      savedPumpData.times.splice(1500);
     }
     savedPumpData.watts.push(pumpData.watt);
     savedPumpData.rpms.push(pumpData.rpm);
@@ -127,3 +127,8 @@ var findPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
 
 export default pumpData;
 export { socket, pumpData, setPumpData, alerts, serverConnected, savedPumpData, findPumpDataBetweenTime };
+
+// import moment from 'moment';
+// findPumpDataBetweenTime(new Date(), moment().startOf('week').toDate())
+//   .then(sumPower => console.log (sumPower))
+//   .catch(err => console.log(err));
