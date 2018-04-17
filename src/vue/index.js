@@ -4,6 +4,7 @@ import VueRouter from 'vue-router';
 import {socket} from './socket.js';
 
 import NavBar from './components/NavBar.vue';
+import Chart from './components/Chart.vue';
 import Pump from './components/Pump.vue';
 import UserSettings from './components/UserSettings.vue';
 
@@ -28,6 +29,7 @@ const routes = [
   { path: '/', component: Pump },
   { path: '/index', component: Pump },
   { path: '/Settings', component: UserSettings },
+  { path: '/Graph', component: Chart },
 ];
 
 

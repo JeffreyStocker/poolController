@@ -28,6 +28,7 @@
       <router-link :to="'/' + equipment.name" :key="equipment.name" >{{equipment.name}}</router-link>
     </template>
     <router-link to="/Settings">Settings</router-link>
+    <router-link to="/Graph">Graph</router-link>
     <button @click="toggleState">test</button>
     <button @click="test">test</button>
   </div>
