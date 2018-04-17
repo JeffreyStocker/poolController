@@ -76,7 +76,7 @@ var log = function (parsedPumpData) {
   debugger;
   if (~~(currentMin / interval) !== ~~(min / interval)) {
     if ( currentLogs.length === 0) {
-      console.log ('no data in currentLogs');
+      // console.log ('no data in currentLogs');
     } else {
       var tempCurrent = currentLogs;
       currentLogs = [];
@@ -91,13 +91,12 @@ var log = function (parsedPumpData) {
           console.log (err);
         });
     }
-
-    currentLogs.push({
-      equipment: PentairMessage.addresses[parsedPumpData.equipment],
-      watt: parsedPumpData.watt,
-      rpm: parsedPumpData.rpm,
-    });
   }
+  currentLogs.push({
+    equipment: PentairMessage.addresses[parsedPumpData.equipment],
+    watt: parsedPumpData.watt,
+    rpm: parsedPumpData.rpm,
+  });
 };
 
 
