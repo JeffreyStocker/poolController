@@ -142,7 +142,7 @@ var allDocs = function () {
   return db.allDocs({});
 };
 
-var sumPower = function (powerLogs) {
+var sumAndAverageOfPowerLogs = function (powerLogs) {
   var sumWatt = 0;
   var sumRpm = 0;
 
@@ -152,7 +152,16 @@ var sumPower = function (powerLogs) {
       sumRpm += (log.rpm * log.interval) / 60;
     }
   }
-  return {watt: ~~sumWatt, rpm: ~~sumRpm };
+  return {
+    watt: {
+      average: ~~(sumWatt / powerLogs.length),
+      sum: ~~sumWatt,
+    },
+    rpm: {
+      average: ~~(sumRpm / powerLogs.length),
+      sum: ~~sumRpm,
+    }
+  };
 };
 
 
@@ -164,5 +173,5 @@ module.exports = {
   init,
   shrink,
   log,
-  sumPower
+  sumAndAverageOfPowerLogs
 };
