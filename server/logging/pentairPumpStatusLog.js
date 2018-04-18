@@ -113,7 +113,7 @@ var findBetweenTime = function(startTime = new Date(), endTime = new Date(), pum
     }
     db.find({
       selector: {
-        timeStamp: { $lte: startTime, $gte: endTime },
+        _id: { $lte: startTime, $gte: endTime },
         equipment: { $eq: pumpName }
       }
     })

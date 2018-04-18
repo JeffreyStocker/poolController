@@ -159,11 +159,11 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   socket.on('getPumpDataBetweenTime', function (time1, time2, pumpName, callback) {
     pumpLogger.findBetweenTime(time1, time2)
       .then(results => {
-        var data = results.map(currentDoc => {
-          return { watt: currentDoc.watt, rpm: currentDoc.rpm };
-        });
-        console.log(data);
-        callback (null, data);
+        callback (null, results);
+        // var data = results.map(currentDoc => {
+        //   return { watt: currentDoc.watt, rpm: currentDoc.rpm, date: currentDoc._id };
+        // });
+        // callback (null, data);
       })
       .catch (err => {
         callback({message: err.message}, null);

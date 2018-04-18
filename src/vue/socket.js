@@ -4,7 +4,7 @@ var serverConnected = { status: false };
 var savedPumpData = {
   watts: [],
   rpms: [],
-  times: [],
+  dates: [],
 };
 var alerts = {
   'Pump1': {
@@ -73,11 +73,11 @@ var storePumpData = function (pumpData) {
     if (savedPumpData.watts.length > 2000) {
       savedPumpData.watts.splice(1500);
       savedPumpData.rpms.splice(1500);
-      savedPumpData.times.splice(1500);
+      savedPumpData.dates.splice(1500);
     }
     savedPumpData.watts.push(pumpData.watt);
     savedPumpData.rpms.push(pumpData.rpm);
-    savedPumpData.times.push(new Date());
+    savedPumpData.dates.push(new Date());
     console.log ('updated');
   } else {
     console.log ('not updated');
@@ -128,7 +128,17 @@ var findPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
 export default pumpData;
 export { socket, pumpData, setPumpData, alerts, serverConnected, savedPumpData, findPumpDataBetweenTime };
 
-// import moment from 'moment';
-// findPumpDataBetweenTime(new Date(), moment().startOf('week').toDate())
-//   .then(sumPower => console.log (sumPower))
-//   .catch(err => console.log(err));
+import moment from 'moment';
+findPumpDataBetweenTime(new Date(), moment().startOf('day').toDate())
+  .then(powerData => {
+    powerData.watts = [];
+    powerData.rpms = [];
+    powerData.dates = [];
+
+    for (let entry of powerData) {
+      savedPumpData.watts.push(entry.watt);
+      savedPumpData.rpms.push(entry.rpm);
+      savedPumpData.dates.push(new Date(entry._id));
+    }
+  })
+  .catch(err => console.log(err));

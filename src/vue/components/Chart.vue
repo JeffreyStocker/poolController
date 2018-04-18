@@ -8,7 +8,7 @@
     data: function () {
       return {
       rpms: savedPumpData.rpms ,
-      times: savedPumpData.times,
+      dates: savedPumpData.times,
       watt: savedPumpData.watt,
       timer: null
       }
@@ -16,14 +16,14 @@
     created: function () {},
     mounted: function () {
       var trace1 = {
-        x: savedPumpData.times,
+        x: savedPumpData.dates,
         y: savedPumpData.watts,
         name: 'yaxis data',
         type: 'scatter'
       };
 
       var trace2 = {
-        x: savedPumpData.times,
+        x: savedPumpData.dates,
         y: savedPumpData.rpms,
         name: 'yaxis2 data',
         yaxis: 'y2',
