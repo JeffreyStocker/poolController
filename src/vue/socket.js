@@ -112,7 +112,7 @@ socket.on('connect', () => {
 });
 
 
-var findPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
+var getPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
   return new Promise ((resolve, revoke) => {
     socket.emit('getPumpDataBetweenTime', date1, date2, pumpName, (err, data) => {
       if (err) {
@@ -123,23 +123,33 @@ var findPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
   });
 };
 
-var updatePumpDataFromBetweenTimes = function (startDateIntervalString, pumpName = 'Pump1') {
-  var starTime = new Date();
-  findPumpDataBetweenTime(new Date(), moment().startOf(startDateIntervalString).toDate())
-    .then(powerData => {
-      var length = powerData.length;
-      for (var i = 0; i < length; i++) {
-        savedPumpData.watts[i] = powerData[i].watt;
-        savedPumpData.rpms[i] = powerData[i].rpm;
-        savedPumpData.dates[i] = new Date(powerData[i]._id);
-        // savedPumpData.dates[i] = new Date(powerData[i]._id);
-      }
-      savedPumpData.watts.splice(length);
-      savedPumpData.rpms.splice(length);
-      savedPumpData.dates.splice(length);
-      console.log('Time Difference2', starTime.getTime() - new Date().getTime());
-      // console.log(savedPumpData);
-    })
+
+var updatePumpData = function (powerData) {
+  var length = powerData.length;
+  for (var i = 0; i < length; i++) {
+    savedPumpData.watts[i] = powerData[i].watt;
+    savedPumpData.rpms[i] = powerData[i].rpm;
+    savedPumpData.dates[i] = new Date(powerData[i]._id);
+  }
+  savedPumpData.watts.splice(length);
+  savedPumpData.rpms.splice(length);
+  savedPumpData.dates.splice(length);
+  // console.log('Time Difference2', startTime.getTime() - new Date().getTime());
+};
+
+var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName = 'Pump1') {
+  // var startTime = new Date();
+  console.log(time1, time2);
+  getPumpDataBetweenTime(time1, time2, pumpName)
+    .then(updatePumpData)
+    .catch(err => console.log(err));
+};
+
+
+var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName = 'Pump1') {
+  // var startTime = new Date();
+  getPumpDataBetweenTime(new Date(), moment().startOf(startDateIntervalString).toDate())
+    .then(updatePumpData)
     .catch(err => console.log(err));
 };
 
@@ -151,6 +161,7 @@ export { socket,
   alerts,
   serverConnected,
   savedPumpData,
-  findPumpDataBetweenTime,
-  updatePumpDataFromBetweenTimes
+  getPumpDataBetweenTime,
+  updatePumpDataFromBetweenTimes,
+  updatePumpDataFromStartOfTime
 };
