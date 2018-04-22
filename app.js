@@ -1,5 +1,13 @@
 process.env.NODE_PATH = __dirname;
 
+process.argv.forEach((val, index) => {
+  let split = val.split('=');
+  if (split.length > 1) {
+    process.env[split[0]] = split[2];
+    console.log(split[0], ':', split[1]);
+  }
+});
+
 // var Promise = require('bluebird');
 var glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
 var configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
@@ -7,71 +15,43 @@ var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(
 configureFile.initLogging('system', logger);
 var logStatus = requireGlob ('pentairPumpStatusLog.js');
 
-var useModular = true;
-
-if (useModular) {
-  // var serialPaths = configureFile.config.system.communications && configureFile.config.system.communications.rs485.ports;
-  // require(process.env.NODE_PATH + '/server/serialPort_modular.js').init(serialPaths);
-  require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init()
-    .then(serialPorts => {
-      return serialPorts;
-    })
-    .catch(serialPorts => {
-      return serialPorts;
-    })
-    .then((serialPorts) => {
-      var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
-      var groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues').init(
-        configureFile.config.system.communications,
-        serialPorts,
-        logger
-      );
-      groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
-      logStatus.init('./database/power', .5 );
-    })
-    .then(() => {
+require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init()
+  .then(serialPorts => {
+    return serialPorts;
+  })
+  .catch(serialPorts => {
+    return serialPorts;
+  })
+  .then((serialPorts) => {
+    var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
+    var groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues').init(
+      configureFile.config.system.communications,
+      serialPorts,
+      logger
+    );
+    groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
+    logStatus.init('./database/power', 5 );
+  })
+  .then(() => {
+    if (process.env.NODE_ENV === 'production') {
       requireGlob('pentairPumpCommands.js').runRepeatingStatus();
-      // logStatus.allDocs()
-      //   .then(data => console.log(data));
-    })
-    .catch(err => {
-      console.log (err);
-    });
+    }
 
-} else {
-  // var config = require('./server/configureFile').init('./config.json');
-
-  // var { statusRequestUpdateInverval, statusTimers } = require (process.env.NODE_PATH + '/server/variables');
-  // // var { timeBetweenQueueSending } = require (process.env.NODE_PATH + '/server/server');
-  // var {defaultStatusMessage} = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
-  // var { queueLoopMain, addToQueue } = require (process.env.NODE_PATH + '/server/equipment/pentair/queue');
-  // var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
-
-
-  // var timeBetweenQueueSending = 250; //intervel beteen when the queue sends off another message
+    // var moment = require('moment');
+    // var start = moment().subtract(1, 'days').startOf('week').toDate();
+    // logStatus.findBetweenTime(new Date(), start )
+    //   .then(logStatus.sumAndAverageOfPowerLogs)
+    //   .then(sumPower => console.log (sumPower))
+    //   .catch(err => console.log(err));
+  })
+  .catch(err => {
+    console.log (err);
+  });
 
 
 
-  ////start main program
 
-  // setInterval(queueLoopMain, configureFile.config.system.queue.timeBetweenQueueSending, configureFile.config.system.communications);
-  // ////starts routine pump status updates
-  // addToQueue(defaultStatusMessage());
-
-
-  // statusTimers = setInterval( ()=> {
-  //   addToQueue(defaultStatusMessage());
-  //   // console.log (pumpToLocal);
-  //   // addToQueue(pumpToLocal);
-  // }, statusRequestUpdateInverval); //gets pump status once every mintute
-}
-
-
-
-// process.on('uncaughtException', function(err) {
-//   console.log('Caught exception: ' + err);
-// });
-
+////// these i will probably not use but they could come in handy for exiting /////////
 
 
 // process.stdin.resume();//so the program will not close instantly

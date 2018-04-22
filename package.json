@@ -42,13 +42,13 @@
   },
   "scripts": {
     "dev": "webpack --progress --colors --watch",
-    "devserver": "webpack-dev-server --inline --progress --colors --watch",
+    "devserver": "node app.js NODE_ENV=development",
     "pm2": "pm2 start app.js",
-    "mochawesome": "mocha ./spec/* --recursive --reporter mochawesome",
-    "nodemon": "nodemon --ignore 'public/' --delay 1  app.js",
-    "debug": "node --inspect-brk=0.0.0.0:8000  app.js",
+    "nodemon": "nodemon --ignore 'public/' --delay 1  app.js NODE_ENV=development",
+    "debug": "node --inspect-brk=0.0.0.0:8000 app.js NODE_ENV=development",
     "start": "node app.js",
-    "test": "mocha ./spec/* --recursive"
+    "test": "mocha ./spec/* --recursive",
+    "production": "node app.js NODE_ENV=production"
   },
   "keywords": [
     "pool",
