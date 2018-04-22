@@ -5,6 +5,7 @@
   import OnlyButtons from './OnlyButtons.vue';
   import PumpStatus from './PumpStatus.vue';
   import PumpPower from './PumpPower.vue';
+  import Chart from './Chart.vue';
   import SelectedPumpControl from './SelectedPumpControl.vue';
   import StatusMessage from './statusMessage.vue';
   import { clearTimeout } from 'timers';
@@ -17,6 +18,7 @@
     components: {
       AlertMessages,
       DoubleButton,
+      Chart,
       PumpStatus,
       OnlyButtons,
       PumpPower,
@@ -52,7 +54,7 @@
         maintenceMode: false
       }
     },
-    props: ['equipmentName'],
+    props: ['equipmentName', 'menuSelect'],
       methods: {
     setMessage(message) {
       if (messageTimer) {
@@ -80,40 +82,49 @@
       this.maintenceMode = newMode;
     }
   },
-    watch: {}
+    watch: {
+    '$route' (to, from) {
+      }
+    }
   }
 </script>
 
 <template>
-  <div class="">
-    <div class="row">
-      <AlertMessages
-        :equipmentName="equipmentName"
-        :maintenceMode="maintenceMode">
-      </AlertMessages>
-      <PumpStatus></PumpStatus>
-      <StatusMessage v-bind:message='message'></StatusMessage>
+  <div>
+    <div v-if="menuSelect==='controls' || !menuSelect" class="">
+      <div class="row">
+        <AlertMessages
+          :equipmentName="equipmentName"
+          :maintenceMode="maintenceMode">
+        </AlertMessages>
+        <PumpStatus></PumpStatus>
+        <StatusMessage v-bind:message='message'></StatusMessage>
+      </div>
+      <div class="row">
+        <PumpPower
+          v-bind:equipmentName="equipmentName"
+          v-bind:setMessageCallback="setMessageCallback"
+          v-bind:setMessage="setMessage"
+          v-bind:setMaintenceMode="setMaintenceMode"
+          />
+        <OnlyButtons v-for="(data, title) in buttonData"
+          v-bind:buttons="data"
+          v-bind:setMessage="setMessageCallback"
+          v-bind:key="title"
+          v-bind:title='title'>
+        </OnlyButtons>
+        <SelectedPumpControl v-for="(data, title) in savePumpSpeedButtons"
+          v-bind:buttons="data"
+          v-bind:setMessage="setMessageCallback"
+          v-bind:key="title"
+          v-bind:title='title'>
+        </SelectedPumpControl>
+      </div>
     </div>
-    <div class="row">
-      <PumpPower
-        v-bind:equipmentName="equipmentName"
-        v-bind:setMessageCallback="setMessageCallback"
-        v-bind:setMessage="setMessage"
-        v-bind:setMaintenceMode="setMaintenceMode"
-        />
-      <OnlyButtons v-for="(data, title) in buttonData"
-        v-bind:buttons="data"
-        v-bind:setMessage="setMessageCallback"
-        v-bind:key="title"
-        v-bind:title='title'>
-      </OnlyButtons>
-      <SelectedPumpControl v-for="(data, title) in savePumpSpeedButtons"
-        v-bind:buttons="data"
-        v-bind:setMessage="setMessageCallback"
-        v-bind:key="title"
-        v-bind:title='title'>
-      </SelectedPumpControl>
-    </div>
+    <Chart v-if="menuSelect==='graph'"/>
+    rwar1
+        {{ $route.params }}
+        test
   </div>
 </template>
 

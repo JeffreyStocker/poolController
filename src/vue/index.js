@@ -25,11 +25,17 @@ var listEquipment = [];
 // };
 
 const routes = [
-  { path: '/vue', component: Pump },
-  { path: '/', component: Pump },
-  { path: '/index', component: Pump },
+  // { path: '/vue', component: Pump },
+  // { path: '/', component: Pump },
+  // { path: '/index', component: Pump },
   { path: '/Settings', component: UserSettings },
   { path: '/Graph', component: Chart },
+  { path: '/:pumpName/:menuSelect', component: Pump, props: function (route) {
+    return {
+      equipmentName: route.params.pumpName.toLowerCase(),
+      menuSelect: route.params.menuSelect.toLowerCase()
+    };
+  } },
 ];
 
 
@@ -72,7 +78,7 @@ const app = new Vue({
   },
   template: `
   <div>
-    <NavBar :listEquipment="listEquipment"/>
+    <NavBar :listEquipment="listEquipment" />
     <router-view>
     </router-view>
   </div>
