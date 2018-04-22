@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 var sendDataToServer, pumpData;
 var socket = io.connect();
 var serverConnected = { status: false };
@@ -78,18 +80,15 @@ var storePumpData = function (pumpData) {
     savedPumpData.watts.push(pumpData.watt);
     savedPumpData.rpms.push(pumpData.rpm);
     savedPumpData.dates.push(new Date());
-    console.log ('updated');
-  } else {
-    console.log ('not updated');
   }
 };
-
 
 
 socket.on('connect', () => {
   console.log ('connected');
   serverConnected.status = true;
   socket.on('pumpDataReturn', function (data) {
+    console.log('New Pump Data');
     storePumpData(data);
     setPumpData(data);
   });
@@ -124,21 +123,34 @@ var findPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
   });
 };
 
+var updatePumpDataFromBetweenTimes = function (startDateIntervalString, pumpName = 'Pump1') {
+  var starTime = new Date();
+  findPumpDataBetweenTime(new Date(), moment().startOf(startDateIntervalString).toDate())
+    .then(powerData => {
+      var length = powerData.length;
+      for (var i = 0; i < length; i++) {
+        savedPumpData.watts[i] = powerData[i].watt;
+        savedPumpData.rpms[i] = powerData[i].rpm;
+        savedPumpData.dates[i] = new Date(powerData[i]._id);
+        // savedPumpData.dates[i] = new Date(powerData[i]._id);
+      }
+      savedPumpData.watts.splice(length);
+      savedPumpData.rpms.splice(length);
+      savedPumpData.dates.splice(length);
+      console.log('Time Difference2', starTime.getTime() - new Date().getTime());
+      // console.log(savedPumpData);
+    })
+    .catch(err => console.log(err));
+};
+
 
 export default pumpData;
-export { socket, pumpData, setPumpData, alerts, serverConnected, savedPumpData, findPumpDataBetweenTime };
-
-import moment from 'moment';
-findPumpDataBetweenTime(new Date(), moment().startOf('day').toDate())
-  .then(powerData => {
-    powerData.watts = [];
-    powerData.rpms = [];
-    powerData.dates = [];
-
-    for (let entry of powerData) {
-      savedPumpData.watts.push(entry.watt);
-      savedPumpData.rpms.push(entry.rpm);
-      savedPumpData.dates.push(new Date(entry._id));
-    }
-  })
-  .catch(err => console.log(err));
+export { socket,
+  pumpData,
+  setPumpData,
+  alerts,
+  serverConnected,
+  savedPumpData,
+  findPumpDataBetweenTime,
+  updatePumpDataFromBetweenTimes
+};
