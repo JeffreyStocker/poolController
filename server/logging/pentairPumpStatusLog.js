@@ -210,6 +210,66 @@ var sumAndAverageOfPowerLogs = function (powerLogs) {
   };
 };
 
+var returnAverageOverHour = function (sum, timeInMinutes) {
+  return (sum * time) / 60;
+};
+
+var convertMsToHours = function (milliseconds) {
+  return milliseconds / 1000 / 60 / 60;
+};
+
+var convertMsToMinutes = function (milliseconds) {
+  return milliseconds / 1000 / 60;
+};
+
+var compressLogsIntoRelativeChanges = function (pumpData) {
+  //psudocode
+  /*
+  assume in order by _id which should be a date
+  so loop through each one
+    if not same rpm as previous than
+    create new database with wanted data
+    else
+    store the start date, sum watts, rpms, count,
+    delete the record
+  loop through next
+  */
+  var rpm, sumOfWatts, count, startDate, endDate, prevEntryDate, currEntryDate;
+  var output = [];
+  var length = pumpData.length;
+
+  var setData = function (indvData) {
+    startDate = new Date(indvData._id);
+    currEntryDate = indvData.getTime();
+    sumOfWatts = indvData.watt;
+    rpm = indvData.rpm;
+    count = 1;
+    endDate = null;
+  };
+
+  for (var i = 0; i < length; i++) {
+    prevEntryDate = currEntryDate;
+    if (pumpData[i].rpm === rpm ) {
+      currEntryDate = new Date(pumpData[i]._id).getTime();
+      sumOfWatts += (pumpData[i].watt);
+      count ++;
+    } else if (!rpm) {
+      setData(pumpData[i]);
+    } else {
+      endDate = new Date(pumpData[i]._id);
+      output.push ({
+        average: returnAverageOverHour(watt, convertMsToMinutes(endDate - startDate)),
+        rpm,
+        endDate,
+        sumOfWatts: watt,
+        startDate
+      });
+      setData(pumpData[i]);
+    }
+  }
+  return output;
+};
+
 
 module.exports = {
   allDocs,

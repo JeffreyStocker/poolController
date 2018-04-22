@@ -46,6 +46,42 @@ module.exports = class PentairQueue extends ActionQueue {
     if (this.hardwareAddress) {
       this.setPort(this.hardwareAddress);
     }
+
+    this.storeStatus = (function () {
+      //psudocode
+      /*
+      going to use context
+      use
+      check speed,
+        if same, then add watt to watt sum
+      if not same rpm, then find average of watt sum
+      store average watt, speed and date into the database
+      set time to now
+      set watt sum to 0
+      set rpm to current
+      */
+      var storedDate;
+      var storedRpm = null;
+      var wattSum = 0;
+      var wattCount = 0;
+      return function (data) {
+        if (data.rpm === storedRpm) {
+          wattSum += data.watt;
+          wattCount ++;
+          return Promise.resolve(null);
+        }
+        let output = {
+          date,
+          rpm,
+          watt: ~~(wattSum / wattCount),
+        };
+        rpm = data.rpm;
+        wattSum = data.watt;
+        wattCount = 1;
+        date = new Date();
+        return Promise.resolve(output);
+      };
+    })();
   }
 
 
@@ -121,6 +157,17 @@ module.exports = class PentairQueue extends ActionQueue {
       if (Message.prototype.isStatusMessage(data)) {
         var pumpData = Message.prototype.parsePumpStatus(data);
         this.logger('status', 'info', 'Status Received:  [' + [... data] + ']');
+        // this.storeStatus(pumpData)
+        //   .then(resultsFromBeforeRpmChange => {
+        //     if (resultsFromBeforeRpmChange) {
+        //       logStatus.log({
+        //         equipment: this.name,
+        //         watt: resultsFromBeforeRpmChange.watt,
+        //         rpm: resultsFromBeforeRpmChange.rpm
+        //       });
+        //     }
+        //   })
+        // .catch (this.logger('events', 'warn', err));
         logStatus.log({
           equipment: this.name,
           watt: pumpData.watt,
