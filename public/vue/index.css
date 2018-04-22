@@ -93,19 +93,30 @@
 	text-decoration: none;
 }
 
-
 .navbar a:hover, .navBarDropdown li:hover {
 	background: #ddd;
 	color: black;
 }
 
 .navBarDropdown {
+	background: black;
 	padding-top: 30px;
 	height: 70%;
 	position: absolute;
 	width: 50%;
-	background: black;
-	z-index: 11;
-
+	z-index: 12;
 }
 
+.floatRight {
+	float: right !important;
+}
+
+.offClickElement {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	background-color: transparent;
+	z-index: 10;
+}
