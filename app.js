@@ -3,7 +3,7 @@ process.env.NODE_PATH = __dirname;
 process.argv.forEach((val, index) => {
   let split = val.split('=');
   if (split.length > 1) {
-    process.env[split[0]] = split[2];
+    process.env[split[0]] = split[1];
     console.log(split[0], ':', split[1]);
   }
 });
@@ -33,6 +33,7 @@ require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init
     logStatus.init('./database/power', 5 );
   })
   .then(() => {
+    // console.log (process.env)
     if (process.env.NODE_ENV === 'production') {
       requireGlob('pentairPumpCommands.js').runRepeatingStatus();
     }
