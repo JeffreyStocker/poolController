@@ -9,13 +9,18 @@ process.argv.forEach((val, index) => {
 });
 
 // var Promise = require('bluebird');
-var glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
-var configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
-var logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
+const glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
+const configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
+const logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging('system', logger);
-var logStatus = requireGlob ('pentairPumpStatusLog.js');
+const logStatus = requireGlob ('pentairPumpStatusLog.js');
+const groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues');
+const PentairQueue = requireGlob('PentairQueue');
+const SerialPort = requireGlob('serialPort');
 
-require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init()
+// const PentairQueue = requireGlob('PentairQueue');
+
+SerialPort.initPromise(configureFile.config.system.communications, logger)
   .then(serialPorts => {
     return serialPorts;
   })
@@ -24,12 +29,30 @@ require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init
   })
   .then((serialPorts) => {
     var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
-    var groupOfQueues = require (process.env.NODE_PATH + '/server/equipment/pentair/GroupOfQueues').init(
-      configureFile.config.system.communications,
-      serialPorts,
-      logger
-    );
-    groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
+    var avaliableQueueTypes = {
+      pentair: requireGlob('PentairQueue')
+    };
+    groupOfQueues.setLogger(logger);
+    for (let queueInfo of configureFile.config.equipment.pumps) {
+      try {
+        if (queueInfo.enabled && avaliableQueueTypes[queueInfo.communications.protocol]) {
+          let queue = new avaliableQueueTypes[queueInfo.communications.protocol](queueInfo.name, queueInfo);
+          groupOfQueues.addQueue(queue, queueInfo.name, queueInfo.communications.hardwareAddress);
+          SerialPort.serialPortEvents.on(queueInfo.name, (dataFromSerialPort) => {
+            queue.processData(dataFromSerialPort);
+          });
+        }
+      } catch (err) {
+        logger('system', 'warn', 'Could not create a new queue with this name: ' + name);
+      }
+    }
+
+    // groupOfQueues.init(
+    //   configureFile.config.equipment.pumps,
+    //   serialPorts,
+    //   logger
+    // );
+    // groupOfQueues.associateEquipment(configureFile.config.equipment.pumps);
     logStatus.init('./database/power', 5 );
   })
   .then(() => {
@@ -46,7 +69,7 @@ require(process.env.NODE_PATH + '/server/communications/serialPortInit.js').init
     //   .catch(err => console.log(err));
   })
   .catch(err => {
-    console.log (err);
+    console.log ('test', err);
   });
 
 

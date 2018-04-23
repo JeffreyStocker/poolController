@@ -1,14 +1,13 @@
 // var sp = require(process.env.NODE_PATH + '/server/serialPort');
-var configureFile = require(process.env.NODE_PATH + '/server/configureFile').config;
-var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
-const { convertToDecArray, parsePumpStatus, isStatusMessage } = require(process.env.NODE_PATH + '/server/equipment/pentair/helperFunctions.js');
-var Promise = require('bluebird');
-var processIncomingSerialPortData = require(process.env.NODE_PATH + '/server/communications/serialPort.js').processIncomingSerialPortData;
+const configureFile = require(process.env.NODE_PATH + '/server/configureFile').config;
+const logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
+const Promise = require('bluebird');
+const processIncomingSerialPortData = require(process.env.NODE_PATH + '/server/communications/serialPort.js').processIncomingSerialPortData;
 
 
-module.exports.init = async function () {
-  var serialPaths = configureFile.system.communications && configureFile.system.communications.rs485;
-  var sp = require(process.env.NODE_PATH + '/server/communications/serialPort.js');
+module.exports.init = async function (serialPortComData, logger, ) {
+  const serialPaths = configureFile.system.communications && configureFile.system.communications.rs485;
+  const sp = require(process.env.NODE_PATH + '/server/communications/serialPort.js');
   sp.setLogger(logger);
   // var waitTOFinish = sp.init(serialPaths, logger);
 

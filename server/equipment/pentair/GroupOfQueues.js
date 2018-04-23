@@ -1,10 +1,14 @@
-var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
-var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
-var serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPort').ports;
-var helpers = require(process.env.NODE_PATH + '/server/helpers');
-var PentairQueue = requireGlob('PentairQueue');
+const ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
+const msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
+const serialPorts = require(process.env.NODE_PATH + '/server/communications/serialPort').ports;
+const helpers = require(process.env.NODE_PATH + '/server/helpers');
+const PentairQueue = requireGlob('PentairQueue');
 
 var _ = require ('lodash');
+
+var avaliableQueueTypes = {
+  pentair: requireGlob('PentairQueue')
+};
 
 var empty = function (context) {
   return msg.defaultPumpControlPanelMessage('local');
@@ -34,12 +38,22 @@ class QueueGroup {
 
   init(queueNames = {}, output = {}, logger = ()=>{}) {
     this.setLogger(logger);
-    _.each(queueNames, (group) => {
-      _.each(group, (newQueueInfo) => {
-        // newQueueInfo.serialPort = serialPorts.returnPortByName(newQueueInfo.hardwareAddress);
-        this.createQueue(newQueueInfo);
-      });
-    });
+    for (let queueInfo of queueNames) {
+      try {
+        if (queueInfo.enabled && avaliableQueueTypes[queueInfo.communications.protocol]) {
+          this.addQueue(new PentairQueue(queueInfo.name, queueInfo), queueInfo.name, queueInfo.communications.hardwareAddress);
+        }
+      } catch (err) {
+        this.logger('system', 'warn', 'Could not create a new queue with this name: ' + name);
+      }
+    }
+
+    // _.each(queueNames, (group) => {
+    //   _.each(group, (newQueueInfo) => {
+    //     newQueueInfo.serialPort = serialPorts.returnPortByName(newQueueInfo.hardwareAddress);
+    //     this.createQueue(newQueueInfo);
+    //   });
+    // });
     return module.exports;
   }
 
@@ -64,20 +78,19 @@ class QueueGroup {
     }
   }
 
-  createQueue (queueInfo) {
-    var name, address;
-    if (!queueInfo.name) {
+  addQueue (queue, name, address) {
+    if (!queue || !name) {
       this.logger('system', 'warn', 'Could not create a new queue with this name: ' + queueInfo.name);
       return;
     }
-    this.names[queueInfo.name] = this.queues[queueInfo.hardwareAddress] = new PentairQueue(queueInfo.name, queueInfo);
-    this.logger ('system', 'info', queueInfo.name + ': queue created');
-    return this.names[queueInfo.name];
+    this.names[name] = queue;
+    this.logger ('system', 'info', name + ': queue created');
+    return this.names[name];
   }
 
   eachQueue (callback) {
     for (let queue of Object.keys(this.queues)) {
-      callback(queue);
+      callback(this.queues[queue]);
     }
   }
 

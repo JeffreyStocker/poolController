@@ -49,21 +49,17 @@ var defaultsFunction = function () {
           }
         },
       },
-      communications: {
-        rs485: [
-          {
-            name: 'serialPort',
-            type: 'rs485',
-            hardwareAddress: '/dev/ttyUSB0'
-          },
-
-        ],
-        gpio: [
-          {
-            name: 'GPIOTest',
-          }
-        ]
-      },
+      communications: [
+        {
+          name: 'serialPort',
+          type: 'rs485',
+          hardwareAddress: '/dev/ttyUSB0'
+        },
+        {
+          name: 'GPIOTest',
+          type: 'gpio',
+        }
+      ]
     },
     equipment: {
       pumps: [
@@ -82,10 +78,12 @@ var defaultsFunction = function () {
         {
           name: 'intellicom',
           enabled: true,
+          override: false
         },
         {
           name: 'intellitouch',
           enabled: false,
+          override: false
         }
       ]
     },

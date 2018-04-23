@@ -1,20 +1,31 @@
-var SerialPort = require('serialport');
-var ports = module.exports.ports = {};
+const SerialPort = require('serialport');
+const Events = require('events');
+const Promise = require('bluebird');
+
+const ports = module.exports.ports = {};
+const serialPortEvents = module.exports.serialPortEvents = new Events();
 var logger = () => {};
 
-var setPortPromise = function (err, data) {
-  return new Promise ((resolve, revoke) => {
-    if (err) {
-      logger('system', 'warn', name + ': Serial Port Was Not Created' + err);
-      revoke(err);
-    } else {
-      logger('system', 'info', name + ': Serial Port Created');
-      resolve();
+
+
+
+module.exports.initPromise = async function (serialPortComData, logger) {
+  var wait = module.exports.setLogger(logger);
+  // var waitTOFinish = sp.init(serialPaths, logger);
+  // const serialPaths = configureFile.system.communications && configureFile.system.communications.rs485;
+  if (!serialPortComData) { return Promise.resolve(); }
+  var results = [];
+  for (var port of serialPortComData) {
+    if (port.type === 'rs485') {
+      results.push(module.exports.newSerialPort(port.name, port.hardwareAddress));
     }
-  });
+  }
+  results = await Promise.all(results);
+  return sp;
 };
 
-exports.newSerialPort = function (portName, address) {
+
+module.exports.newSerialPort = function (portName, address) {
   return new Promise((resolve, revoke) => {
     module.exports.ports[address] = new SerialPort(address, function (err) {
       if (err) {
@@ -22,15 +33,18 @@ exports.newSerialPort = function (portName, address) {
         revoke (err);
       } else {
         logger('system', 'info', portName + ': Serial Port Created');
+        module.exports.ports[address].on(address, (dataFromSerialPort) => {
+          serialPortEvents.emit(address, dataFromSerialPort);
+          module.exports.ports[portName] = module.exports.ports[address];
+        });
         resolve();
       }
     });
-    module.exports.ports[portName] = module.exports.ports[address];
   });
 };
 
 
-var init = exports.init = function (ports = [], newLogger = logger) {
+var init = module.exports.init = function (ports = [], newLogger = logger) {
   //////// server, serial Port Functions //////////////////////
   module.exports.setLogger(newLogger);
   // if (logger !== newLogger && typeof newLogger === 'function') { logger = newLogger; }

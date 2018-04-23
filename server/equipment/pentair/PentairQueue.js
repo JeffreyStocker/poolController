@@ -148,50 +148,54 @@ module.exports = class PentairQueue extends ActionQueue {
     }
   }
 
+  processData(data) {
+    data = Message.prototype.processIncomingPacket(data);
+    var results = this.checkQueue(data);
+    if (Message.prototype.isStatusMessage(data)) {
+      var pumpData = Message.prototype.parsePumpStatus(data);
+      this.logger('status', 'info', 'Status Received:  [' + [... data] + ']');
+      // this.storeStatus(pumpData)
+      //   .then(resultsFromBeforeRpmChange => {
+      //     if (resultsFromBeforeRpmChange) {
+      //       logStatus.log({
+      //         equipment: this.name,
+      //         watt: resultsFromBeforeRpmChange.watt,
+      //         rpm: resultsFromBeforeRpmChange.rpm
+      //       });
+      //     }
+      //   })
+      // .catch (this.logger('events', 'warn', err));
+      logStatus.log({
+        equipment: this.name,
+        watt: pumpData.watt,
+        rpm: pumpData.rpm
+      });
+      try {
+        socketServer.emit('pumpDataReturn', pumpData);
+      } catch (err) {
+        this.logger('system', 'error', 'Error sending pump data via socketIO' + err);
+      }
+      if (this.currentMessage.name === 'Get Pump Status') {
+        this.clearCurrentMessage(null, 'success');
+      }
+    } else if (results === true) {
+      this.logger('events', this.currentMessage.logLevel, 'Acknowledged: ' + this.currentMessage.name + ': [' + data + ']');
+      this.clearCurrentMessage(null, 'success');
+    } else if (results === false) {
+      this.logger('events', 'warn', 'Packet was not an acknowledgment: ' + data);
+    } else if (results === null) {
+      logger('events', 'info', 'Message Received: ' + data);
+    } else {
+    }
+    this.runQueue();
+  }
+
 
   setPort (hardwareName) {
     this.serialPort = serialPort.returnPortByName(this.hardwareAddress);
-    serialPort.setTrigger(hardwareName, 'data', (data) => {
-      data = Message.prototype.processIncomingPacket(data);
-      var results = this.checkQueue(data);
-      if (Message.prototype.isStatusMessage(data)) {
-        var pumpData = Message.prototype.parsePumpStatus(data);
-        this.logger('status', 'info', 'Status Received:  [' + [... data] + ']');
-        // this.storeStatus(pumpData)
-        //   .then(resultsFromBeforeRpmChange => {
-        //     if (resultsFromBeforeRpmChange) {
-        //       logStatus.log({
-        //         equipment: this.name,
-        //         watt: resultsFromBeforeRpmChange.watt,
-        //         rpm: resultsFromBeforeRpmChange.rpm
-        //       });
-        //     }
-        //   })
-        // .catch (this.logger('events', 'warn', err));
-        logStatus.log({
-          equipment: this.name,
-          watt: pumpData.watt,
-          rpm: pumpData.rpm
-        });
-        try {
-          socketServer.emit('pumpDataReturn', pumpData);
-        } catch (err) {
-          this.logger('system', 'error', 'Error sending pump data via socketIO' + err);
-        }
-        if (this.currentMessage.name === 'Get Pump Status') {
-          this.clearCurrentMessage(null, 'success');
-        }
-      } else if (results === true) {
-        this.logger('events', this.currentMessage.logLevel, 'Acknowledged: ' + this.currentMessage.name + ': [' + data + ']');
-        this.clearCurrentMessage(null, 'success');
-      } else if (results === false) {
-        this.logger('events', 'warn', 'Packet was not an acknowledgment: ' + data);
-      } else if (results === null) {
-        logger('events', 'info', 'Message Received: ' + data);
-      } else {
-      }
-      this.runQueue();
-    });
+    // serialPort.setTrigger(hardwareName, 'data', (data) => {
+    //   processData(data);
+    // });
   }
 
 
