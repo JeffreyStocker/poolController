@@ -222,6 +222,7 @@ var convertMsToMinutes = function (milliseconds) {
   return milliseconds / 1000 / 60;
 };
 
+////note WIP not complete yet
 var compressLogsIntoRelativeChanges = function (pumpData) {
   //psudocode
   /*

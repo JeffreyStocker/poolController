@@ -48,11 +48,7 @@
           {{equipment.name}}
         </a>
       </template>
-      <!-- <a @click="dropDownEquipmentNameUpdate('Pump1')">testtt</a> -->
       <router-link to="/Settings" class="floatRight">Settings</router-link>
-      <!-- <router-link to="/Graph">Graph</router-link> -->
-      <!-- <button @click="toggleState">test</button> -->
-      <!-- <button @click="test" class="navButton">Pump1</button> -->
     </div>
     <div class="navbarSize" />
     <NavBarDropdown
