@@ -2,10 +2,7 @@ process.env.NODE_PATH = process.env.NODE_PATH || __dirname + '/../../..';
 var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
 var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
 var Message = msg.Message;
-// var { processIncomingSerialPortData } = require(process.env.NODE_PATH + '/server/communications/serialPort.js');
-var serialPort = requireGlob('serialPort');
 var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
-// var ports = requireGlob('serialPort');
 var logger = requireGlob ('winston').sendToLogs;
 var logStatus = requireGlob ('pentairPumpStatusLog.js');
 
@@ -27,11 +24,16 @@ module.exports = class PentairQueue extends ActionQueue {
         return msg.defaultPumpControlPanelMessage('local');
       }
     }});
+
     this.name = name;
     this.timers = {};
     this.options = options || {};
-
-    this.serialPort = (() => {});
+    this.serialPort = options.serialPort || (() => {});
+    if (options.serialPort && options.serialPort.constructor.name === 'SerialPort') {
+      options.serialPort.on('data', (dataFromSerialPort) => {
+        this.processData(dataFromSerialPort);
+      });
+    }
     this.source = options.source || 16;
     this.logger = options.logger || logger;
     this.running = false;
@@ -43,45 +45,45 @@ module.exports = class PentairQueue extends ActionQueue {
     this.timeout;
     this.currentMessage;
 
-    if (this.hardwareAddress) {
-      this.setPort(this.hardwareAddress);
-    }
+    // if (this.hardwareAddress) {
+    //   this.setPort(this.hardwareAddress);
+    // }
 
-    this.storeStatus = (function () {
-      //psudocode
-      /*
-      going to use context
-      use
-      check speed,
-        if same, then add watt to watt sum
-      if not same rpm, then find average of watt sum
-      store average watt, speed and date into the database
-      set time to now
-      set watt sum to 0
-      set rpm to current
-      */
-      var storedDate;
-      var storedRpm = null;
-      var wattSum = 0;
-      var wattCount = 0;
-      return function (data) {
-        if (data.rpm === storedRpm) {
-          wattSum += data.watt;
-          wattCount ++;
-          return Promise.resolve(null);
-        }
-        let output = {
-          date,
-          rpm,
-          watt: ~~(wattSum / wattCount),
-        };
-        rpm = data.rpm;
-        wattSum = data.watt;
-        wattCount = 1;
-        date = new Date();
-        return Promise.resolve(output);
-      };
-    })();
+    // this.storeStatus = (function () {
+    //   //psudocode
+    //   /*
+    //   going to use context
+    //   use
+    //   check speed,
+    //     if same, then add watt to watt sum
+    //   if not same rpm, then find average of watt sum
+    //   store average watt, speed and date into the database
+    //   set time to now
+    //   set watt sum to 0
+    //   set rpm to current
+    //   */
+    //   var storedDate;
+    //   var storedRpm = null;
+    //   var wattSum = 0;
+    //   var wattCount = 0;
+    //   return function (data) {
+    //     if (data.rpm === storedRpm) {
+    //       wattSum += data.watt;
+    //       wattCount ++;
+    //       return Promise.resolve(null);
+    //     }
+    //     let output = {
+    //       date,
+    //       rpm,
+    //       watt: ~~(wattSum / wattCount),
+    //     };
+    //     rpm = data.rpm;
+    //     wattSum = data.watt;
+    //     wattCount = 1;
+    //     date = new Date();
+    //     return Promise.resolve(output);
+    //   };
+    // })();
   }
 
 
@@ -149,6 +151,7 @@ module.exports = class PentairQueue extends ActionQueue {
   }
 
   processData(data) {
+    debugger;
     data = Message.prototype.processIncomingPacket(data);
     var results = this.checkQueue(data);
     if (Message.prototype.isStatusMessage(data)) {
@@ -254,13 +257,16 @@ module.exports = class PentairQueue extends ActionQueue {
 
   sendToSerialPort(message, callback = () => {}) {
     if (this.serialPort) {
-      serialPort.sendData(this.hardwareAddress, message)
-        .then(data => {
+      var packet = message.packet;
+      this.serialPort.write(Buffer.from(packet), function (err) {
+        if (err) {
+          logger('events', 'error', 'sendData: Error writing [' + packet + '] to serialPort:' + err);
           callback (null, data);
-        })
-        .catch(err => {
+        } else {
+          logger('events', 'debug', 'sendData: Success writing ' + packet + ' to serialPort');
           callback (err, null);
-        });
+        }
+      });
     }
   }
 };

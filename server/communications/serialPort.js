@@ -21,23 +21,23 @@ module.exports.initPromise = async function (serialPortComData, logger) {
     }
   }
   results = await Promise.all(results);
-  return sp;
+  return module.exports;
 };
 
 
 module.exports.newSerialPort = function (portName, address) {
   return new Promise((resolve, revoke) => {
-    module.exports.ports[address] = new SerialPort(address, function (err) {
+    module.exports.ports[address] = new SerialPort(address, function (err, port) {
       if (err) {
         logger('system', 'warn', portName + ': Serial Port Was Not Created' + err);
         revoke (err);
       } else {
         logger('system', 'info', portName + ': Serial Port Created');
-        module.exports.ports[address].on(address, (dataFromSerialPort) => {
+        this.on('data', (dataFromSerialPort) => {
           serialPortEvents.emit(address, dataFromSerialPort);
-          module.exports.ports[portName] = module.exports.ports[address];
         });
-        resolve();
+        module.exports.ports[portName] = module.exports.ports[address];
+        resolve(this);
       }
     });
   });
