@@ -45,10 +45,6 @@ module.exports = class PentairQueue extends ActionQueue {
     this.timeout;
     this.currentMessage;
 
-    // if (this.hardwareAddress) {
-    //   this.setPort(this.hardwareAddress);
-    // }
-
     // this.storeStatus = (function () {
     //   //psudocode
     //   /*
@@ -192,15 +188,6 @@ module.exports = class PentairQueue extends ActionQueue {
     }
     this.runQueue();
   }
-
-
-  setPort (hardwareName) {
-    this.serialPort = serialPort.returnPortByName(this.hardwareAddress);
-    // serialPort.setTrigger(hardwareName, 'data', (data) => {
-    //   processData(data);
-    // });
-  }
-
 
   clearTimer (timerName) {
     if (this.timers[timerName]) {
