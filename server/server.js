@@ -8,7 +8,6 @@ var loggerSystem = require(process.env.NODE_PATH + '/server/logging/winston').lo
 // var events = require('events');
 // var pumpFunctions= require ('./pumpFunction.js')
 
-var port = process.env.PORT = 8181;
 
 app.use(express.static(process.env.NODE_PATH + '/public'));
 
@@ -25,8 +24,8 @@ exports.socketServer = io(server, {
 
 exports.server = server;
 
-server.listen(port, () => {
-  loggerSystem.info('Server Listening on port: ', port);
+server.listen(process.env.PORT, () => {
+  loggerSystem.info('Server Listening on port: ', process.env.PORT);
   // console.log('Server Listening on port: ', port)
 });
 
