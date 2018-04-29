@@ -141,17 +141,12 @@ var past = function (time, amount) {
   }
 };
 
-var insertAtTimeWithTimestamp = function (data) {
-  if (!data || typeof data !== 'object') { return new Error ('Data to insert into database should be a object'); }
-  data.timeStamp = new Date();
-  return db.post(data);
-};
 
 var insertAtTime = function (data) {
   return new Promise ((resolve, revoke) => {
     if (!data || typeof data !== 'object') { return new Error ('Data to insert into database should be a object'); }
     data._id = new Date();
-    console.log (data);
+    // console.log (data);
     db.post(data)
       .then(resolveData => {
         resolve(resolveData);
