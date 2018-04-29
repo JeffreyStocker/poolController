@@ -1,9 +1,12 @@
 var fs = require('fs');
 var config = {};
-var configFileLocation = './confisg.json';
+var configFileLocation = './config.json';
 var logs = [];
 var pretty = require ('jsonminify');
 var hjson = require('hjson');
+var logger = function (group, logLevel, message) {
+  logs.push([group, logLevel, message]);
+};
 
 var defaultsFunction = function () {
   return {
@@ -131,37 +134,28 @@ module.exports.init = function (location = configFileLocation, useDefault = fals
   if (Object.keys(config).length !== 0) { return config; }
   if (location === 'default' || useDefault === true) {
     data = module.exports.defaults;
-    logs.push('Using Default Configuration');
+    logger('system', 'info', 'Using Default Configuration');
   } else {
     try {
       data = fs.readFileSync(location, 'utf8');
       data = parseConfig(data);
-      logs.push('location');
+      logger('system', 'info', 'Config: Using file at ' + configFileLocation);
     } catch (err) {
       data = module.exports.defaults;
-      // console.log ('User Config File not found. Using Defaults Configuration');
-      logs.push('User Config File not found. Using Default Configuration');
+      logger('system', 'info', 'Config: User Config File not found. Using Default Configuration');
     }
   }
   Object.assign(module.exports.config, data);
   return module.exports;
 };
 
-module.exports.initLogging = function (loggerName, loggers) {
-  if (!loggers[loggerName]) { return new Error ('Logger Missing from initLogging'); }
-
-  var logger = loggers[loggerName];
-  logs.forEach(log => {
-    logger.info(log);
-  });
-  logs = function (newLog) {
-    logger.info(newLog);
-  };
-};
-
-
-module.exports.resultsForLogger = function () {
-  return logger;
+module.exports.initLogging = function (newLogger) {
+  if (newLogger) {
+    logger = newLogger;
+    logs.forEach(log => {
+      newLogger(log[0], log[1], log[2]);
+    });
+  }
 };
 
 
@@ -171,8 +165,10 @@ module.exports.loadConfig = function () {
     } else {
       parseConfig(data, function (err, data) {
         if (err) {
-          console.log ('Error Processing Config File', err);
+          logger('system', 'error', 'Error Processing Config File', err);
+          // console.log ('Error Processing Config File', err);
         } else {
+          logger('system', 'info', '');
           module.exports.config = data;
         }
       });
@@ -184,8 +180,10 @@ module.exports.loadConfig = function () {
 module.exports.saveConfig = function () {
   fs.writeFile(configFileLocation, JSON.stringify(config, null, 2), 'utf8', (err) => {
     if (err) {
+      logger('system', 'info', '');
       console.log ('Error writing config file', err);
     } else {
+      logger('system', 'info', '');
       // console.log ('Success writing config file');
     }
   });
@@ -193,6 +191,7 @@ module.exports.saveConfig = function () {
 
 module.exports.loadDefault = function () {
   config = defaults;
+  logger('system', 'info', '');
 };
 
 
@@ -216,23 +215,3 @@ var exportTestString = function () {
   return JSON.parse(functionString);
 
 };
-
-// exportTestString();
-
-var inportHJSON = function () {
-  var string = fs.readFileSync('./hjsontest.hjson', 'utf8');
-  var HJSON = hjson.parse(string, {keepWsc: true});
-  console.log (HJSON.toString());
-};
-
-// inportHJSON();
-
-// module.exports.init();
-// module.exports.loadDefault();
-// module.exports.saveConfig()
-// module.exports.config = get config();
-// Object.defineProperty(module.exports, 'config', {
-//   get: function() { return config; }
-// });
-
-// console.log ('');
