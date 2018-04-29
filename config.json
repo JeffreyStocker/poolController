@@ -4,37 +4,84 @@
       "port": 8181
     },
     "queue": {
+      "mainLoopInterval": 25,
+      "numberOfRetriesForMissingMessages": 3,
       "statusRequestUpdateInverval": 500,
-      "numberOfRetriesForMissingMessages": 3
+      "timeBetweenQueueSending": 100
     },
-    "logs": {},
-    "communications": {
-      "rs485": {
-        "port": "/dev/ttyUSB0"
+    "logs": {
+      "system": {
+        "console": {
+          "colorize": true,
+          "label": "system",
+          "level": "info"
+        },
+        "file": {
+          "filename": "/logs/system.log"
+        }
       },
-      "GPIO": {}
-    }
-  },
-  "equipment": {
-    "pumps": {
-      "1": {
-        "enabled": true,
-        "name": "pump 1",
-        "communications": {
-          "type": "rs485",
-          "address": 96
+      "events": {
+        "console": {
+          "colorize": true,
+          "label": "events",
+          "level": "info"
+        },
+        "file": {
+          "filename": "/logs/events.log"
+        }
+      },
+      "pump": {
+        "console": {
+          "colorize": true,
+          "label": "pump",
+          "level": "info"
+        },
+        "file": {
+          "filename": "/logs/power.log"
         }
       }
     },
-    "controllers": {
-      "intellicom": {
-        "enabled": true,
-        "name": ""
+    "communications": [
+      {
+        "name": "serialPort",
+        "type": "rs485",
+        "hardwareAddress": "/dev/ttyUSB0"
       },
-      "intellitouch": {
-        "enabled": false,
-        "name": ""
+      {
+        "name": "GPIOTest",
+        "type": "gpio"
       }
-    }
-  }
+    ]
+  },
+  "equipment": {
+    "pumps": [
+      {
+        "name": "Pump1",
+        "enabled": true,
+        "communications": {
+          "address": "1",
+          "protocol": "pentair",
+          "type": "rs485",
+          "hardwareAddress": "/dev/ttyUSB0"
+        }
+      }
+    ],
+    "controllers": [
+      {
+        "name": "intellicom",
+        "enabled": true,
+        "override": false
+      },
+      {
+        "name": "intellitouch",
+        "enabled": false,
+        "override": false
+      }
+    ]
+  },
+  "groups": [
+  ],
+  "activities": [
+
+  ]
 }
