@@ -66,6 +66,15 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
     //   .then(logStatus.sumAndAverageOfPowerLogs)
     //   .then(sumPower => console.log (sumPower))
     //   .catch(err => console.log(err));
+
+    // logStatus.count()
+    //   .then(sumPower => console.log (sumPower))
+    //   .catch(err => console.log(err));
+
+    // logStatus.allDocs()
+    //  .then(sumPower => console.log ('all docs', sumPower))
+    //  .then(sumPower => console.log ('all docs', sumPower.rows.map(rec => rec.doc)))
+    //  .catch(err => console.log(err));
   })
   .catch(err => {
     console.log ('test', err);
