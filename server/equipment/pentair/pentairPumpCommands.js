@@ -24,7 +24,7 @@ module.exports = {
     addToQueue(message);
   },
 
-  pumpControlPanelState (powerState, queueName = 'pump1', callback = () => {}) {
+  pumpControlPanelState (powerState, queueName = 'Pump1', callback = () => {}) {
     if (typeof arguments[arguments.length - 1] === 'function') {
       callback = arguments[arguments.length - 1];
     }
@@ -34,12 +34,12 @@ module.exports = {
     } else if (powerState === 'remote' || powerState === 'local') {
       addToQueue(msg.defaultPumpControlPanelMessage(powerState, callback));
     } else {
-      return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
+      return callback('Error: In order to change the pump Power state, you need to enter true/false or on/off', null);
     }
   },
 
 
-  pumpPower (powerState, queueName = 'pump1', callback = () => {}) {
+  pumpPower (powerState, queueName = 'Pump1', callback = () => {}) {
     if (typeof arguments[arguments.length - 1] === 'function') {
       callback = arguments[arguments.length - 1];
     }
@@ -49,7 +49,7 @@ module.exports = {
     } else if (powerState === 'on' || powerState === 'off') {
       addToQueue(msg.defaultPumpPowerMessage(powerState, callback));
     } else {
-      return 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
+      return callback('Error: In order to change the pump Power state, you need to enter true/false or on/off', null);
     }
   },
 
@@ -72,7 +72,7 @@ module.exports = {
   },
 
 
-  runPumpAtSpeed (rpm, queueName = 'pump1', callback = () => {}) {
+  runPumpAtSpeed (rpm, queueName = 'Pump1', callback = () => {}) {
     // var Examplepacket= [ 165, 0, 96, 33, 1, 4, 2, 196, 3, 232 ]
     var message = {};
     var destination = 96; //96 pump 1
@@ -95,7 +95,7 @@ module.exports = {
   },
 
 
-  runPumpProgram (speed, queueName = 'pump1', callback = () => {}) {
+  runPumpProgram (speed, queueName = 'Pump1', callback = () => {}) {
     if (typeof arguments[arguments.length - 1] === 'function') {
       callback = arguments[arguments.length - 1];
     }
