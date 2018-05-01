@@ -1,6 +1,5 @@
 <script>
   // import GroupOfButtons from './GroupOfButtons.vue';
-  import AlertMessages from './AlertMessages.vue';
   import DoubleButton from './DoubleButton.vue';
   import OnlyButtons from './OnlyButtons.vue';
   import PumpStatus from './PumpStatus.vue';
@@ -16,7 +15,6 @@
   export default {
     computed: {},
     components: {
-      AlertMessages,
       DoubleButton,
       Chart,
       PumpStatus,
@@ -28,7 +26,6 @@
     data: function () {
       return {
         message: ' ',
-        items: [[{name: 'test'}], [{name: 'test2'}], [{name: 'test3'}]],
         showExtended: false,
         buttonData: {
           "External Controls" : {
@@ -51,41 +48,37 @@
             'Save Speed': ['test_runpumpSpeedAt1000RPM']
           }
         },
-        maintenceMode: false
       }
     },
-    props: ['equipmentName', 'menuSelect'],
-      methods: {
-    setMessage(message) {
-      if (messageTimer) {
-        clearTimeout(messageTimer);
-        messageTimer = ' ';
-      }
-      this.message = message;
-      setTimeout(() => {
-        this.message = ' ';
-      }, 5000);
-    },
-    setMessageCallback(err, results) {
-      results = results ? ': ' + results : '';
+    props: ['equipmentName', 'menuSelect', 'setMaintenanceMode'],
+    methods: {
+      setMessage(message) {
+        if (messageTimer) {
+          clearTimeout(messageTimer);
+          messageTimer = ' ';
+        }
+        this.message = message;
+        setTimeout(() => {
+          this.message = ' ';
+        }, 5000);
+      },
+      setMessageCallback(err, results) {
+        results = results ? ': ' + results : '';
 
-      if (err) {
-        this.setMessage('Message Failed' + err);
-      } else {
-        this.setMessage('Message Confirmed' + results);
-      }
+        if (err) {
+          this.setMessage('Message Failed' + err);
+        } else {
+          this.setMessage('Message Confirmed' + results);
+        }
+      },
+      returnFirstObjectKey (obj) {
+        return Object.keys(obj)[0];
+      },
     },
-    returnFirstObjectKey (obj) {
-      return Object.keys(obj)[0];
-    },
-    setMaintenceMode (newMode = false) {
-      this.maintenceMode = newMode;
-    }
-  },
-    watch: {
-    '$route' (to, from) {
-      }
-    }
+    // watch: {
+    //   '$route' (to, from) {
+    //   }
+    // }
   }
 </script>
 
@@ -93,10 +86,6 @@
   <div>
     <div v-if="menuSelect==='controls' || !menuSelect" class="">
       <div class="row">
-        <AlertMessages
-          :equipmentName="equipmentName"
-          :maintenceMode="maintenceMode">
-        </AlertMessages>
         <PumpStatus></PumpStatus>
         <StatusMessage v-bind:message='message'></StatusMessage>
       </div>
@@ -105,7 +94,7 @@
           v-bind:equipmentName="equipmentName"
           v-bind:setMessageCallback="setMessageCallback"
           v-bind:setMessage="setMessage"
-          v-bind:setMaintenceMode="setMaintenceMode"
+          v-bind:setMaintenanceMode="setMaintenanceMode"
           />
         <OnlyButtons v-for="(data, title) in buttonData"
           v-bind:buttons="data"
@@ -121,10 +110,7 @@
         </SelectedPumpControl>
       </div>
     </div>
-    <Chart v-if="menuSelect==='graph'"/>
-    rwar1
-        {{ $route.params }}
-        test
+    <Chart v-if="menuSelect==='Graph'"/>
   </div>
 </template>
 

@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 
 import {socket} from './socket.js';
 
+import AlertMessages from './components/AlertMessages.vue';
 import NavBar from './components/NavBar.vue';
 import Chart from './components/Chart.vue';
 import Pump from './components/Pump.vue';
@@ -17,23 +18,27 @@ var equipmentTypes = {
 };
 var listEquipment = [];
 
-// var exampleData = {
-//   'groupName': [
-//   {name: "Pump Control", data: ['test', 'test2', 'test3'], type: 'button'},
-//   {name: "name2", data: ['test', 'test2', 'test3']}
-//   ]
-// };
-
 const routes = [
-  // { path: '/vue', component: Pump },
-  // { path: '/', component: Pump },
+  { path: '/vue', component: Pump, Pump, props: function (route) {
+    return {
+      equipmentName: 'Pump1',
+      menuSelect: 'controls'
+    };
+  }
+  },
+  { path: '/', component: Pump, props: function (route) {
+    return {
+      equipmentName: 'Pump1',
+      menuSelect: 'controls'
+    };
+  } },
   // { path: '/index', component: Pump },
   { path: '/Settings', component: UserSettings },
   { path: '/Graph', component: Chart },
   { path: '/:pumpName/:menuSelect', component: Pump, props: function (route) {
     return {
-      equipmentName: route.params.pumpName.toLowerCase(),
-      menuSelect: route.params.menuSelect.toLowerCase()
+      equipmentName: route.params.pumpName,
+      menuSelect: route.params.menuSelect
     };
   } },
 ];
@@ -64,7 +69,8 @@ var getListOfEquipment = function () {
 
 
 const router = new VueRouter({
-  routes
+  routes,
+  // mode: 'history'
 });
 
 getListOfEquipment();
@@ -72,14 +78,23 @@ getListOfEquipment();
 const app = new Vue({
   el: '#app',
   router,
-  components: { NavBar, Pump, UserSettings },
+  components: { AlertMessages, NavBar, Pump, UserSettings },
   data: {
-    listEquipment
+    listEquipment,
+    maintenanceMode: false
+  },
+  methods: {
+    setMaintenanceMode (newMode = false) {
+      this.maintenanceMode = newMode;
+    }
   },
   template: `
   <div>
     <NavBar :listEquipment="listEquipment" />
-    <router-view>
+    <AlertMessages
+      :maintenanceMode="maintenanceMode">
+    </AlertMessages>
+    <router-view :setMaintenanceMode='setMaintenanceMode'>
     </router-view>
   </div>
 `

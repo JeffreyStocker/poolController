@@ -2,7 +2,7 @@
   import { alerts, serverConnected } from '../socket.js';
 
   export default {
-    props: ['equipmentName', 'maintenceMode'],
+    props: ['maintenanceMode'],
     components: {},
     data: function () {
       return {
@@ -26,9 +26,11 @@
       </div>
       <div
         class="yellow center"
-        v-if="maintenceMode"
-      >
-      Maintence Mode
+        v-if="maintenanceMode"
+        >
+        <!-- <template> -->
+          Maintence Mode
+        <!-- </template> -->
       </div>
   </div>
 </template>

@@ -12,7 +12,7 @@
         pumpData,
       }
     },
-    props: ['setMaintenceMode', 'equipmentName', 'setMessageCallback', 'setMessage', 'setPumpData'],
+    props: ['setMaintenanceMode', 'equipmentName', 'setMessageCallback', 'setMessage', 'setPumpData'],
     methods: {
       powerOn: function () { socket.emit('pumpPower', 'on', this.equipmentName, this.setMessageCallback) },
       powerOff: function () { socket.emit('pumpPower', 'off', this.equipmentName, this.setMessageCallback) },
@@ -28,11 +28,11 @@
       setMaintenceModeCallback: function (err, results, evt) {
         this.setMessageCallback(err, results);
         if (err) {
-          console.log (err)
+          console.log ('Error:', err)
         } else {
-          let target = evt.target.textContent.trim() === 'On' ? true : false;
-          target && setPumpData();
-          this.setMaintenceMode (target);
+          let state = evt.target.textContent.trim() === 'On' ? true : false;
+          state && setPumpData();
+          this.setMaintenanceMode (state);
         }
       }
     },
@@ -43,21 +43,21 @@
   <div class="col-sm-2 center">
     <label>Power Controls </label>
     <DoubleButton
-      :button1="{name: 'On', data: ['pumpPower', 'on'] }"
-      :button2="{name: 'Off', data: ['pumpPower', 'off'] }"
+      :button1="{name: 'On', data: ['pumpPower', 'on', equipmentName] }"
+      :button2="{name: 'Off', data: ['pumpPower', 'off', equipmentName] }"
       :setMessage="setMessageCallback" >
     </DoubleButton>
     <Buttonx name="Power Toggle" v-bind:onClick="powerToggle" />
     Control Panel
     <DoubleButton
-      :button1="{name: 'Local', data: ['pumpControlPanelState', 'local'] }"
-      :button2="{name: 'Remote', data: ['pumpControlPanelState', 'remote'] }"
+      :button1="{name: 'Local', data: ['pumpControlPanelState', 'local', equipmentName] }"
+      :button2="{name: 'Remote', data: ['pumpControlPanelState', 'remote', equipmentName] }"
       :setMessage="setPumpDataCallback" >
     </DoubleButton>
     Maintence Mode
     <DoubleButton
-      :button1="{name: 'On', data: ['toggleStatusUpdate', 'off'] }"
-      :button2="{name: 'Off', data: ['toggleStatusUpdate', 'on'] }"
+      :button1="{name: 'On', data: ['toggleStatusUpdate', 'off', equipmentName] }"
+      :button2="{name: 'Off', data: ['toggleStatusUpdate', 'on', equipmentName] }"
       v-bind:setMessage="setMaintenceModeCallback" >
     </DoubleButton>
   </div>
