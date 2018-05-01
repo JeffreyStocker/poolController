@@ -72,10 +72,11 @@ setPumpData();
 
 var storePumpData = function (pumpData) {
   if (typeof pumpData.watt === 'number' && typeof pumpData.rpm === 'number') {
-    if (savedPumpData.watts.length > 2000) {
-      savedPumpData.watts.splice(1500);
-      savedPumpData.rpms.splice(1500);
-      savedPumpData.dates.splice(1500);
+    if (savedPumpData.watts.length > 5000) {
+      console.log('shrunk to smaller size');
+      savedPumpData.watts.splice(3000);
+      savedPumpData.rpms.splice(3000);
+      savedPumpData.dates.splice(3000);
     }
     savedPumpData.watts.push(pumpData.watt);
     savedPumpData.rpms.push(pumpData.rpm);
@@ -125,6 +126,7 @@ var getPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
 
 
 var updatePumpData = function (powerData) {
+  console.log('DataSize=' + powerData.length);
   var length = powerData.length;
   for (var i = 0; i < length; i++) {
     savedPumpData.watts[i] = powerData[i].watt;
