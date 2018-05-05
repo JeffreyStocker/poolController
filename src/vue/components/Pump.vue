@@ -29,23 +29,23 @@
         showExtended: false,
         buttonData: {
           "External Controls" : {
-            '1: SPA': ['intellicom', 1],
-            '2: Waterfall': ['intellicom', 2],
-            "3: Slow": ['intellicom', 3],
-            "4: Solar": ['intellicom', 4],
-            "External: Off": ['intellicom', 0]
+            '1: SPA': ['intellicom', 1, this.equipmentName],
+            '2: Waterfall': ['intellicom', 2, this.equipmentName],
+            "3: Slow": ['intellicom', 3, this.equipmentName],
+            "4: Solar": ['intellicom', 4, this.equipmentName],
+            "External: Off": ['intellicom', 0, this.equipmentName]
           },
           "Speed Controls" : {
-            'Program 1': ['runSpeed', 1],
-            'Program 2': ['runSpeed', 2],
-            "Program 3": ['runSpeed', 3],
-            "Program 4": ['runSpeed', 4],
-            "Speed: Off": ['pumpPower', 'toggle'],
+            'Program 1': ['runSpeed', 1, this.equipmentName],
+            'Program 2': ['runSpeed', 2, this.equipmentName],
+            "Program 3": ['runSpeed', 3, this.equipmentName],
+            "Program 4": ['runSpeed', 4, this.equipmentName],
+            "Speed: Off": ['pumpPower', 'toggle', this.equipmentName],
           }
         },
         savePumpSpeedButtons: {
           "Speed in RPM & Save Prog 1": {
-            'Save Speed': ['test_runpumpSpeedAt1000RPM']
+            'Save Speed': ['test_runpumpSpeedAt1000RPM', this.equipmentName]
           }
         },
       }

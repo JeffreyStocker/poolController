@@ -1,11 +1,12 @@
 class Message {
-  constructor(packet, name = 'unknown', options = {
-    timer: 250,
-    logLevel: 'info',
-    source: 16,
-    destination: 96,
-    acknowledgment: null
-  }) {
+  constructor(packet, name = 'unknown',
+    options = {
+      timer: 250,
+      logLevel: 'info',
+      source: 16,
+      destination: 96,
+      acknowledgment: null
+    }) {
 
     if (!Array.isArray(packet)) { throw Error('packet must be a array'); }
 
@@ -548,9 +549,7 @@ module.exports = {
       defaultMessage = defaultMessages.pump_PowerOff;
       return new Message(defaultMessage.byte, defaultMessage.name, {timer: 'off'}, callback);
     } else {
-      let errorMessage = 'Error: In order to change the pump Power state, you need to enter true/false or on/off';
-      callback (errorMessage);
-      throw new Error(errorMessage);
+      callback (new Error('Error: In order to change the pump Power state, you need to enter true/false or on/off'), null);
     }
   },
 

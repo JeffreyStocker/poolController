@@ -72,11 +72,9 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   // });
 
 
-  socket.on('intellicom', function (speed, callback) {
+  socket.on('intellicom', function (speed, queueName, callback) {
     // logger.debug('intellicom');
-    runIntellicomPumpSpeed(speed, callback);
-    // socket.emit('confirm');
-    // callback(0);
+    runIntellicomPumpSpeed(speed, queueName, callback);
   });
 
 
@@ -87,13 +85,12 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   // });
 
 
-  socket.on('runSpeed', function (speed, callback) {
-    console.log ('run speed', speed);
+  socket.on('runSpeed', function (speed, queueName, callback) {
     runPumpProgram(speed, undefined, undefined, callback);
   });
 
 
-  socket.on('setPumpExternalspeed', function (speed, callback) {
+  socket.on('setPumpExternalspeed', function (speed, queueName, callback) {
     // logger.debug('setPumpExternalspeed');
     runIntellicomPumpSpeed(speed, callback);
     // socket.emit('confirm');

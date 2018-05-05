@@ -3,9 +3,9 @@ var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMes
 var logger = require (process.env.NODE_PATH + '/server/logging/winston').sendToLogs;
 var queues = requireGlob('GroupOfQueues');
 
-var addToQueue = function (message) {
-  queues.addMessageToQueue('Pump1', message);
-};
+// var addToQueue = function (message) {
+//   queues.addMessageToQueue('Pump1', message);
+// };
 
 module.exports = {
 
@@ -20,8 +20,9 @@ module.exports = {
       interval = 10000;
     }
 
-    var message = msg.defaultIntellicomMessage(speed, {timers: interval}, callback);
-    addToQueue(message);
+    // var message = msg.defaultIntellicomMessage(speed, {timers: interval}, callback);
+    // addToQueue(message);
+    queues.addMessageToQueue(queueName, msg.defaultIntellicomMessage(speed, {timers: interval}, callback));
   },
 
   pumpControlPanelState (powerState, queueName = 'Pump1', callback = () => {}) {
@@ -29,10 +30,13 @@ module.exports = {
       callback = arguments[arguments.length - 1];
     }
     if (powerState === 'toggle') {
-      addToQueue(msg.defaultPumpControlPanelMessage('remote'));
-      addToQueue(msg.defaultPumpControlPanelMessage('local', callback));
+      queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage('remote'));
+      // addToQueue(msg.defaultPumpControlPanelMessage('remote'));
+      queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage('local', callback));
+      // addToQueue(msg.defaultPumpControlPanelMessage('local', callback));
     } else if (powerState === 'remote' || powerState === 'local') {
-      addToQueue(msg.defaultPumpControlPanelMessage(powerState, callback));
+      queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage(powerState, callback));
+      // addToQueue(msg.defaultPumpControlPanelMessage(powerState, callback));
     } else {
       return callback('Error: In order to change the pump Power state, you need to enter true/false or on/off', null);
     }
@@ -44,10 +48,13 @@ module.exports = {
       callback = arguments[arguments.length - 1];
     }
     if (powerState === 'toggle') {
-      addToQueue(msg.defaultPumpPowerMessage('off'));
-      addToQueue(msg.defaultPumpPowerMessage('on', callback));
+      queues.addMessageToQueue(queueName, msg.defaultPumpPowerMessage('off'));
+      // addToQueue(msg.defaultPumpPowerMessage('off'));
+      queues.addMessageToQueue(queueName, msg.defaultPumpPowerMessage('on', callback));
+      // addToQueue(msg.defaultPumpPowerMessage('on', callback));
     } else if (powerState === 'on' || powerState === 'off') {
-      addToQueue(msg.defaultPumpPowerMessage(powerState, callback));
+      queues.addMessageToQueue(queueName, msg.defaultPumpPowerMessage(powerState, callback));
+      // addToQueue(msg.defaultPumpPowerMessage(powerState, callback));
     } else {
       return callback('Error: In order to change the pump Power state, you need to enter true/false or on/off', null);
     }
@@ -65,9 +72,11 @@ module.exports = {
     }
 
     if (state === 'on') {
-      addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}, callback));
+      queues.addMessageToQueue(queueName, msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}, callback));
+      // addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}, callback));
     } else if (state === 'off') {
-      addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 0}}, callback));
+      queues.addMessageToQueue(queueName, msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 0}}, callback));
+      // addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 0}}, callback));
     }
   },
 
@@ -85,13 +94,11 @@ module.exports = {
     var commandLowBit = returnLowBit (rpm); //changes either rpm low, or timer MM
     // var checksumHighBit = //checksum high added later in code
     // var checksumLowBit = //chechsum low added later in code
-    // console.log('commandHighBit: ' , commandHighBit);
-    // console.log('returnLowBit (rpm): ' , commandLowBit);
     message.packet = [165, 0, destination, source, action, length, command, subcommand, commandHighBit, commandLowBit];
-    // console.log (packet.byte)
     message.name = 'Run Pump at ' + rpm;
 
-    addToQueue (new Message (message.packet, message.name, callback));
+    // addToQueue (new Message (message.packet, message.name, callback));
+    queues.addMessageToQueue(queueName, new Message (message.packet, message.name, callback));
   },
 
 
@@ -99,13 +106,12 @@ module.exports = {
     if (typeof arguments[arguments.length - 1] === 'function') {
       callback = arguments[arguments.length - 1];
     }
-
     if (speed === 0) {
-      pumpPower('toogle', callback);
+      pumpPower('toogle', queueName, callback);
     } else if (speed >= 1 || speed <= 4) {
-      addToQueue(msg.defaultPumpSpeedMessage(speed, callback));
+      queues.addMessageToQueue(queueName, msg.defaultPumpSpeedMessage(speed, callback));
     } else {
-      callback ('Speed outside Correct Range (0-4)');
+      callback ('Speed outside Correct Range (0-4)', null);
     }
   },
 
@@ -137,12 +143,11 @@ module.exports = {
     var commandLowBit = returnLowBit (rpm); //changes either rpm low, or timer MM
     // var checksumHighBit = //checksum high added later in code
     // var checksumLowBit = //chechsum low added later in code
-    // console.log('commandHighBit: ' , commandHighBit);
-    // console.log('returnLowBit (rpm): ' , commandLowBit);
     message.packet = [165, 0, destination, source, action, length, command, subcommand, commandHighBit, commandLowBit];
-    // console.log (packet.byte)
     message.name = 'Run Pump Program: ' + program + ' at ' + rpm;
+
     addToQueue (packet);
+    // queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage(powerState, callback));
   },
 
   //wip
@@ -160,8 +165,6 @@ module.exports = {
     var commandLowBit = 50; //returnLowBit (time)  //changes either rpm low, or timer MM
     // var checksumHighBit = //checksum high added later in code
     // var checksumLowBit = //chechsum low added later in code
-    console.log('commandHighBit: ', commandHighBit);
-    console.log('returnLowBit (rpm): ', commandLowBit);
 
     message.packet = [165, 0, destination, source, action, 3, command, commandHighBit, commandLowBit];
     // packet['byte']= [165, 0, destination, source, action, length, command, subcommand, 3,232,commandHighBit, commandLowBit]
@@ -170,9 +173,9 @@ module.exports = {
     message.packet = [ 165, 0, 96, 16, 1, 2, 3, 43];
     message.packet = [ 165, 0, 96, 16, 1, 2, 3, 43];
     message.name = 'Run Pump With Timer of ' + min;
-    // console.log (packet.byte)
-
     // packet.name= 'Run Pump at ' + rpm
+
+    // queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage(powerState, callback));
     addToQueue (message);
   },
 
@@ -189,15 +192,13 @@ module.exports = {
     var subcommand = 43; //33 = run program xx / turn off pump, 39-42, save P1-4 as xx, 43 set pump timer for xx min || command =2; subcommand - 96 or 196 then might be linked to speed 1
     var commandHighBit = returnHighBit (timer); //changes, either RPM high or timer HH or MM
     var commandLowBit = returnLowBit (timer); //changes either rpm low, or timer MM
-
     var timerHighBit = 1;
     var timerLowBit = 10;
-    // if ()
 
     // var checksumHighBit = //checksum high added later in code
     // var checksumLowBit = //chechsum low added later in code
-    console.log('commandHighBit: ', commandHighBit);
-    console.log('returnLowBit (rpm): ', commandLowBit);
+    // console.log('commandHighBit: ', commandHighBit);
+    // console.log('returnLowBit (rpm): ', commandLowBit);
 
     // packet['byte']= [165, 0, destination, source, action, 6, command, subcommand, 3,232,commandHighBit, commandLowBit]  //manual set to 1000 rpm
     // packet['byte']= [165, 0, destination, source, action, length, command, subcommand, commandHighBit, commandLowBit]
@@ -205,6 +206,8 @@ module.exports = {
     // packet['byte']= [165, 0, destination, source, action, 2, command, subcommand, ]
     message.name = 'Manual Pump Control ' + rpm;
 
+
     addToQueue (new Message(message.packet, message.name));
+    // queues.addMessageToQueue(queueName, new Message(message.packet, message.name));
   }
 };
