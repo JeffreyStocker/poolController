@@ -90,13 +90,13 @@ describe('Should be a Message Class', function () {
       let corruptStart2ndByte = Message.prototype.findStart([165, 1, 96, 16, 4, 1, 255, 2, 25]);
       corruptStart2ndByte.should.be.equal(-1);
 
-      should.throw(() => {
-        Message.prototype.findStart('test');
-      });
+      // should.throw(() => {
+      //   Message.prototype.findStart('test');
+      // });
 
-      should.throw(() => {
-        Message.prototype.findStart({test: [165, 0]});
-      });
+      // should.throw(() => {
+      //   Message.prototype.findStart({test: [165, 0]});
+      // });
 
       let canHaveOtherTypesInArray = Message.prototype.findStart([165, 0, {test: 'yes'}, 96, 'test', 4, 1, 'nope', [2, 5, 'test'], 25]);
       canHaveOtherTypesInArray.should.be.equal(0);
@@ -218,15 +218,15 @@ describe('Should be a Message Class', function () {
       Message.prototype.stripPacketOfHeaderAndChecksum([255, 0, 255, 165, 0, 96, 16, 1, 4, 3, 33, 0, 8, 1, 70]).should.eql([165, 0, 96, 16, 1, 4, 3, 33, 0, 8]);
       Message.prototype.stripPacketOfHeaderAndChecksum([165, 0, 96, 16, 1, 4, 3, 33, 0, 0, 1, 62]).should.eql([165, 0, 96, 16, 1, 4, 3, 33, 0, 0]);
 
-      should.throw(() => {
-        Message.prototype.stripPacketOfHeaderAndChecksum('test');
-      });
-      should.throw(() => {
-        throw (Message.prototype.stripPacketOfHeaderAndChecksum(65));
-      });
-      should.throw(() => {
-        (Message.prototype.stripPacketOfHeaderAndChecksum({test: [5, 4, 3, 2, 1]}));
-      });
+      // should.throw(() => {
+      //   Message.prototype.stripPacketOfHeaderAndChecksum('test');
+      // });
+      // should.throw(() => {
+      //   throw (Message.prototype.stripPacketOfHeaderAndChecksum(65));
+      // });
+      // should.throw(() => {
+      //   (Message.prototype.stripPacketOfHeaderAndChecksum({test: [5, 4, 3, 2, 1]}));
+      // });
     });
 
     it('should contain method "stripHeader"', function () {
