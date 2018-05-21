@@ -18,12 +18,24 @@ module.exports = class StandardDeviation {
     dataArray.forEach(val => this.addDataPoint(val));
   }
 
-  return (average) {
+  return ({average = undefined, type = 'population'} = {type: 'population'}) {
+    var variances, sumOfvariances;
     if (!average) {
-      average = this._dataPoints.reduce((sum, val) => sum + val, 0) / this._dataPoints.length;
+      var sum = this._dataPoints.reduce((sum, val) => sum + val, 0);
+      average = sum / this._dataPoints.length;
     }
-    var variances = this._dataPoints.map(val => Math.pow(val - average, 2));
-    var sumOfvariances = variances.reduce((sum, elementVal) => sum + elementVal, 0);
-    return Math.sqrt(sumOfvariances / this._dataPoints.length);
+
+    variances = this._dataPoints.map(val => Math.pow(val - average, 2));
+    sumOfvariances = variances.reduce((sum, elementVal) => sum + elementVal);
+
+    if (type === 'population') {
+      return Math.pow(sumOfvariances / this._dataPoints.length, 0.5);
+
+    } else if (type === 'sample') {
+      return Math.pow(sumOfvariances / (this._dataPoints.length - 1), 0.5);
+
+    } else {
+      throw new Error ('type variable must be "population" or "sample"');
+    }
   }
 };
