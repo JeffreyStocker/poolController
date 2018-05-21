@@ -27,7 +27,6 @@ var init = function (location = './database/power', invervalInMin = 5) {
 
 var shrinkAndSave = function (logDataForFiveMins, equipment = 'Pump1') {
   return new Promise ((resolve, revoke) => {
-    debugger;
     shrink(logDataForFiveMins)
       .then(compactedData => {
         compactedData.equipment = compactedData.equipment || equipment;
@@ -92,7 +91,7 @@ var log = function (parsedPumpData) {
     }
   }
   currentLogs.push({
-    equipment: PentairMessage.addresses[parsedPumpData.equipment],
+    equipment: parsedPumpData.equipment,
     watt: parsedPumpData.watt,
     rpm: parsedPumpData.rpm,
   });
@@ -117,7 +116,9 @@ var findBetweenTime = function(startTime = new Date(), endTime = new Date(), pum
         equipment: { $eq: pumpName }
       }
     })
-      .then (searchResults => resolve(searchResults.docs))
+      .then (searchResults => {
+        return resolve(searchResults.docs);
+      })
       .catch (err => revoke(err));
   });
 };
@@ -146,7 +147,6 @@ var insertAtTime = function (data) {
   return new Promise ((resolve, revoke) => {
     if (!data || typeof data !== 'object') { return new Error ('Data to insert into database should be a object'); }
     data._id = new Date();
-    // console.log (data);
     db.post(data)
       .then(resolveData => {
         resolve(resolveData);
@@ -180,7 +180,7 @@ var count = function () {
 
 
 var allDocs = function () {
-  return db.allDocs({});
+  return db.allDocs({include_docs: true});
 };
 
 var sumAndAverageOfPowerLogs = function (powerLogs) {
