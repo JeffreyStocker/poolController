@@ -1,10 +1,12 @@
-process.env.NODE_PATH = process.env.NODE_PATH || __dirname + '/../../..';
-var ActionQueue = require (process.env.NODE_PATH + '/server/Classes/ActionQueue.js');
-var msg = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages.js');
+const path = require('path');
+
+var ActionQueue = require (path.resolve(__dirname + '/server/Classes/ActionQueue.js'));
+var msg = require (path.resolve(__dirname + '/server/equipment/pentair/PentairMessages.js'));
 var Message = msg.Message;
-var socketServer = require (process.env.NODE_PATH + '/server/server.js').socketServer;
+var socketServer = require (path.resolve(__dirname + '/server/server.js')).socketServer;
 var logger = requireGlob ('winston').sendToLogs;
 var logStatus = requireGlob ('pentairPumpStatusLog.js');
+var currentLogs = requireGlob ('CurrentLogs.js');
 
 module.exports = class PentairQueue extends ActionQueue {
   constructor (
@@ -29,6 +31,7 @@ module.exports = class PentairQueue extends ActionQueue {
     this.timers = {};
     this.options = options || {};
     this.serialPort = options.serialPort || (() => {});
+    //note need to get rid of this later
     if (options.serialPort && options.serialPort.constructor.name === 'SerialPort') {
       options.serialPort.on('data', (dataFromSerialPort) => {
         this.processData(dataFromSerialPort);
@@ -44,42 +47,6 @@ module.exports = class PentairQueue extends ActionQueue {
     this.currentRetries = 0;
     this.timeout;
     this.currentMessage;
-
-    // this.storeStatus = (function () {
-    //   //psudocode
-    //   /*
-    //   going to use context
-    //   use
-    //   check speed,
-    //     if same, then add watt to watt sum
-    //   if not same rpm, then find average of watt sum
-    //   store average watt, speed and date into the database
-    //   set time to now
-    //   set watt sum to 0
-    //   set rpm to current
-    //   */
-    //   var storedDate;
-    //   var storedRpm = null;
-    //   var wattSum = 0;
-    //   var wattCount = 0;
-    //   return function (data) {
-    //     if (data.rpm === storedRpm) {
-    //       wattSum += data.watt;
-    //       wattCount ++;
-    //       return Promise.resolve(null);
-    //     }
-    //     let output = {
-    //       date,
-    //       rpm,
-    //       watt: ~~(wattSum / wattCount),
-    //     };
-    //     rpm = data.rpm;
-    //     wattSum = data.watt;
-    //     wattCount = 1;
-    //     date = new Date();
-    //     return Promise.resolve(output);
-    //   };
-    // })();
   }
 
 
@@ -138,7 +105,7 @@ module.exports = class PentairQueue extends ActionQueue {
           this.currentRetries++;
           this.logger('events', 'debug', this.currentRetries + ': Message timed out waiting for acknowledgment: ', message.name);
         } else {
-          this.logger('events', 'info', this.currentRetries + ': Message timeout: ' + message.name + '\nError: Removing message from queue');
+          this.logger('events', 'info', this.currentMessage.name + ': Message timeout: ' + message.name + '\nError: Removing message from queue');
           this.clearCurrentMessage('Message failed to send to pump');
         }
         this.runQueue(resend = true);
@@ -147,7 +114,7 @@ module.exports = class PentairQueue extends ActionQueue {
   }
 
   processData(data) {
-    debugger;
+    // debugger;
     data = Message.prototype.processIncomingPacket(data);
     var results = this.checkQueue(data);
     if (Message.prototype.isStatusMessage(data)) {
@@ -169,6 +136,8 @@ module.exports = class PentairQueue extends ActionQueue {
         watt: pumpData.watt,
         rpm: pumpData.rpm
       });
+      currentLogs.addData(this.name, pumpData.watt, pumpData.rpm);
+
       try {
         socketServer.emit('pumpDataReturn', pumpData);
       } catch (err) {
