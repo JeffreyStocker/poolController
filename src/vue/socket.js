@@ -72,7 +72,7 @@ setPumpData();
 
 var storePumpData = function (pumpData) {
   if (typeof pumpData.watt === 'number' && typeof pumpData.rpm === 'number') {
-    if (savedPumpData.watts.length > 5000) {
+    if (savedPumpData.watts.length > 500000) {
       console.log('shrunk to smaller size');
       savedPumpData.watts.splice(3000);
       savedPumpData.rpms.splice(3000);
