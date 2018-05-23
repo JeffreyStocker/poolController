@@ -3,6 +3,10 @@ const expect = chai.expect;
 const fs = require('fs');
 const sinon = require ('sinon');
 const moment = require('moment');
+const path =  require('path');
+
+const MathUtils = require(path.resolve(__dirname + '/../../server/MathUtils.js'));
+
 
 const PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find'));
@@ -180,6 +184,7 @@ describe ('CurrentLogs', function () {
           mainDatabaseRecords = rows.map((doc) => {
             return Object.assign({}, doc.doc);
           });
+          // console.log('mainDatabaseRecords:', mainDatabaseRecords);
           done();
         })
         .catch(err => {
@@ -206,7 +211,7 @@ describe ('CurrentLogs', function () {
 
   });
 
-  describe.only ('_processInfo', function ( ) {
+  describe ('_processInfo', function ( ) {
     var testStart, testData;
     var watts = [100, 200, 300, 100, 200, 300];
     var rpm = 200;
@@ -222,7 +227,7 @@ describe ('CurrentLogs', function () {
         });
       }
       // console.log(testData);
-      currentLogs._processData;
+      // currentLogs._processData;
     });
 
     it('should have 3 new property, watts, wattTotal and standardDeviation', function () {
@@ -231,12 +236,17 @@ describe ('CurrentLogs', function () {
       expect(testData).to.not.haveOwnProperty('wattsTotal');
 
       var processedData = currentLogs._processData(testData);
+      // console.log(processedData);
 
       expect(processedData).to.haveOwnProperty('watts');
       expect(processedData).to.haveOwnProperty('standardDeviation');
       expect(processedData).to.haveOwnProperty('wattsTotal');
 
-      console.log('processedData:', processedData);
+      expect(processedData.watts).to.equal(200);
+      expect(Math.betterRound(processedData.standardDeviation, 5)).to.equal(81.64966);
+      expect(Math.betterRound(processedData.wattsTotal, 5)).to.equal(.13889);
+
+      // console.log('processedData:', processedData);
 
     });
 
