@@ -499,6 +499,13 @@ module.exports = {
   defaultMessages,
   Message,
   addresses,
+  reverseAddresses: (function () {
+    var output = {};
+    for (var [key, value] of Object.entries(addresses) ) {
+      output[value] = key;
+    }
+    return output;
+  })(),
 
   returnDefaultMessage(preBuiltMessage, destination = 96, options = {name: null, logLevel: 'debug'}, callback = () => {} ) {
     var logLevel, name;
