@@ -26,7 +26,11 @@ module.exports = class StandardDeviation {
     }
 
     variances = this._dataPoints.map(val => Math.pow(val - average, 2));
-    sumOfvariances = variances.reduce((sum, elementVal) => sum + elementVal);
+    sumOfvariances = variances.reduce((sum, elementVal) => sum + elementVal, 0);
+
+    if (this._dataPoints.length === 0 || this._dataPoints.length === 1) {
+      return 0;
+    }
 
     if (type === 'population') {
       return Math.pow(sumOfvariances / this._dataPoints.length, 0.5);
