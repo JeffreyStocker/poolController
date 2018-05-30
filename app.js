@@ -21,6 +21,7 @@ var socketServer = require (process.env.NODE_PATH + '/server/server');
 const PentairQueue = requireGlob('PentairQueue');
 const SerialPort = requireGlob('serialPort');
 var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
+var currentLogs = require (process.env.NODE_PATH + '/server/logging/CurrentLogs.js');
 
 
 SerialPort.initPromise(configureFile.config.system.communications, logger)
@@ -52,7 +53,9 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
         logger('system', 'error', 'Could not create a new queue with this name: ' + name);
       }
     }
-    logStatus.init('./database/power', 5 );
+    logStatus.init('./database/powerOld', 5 );
+
+    return currentLogs.start();
   })
   .then(() => {
     // console.log (process.env)
@@ -77,7 +80,9 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
     //  .catch(err => console.log(err));
   })
   .catch(err => {
+    logger('system', 'error', 'err');
     console.log ('test', err);
+    process.exit();
   });
 
 
@@ -101,15 +106,39 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
 //   });
 // };
 
-// // //do something when app is closing
-// process.on('exit', exitHandler.bind(null, {cleanup: true}));
+var exitHandler = function(options, err) {
+  if (options.cleanup) { console.log('clean'); }
+  if (err) { console.log(err.stack); }
+  // let packet = Buffer.from([165, 0, 96, 16, 4, 1, 0, 1, 26, 1, 53]); //adds header, checksum and converts to a buffer
+  // var { port } = require (process.env.NODE_PATH + '/server/serialPort');
+  // require (__dirname + '/server/logging/CurrentLogs.js').exit()
+  //   .then(results => {})
+  //   .catch(err => {
+  //     console.log('Error on write: ', err.message + '/n' + err.stack);
+  //   })
+  //   .then(() => {
+  //     port.write(packet, function(err) {
 
-// // //catches ctrl+c event
-// process.on('SIGINT', exitHandler.bind(null, {exit: true}));
+  //       if (err) {
+  //         console.log('Error on write: ', err.message + '/n' + err.stack);
+  //       }
+  //       if (options.exit) {
+  //         console.log ('exiting');
+  //       }
+  //     });
+  //   });
+  process.exit();
+};
 
-// // // catches "kill pid" (for example: nodemon restart)
-// process.on('SIGUSR1', exitHandler.bind(null, {exit: true}));
-// process.on('SIGUSR2', exitHandler.bind(null, {exit: true}));
+// //do something when app is closing
+process.on('exit', exitHandler.bind(null, {cleanup: true}));
 
-// //catches uncaught exceptions
-// process.on('uncaughtException', exitHandler.bind(null, {exit: true}));
+// //catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, {exit: true}));
+
+// // catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR1', exitHandler.bind(null, {exit: true}));
+process.on('SIGUSR2', exitHandler.bind(null, {exit: true}));
+
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, {exit: true}));
