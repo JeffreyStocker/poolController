@@ -1,9 +1,10 @@
 const path = require('path');
 
-var ActionQueue = require (path.resolve(__dirname + '/server/Classes/ActionQueue.js'));
-var msg = require (path.resolve(__dirname + '/server/equipment/pentair/PentairMessages.js'));
+var ActionQueue = require (path.resolve(__dirname + '/../../Classes/ActionQueue.js'));
+var msg = require (path.resolve(__dirname + '/PentairMessages.js'));
 var Message = msg.Message;
-var socketServer = require (path.resolve(__dirname + '/server/server.js')).socketServer;
+
+var socketServer = require (path.resolve(__dirname + '/../../server.js')).socketServer;
 var logger = requireGlob ('winston').sendToLogs;
 var logStatus = requireGlob ('pentairPumpStatusLog.js');
 var currentLogs = requireGlob ('CurrentLogs.js');
@@ -47,6 +48,12 @@ module.exports = class PentairQueue extends ActionQueue {
     this.currentRetries = 0;
     this.timeout;
     this.currentMessage;
+
+    this.externalMessage = {
+      timer: null,
+      status: false
+    };
+
   }
 
 
@@ -69,8 +76,8 @@ module.exports = class PentairQueue extends ActionQueue {
     // debugger;
     var queuedMessage = this.currentMessage;
     if (!queuedMessage) { return null; }
-    var response = this.currentMessage.tryAcknowledgment(incomingMessage);
-    if (response === true) {
+
+    if (this.currentMessage.tryAcknowledgment(incomingMessage)) {
       return true;
     }
     return false;
@@ -113,29 +120,45 @@ module.exports = class PentairQueue extends ActionQueue {
     }
   }
 
+  checkForExternalMessasgeToSameSource(messageData) {
+    if (messageData === null) {
+      return false;
+    }
+
+    if (/* messageData[3] === this.source && */ messageData[2] === this.destination) {
+      clearTimeout(this.externalMessage.timer);
+      this.externalMessage.status = true;
+      this.externalMessage.timer = setTimeout(() => {
+        this.externalMessage.status = false;
+      }, 60000);
+      return true;
+      // msg.reverseAddresses[messageData[3]] === this.source;
+    } else {
+      return false;
+    }
+  }
+
+
   processData(data) {
     // debugger;
-    data = Message.prototype.processIncomingPacket(data);
-    var results = this.checkQueue(data);
-    if (Message.prototype.isStatusMessage(data)) {
-      var pumpData = Message.prototype.parsePumpStatus(data);
-      this.logger('status', 'info', 'Status Received:  [' + [... data] + ']');
-      // this.storeStatus(pumpData)
-      //   .then(resultsFromBeforeRpmChange => {
-      //     if (resultsFromBeforeRpmChange) {
-      //       logStatus.log({
-      //         equipment: this.name,
-      //         watt: resultsFromBeforeRpmChange.watt,
-      //         rpm: resultsFromBeforeRpmChange.rpm
-      //       });
-      //     }
-      //   })
-      // .catch (this.logger('events', 'warn', err));
+    var processedData = Message.prototype.processIncomingPacket(data);
+    var checkQueueResults = this.checkQueue(processedData);
+
+    this.checkForExternalMessasgeToSameSource(processedData);
+    if (!processedData) {
+
+    }
+
+    if (Message.prototype.isStatusMessage(processedData)) {
+      var pumpData = Message.prototype.parsePumpStatus(processedData);
+      this.logger('status', 'info', 'Status Received:  [' + [... processedData] + ']');
+
       logStatus.log({
         equipment: this.name,
         watt: pumpData.watt,
         rpm: pumpData.rpm
       });
+
       currentLogs.addData(this.name, pumpData.watt, pumpData.rpm);
 
       try {
@@ -146,13 +169,15 @@ module.exports = class PentairQueue extends ActionQueue {
       if (this.currentMessage.name === 'Get Pump Status') {
         this.clearCurrentMessage(null, 'success');
       }
-    } else if (results === true) {
-      this.logger('events', this.currentMessage.logLevel, 'Acknowledged: ' + this.currentMessage.name + ': [' + data + ']');
+    } else if (checkQueueResults === true) {
+      this.logger('events', this.currentMessage.logLevel, 'Acknowledged: ' + this.currentMessage.name + ': [' + processedData + ']');
       this.clearCurrentMessage(null, 'success');
-    } else if (results === false) {
-      this.logger('events', 'warn', 'Packet was not an acknowledgment: ' + data);
-    } else if (results === null) {
-      logger('events', 'info', 'Message Received: ' + data);
+    } else if (checkQueueResults === false) {
+      this.logger('events', 'warn', 'Packet was not an acknowledgment: ' + processedData);
+    } else if (checkQueueResults === null) {
+      logger('events', 'info', 'Message Received: ' + processedData);
+    } else if (processedData === null) {
+      logger('events', 'info', 'Message Received but not a packet: ' + data);
     } else {
     }
     this.runQueue();
