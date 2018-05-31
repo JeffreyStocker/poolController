@@ -45,8 +45,8 @@
     "dev": "node app.js NODE_ENV=development",
     "pm2": "pm2 start app.js",
     "nodemon": "nodemon --ignore 'public/' --ignore 'src/' --delay 1  app.js NODE_ENV=development --trace-warnings",
-    "debug": "node --inspect-brk=0.0.0.0:8000 app.js NODE_ENV=debug --trace-warnings && webpack ",
-    "start": "node app.js NODE_ENV=production && webpack ",
+    "debug": "node --inspect-brk=0.0.0.0:8000 app.js --trace-warnings NODE_ENV=debug  && webpack ",
+    "start": "node app.js NODE_ENV=production --trace-warnings && webpack ",
     "test": "mocha ./spec/**/*.js --recursive --trace-warnings",
     "production": "node app.js NODE_ENV=production"
   },
