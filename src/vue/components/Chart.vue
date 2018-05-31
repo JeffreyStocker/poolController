@@ -9,14 +9,16 @@
           x: this.dates,
           y: this.watts,
           name: this.pumpName + ' Watts',
-          type: 'scatter'
+          type: 'scatter',
+          line: {shape: 'vh'},
         },
         {
           x: this.dates,
           y: this.rpms,
           name: this.pumpName + ' RPM',
           yaxis: 'y2',
-          type: 'scatter'
+          type: 'scatter',
+          line: {shape: 'vh'},
         }
       ]}
     },
@@ -39,17 +41,16 @@
             // scaleanchor: "x",
           },
           yaxis2: {
-
             title: 'RPMs',
             titlefont: {color: 'rgb(148, 103, 189)'},
             tickfont: {color: 'rgb(148, 103, 189)'},
             overlaying: 'y',
-            side: 'right'
+            side: 'right',
           },
           xaxis: {
             type: 'date',
             title: 'Dates'
-          },
+          }
         }
 
       }
