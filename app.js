@@ -127,7 +127,13 @@ var exitHandler = function(options, err) {
   //       }
   //     });
   //   });
-  process.exit();
+  currentLogs.exit()
+    .catch(err => {
+      console.log('error exiting', err);
+    })
+    .then(() => {
+      process.exit();
+    });
 };
 
 // //do something when app is closing
