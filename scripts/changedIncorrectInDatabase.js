@@ -30,7 +30,10 @@ db.find({
     });
   })
   .then(data => {
-    console.log(data);
+    return db.bulkDocs(data);
+  })
+  .then(results => {
+    console.log(results);
   })
   .catch (err => {
     console.log(err);
