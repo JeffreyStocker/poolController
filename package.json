@@ -42,11 +42,11 @@
   },
   "scripts": {
     "build": "webpack --progress --colors --watch",
-    "dev": "node app.js NODE_ENV=development",
+    "dev": "node --trace-warnings app.js NODE_ENV=development",
     "pm2": "pm2 start app.js",
-    "nodemon": "nodemon --ignore 'public/' --ignore 'src/' --delay 1  app.js NODE_ENV=development --trace-warnings",
-    "debug": "node --inspect-brk=0.0.0.0:8000 app.js --trace-warnings NODE_ENV=debug  && webpack ",
-    "start": "node app.js NODE_ENV=production --trace-warnings && webpack ",
+    "nodemon": "nodemon --ignore 'public/' --ignore 'src/' --delay 1 --trace-warnings app.js NODE_ENV=development ",
+    "debug": "node --inspect-brk=0.0.0.0:8000 --trace-warnings app.js NODE_ENV=debug  && webpack ",
+    "start": "node --trace-warnings  app.js NODE_ENV=production && webpack ",
     "test": "mocha ./spec/**/*.js --recursive --trace-warnings",
     "production": "node app.js NODE_ENV=production"
   },
