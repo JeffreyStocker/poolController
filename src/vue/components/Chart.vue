@@ -2,6 +2,11 @@
   import {savedPumpData, updatePumpDataFromStartOfTime, updatePumpDataFromBetweenTimes} from '../socket.js'
   import Moment from 'moment';
   export default {
+    beforeDestroy: function () {
+      window.removeEventListener('resize', this.__resizeListener)
+      this.__generalListeners.forEach(obj => this.$refs.container.removeAllListeners(obj.fullName))
+      Plotly.purge(this.$refs.container)
+    },
     computed: {
       plotCombinedData: function () {
         return [
@@ -23,14 +28,18 @@
       ]}
     },
     components: {},
+    created: function () {
+      updatePumpDataFromStartOfTime('day', 'Pump1');
+    },
     data: function () {
       return {
         pumpName: 'Pump1',
         rpms: savedPumpData.rpms,
         dates: savedPumpData.dates,
         watts: savedPumpData.watts,
-        plot: null,
         timer: null,
+        graph: null,
+        element: null,
         placeholder: null,
         layout: {
           title: 'Double Y Axis Example',
@@ -55,11 +64,45 @@
 
       }
     },
-    created: function () {
-      updatePumpDataFromStartOfTime('day', 'Pump1');
-    },
     mounted: function () {
-      this.plot = Plotly.react(this.$refs.polar, this.plotCombinedData, this.layout);
+      var element = this.$el,
+        WIDTH_IN_PERCENT_OF_PARENT = 100,
+        HEIGHT_IN_PERCENT_OF_PARENT = 80;
+
+      var d3 = Plotly.d3;
+      var gd3 = d3.select(this.$refs.polar)
+          .append('div')
+          .style({
+            width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+            'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+
+            height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+            // 'margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh'
+            'min-height': '400px',
+          });
+
+      this.element = gd3.node();
+
+      window.addEventListener('resize', () => {
+        this.updateGraph();
+      });
+
+      this.graph = Plotly.react(this.element, this.plotCombinedData, this.layout);
+
+      this.graph
+        .then(graph => {
+          graph.on('plotly_relayout',
+            (eventdata) => {
+              // eventdata.then( () => { console.log('test');})
+              if (eventdata.autosize) {
+                console.log('autoresized', eventdata);
+              } else if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
+                console.log('x axis changed:', eventdata);
+              } else {
+                console.log('????:', eventdata);
+              }
+            });
+        })
     },
     props: [],
     methods: {
@@ -68,6 +111,9 @@
       },
       getFromNow (timeString) {
         updatePumpDataFromBetweenTimes(new Date(), Moment().subtract(1, timeString).toDate());
+      },
+      updateGraph() {
+        Plotly.Plots.resize(this.element);
       }
     },
     watch: {
