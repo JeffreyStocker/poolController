@@ -6,6 +6,18 @@ const TimeTracker = require(path.resolve(__dirname + '/../TimeTracker.js'));
 const Timer = require(path.resolve(__dirname + '/../Classes/Timer.js'));
 const WeightedAverage = require(path.resolve(__dirname + '/../Classes/WeightedAverage.js'));
 
+try {
+  const internalWinston = require(path.resolve(__dirname + '/winston.js'));
+  const log = internalWinston.sendToLogs;
+} catch (err) {
+  const log = (function () {
+    console.log ('missing logging function, will not log anything in CurrentLogs.js');
+    return function () {};
+  })();
+}
+
+
+
 var PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find'));
 
@@ -22,7 +34,9 @@ var CurrentLogs = class CurrentLogs {
 
   _createEmptyDefault (queueName, rpm) {
     if (typeof queueName === 'string' && typeof rpm !== 'number') {
-      throw new Error ('queueName should be a string and rpm should be a number');
+      var error = new Error ('queueName should be a string and rpm should be a number');
+      log('status', 'error', error);
+      throw error;
     }
     return {
       startTime: new Date(),
