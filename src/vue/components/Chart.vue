@@ -61,7 +61,6 @@
             title: 'Dates'
           }
         }
-
       }
     },
     mounted: function () {

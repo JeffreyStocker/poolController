@@ -232,6 +232,19 @@ var CurrentLogs = class CurrentLogs {
     });
   }
 
+  _convertNameToLocal (queueName) {
+    return '_local/' + queueName;
+  }
+
+  _getDocFromCurrentDB (queueName) {
+    return this.currentDB.get(this._convertNameToLocal(queueName));
+  }
+
+  _putDocToCurrentDB (queueName, doc) {
+
+    return this.currentDB.put(this._convertNameToLocal(queueName));
+  }
+
   async _updateMainDatabaseFromCacheAndCurrentDB (queueName, rpm, watt) {
     var doc, docDataPoints, returnedDoc, count, mainUpdateResults;
     // console.log('_updateMainDatabaseFromCacheAndCurrentDB');
@@ -257,10 +270,10 @@ var CurrentLogs = class CurrentLogs {
     }
 
     try {
-      returnedDoc = await this.currentDB.get(queueName);
+      returnedDoc = await this._getDocFromCurrentDB(queueName);
       returnedDoc.dataPoints.push(...doc.dataPoints);
       this.equipment[queueName].data._rev = returnedDoc._rev;
-      this.currentDB.put(this._getEquipmentData(queueName))
+      this.currentDB.put(returnedDoc)
         .then(data => {
 
         })
@@ -302,7 +315,7 @@ var CurrentLogs = class CurrentLogs {
     doc = Object.assign({}, this.equipment[queueName].data);
     doc.dataPoints = docDataPoints;
 
-    this.currentDB.get(queueName)
+    this._getDocFromCurrentDB(queueName)
       .then(returnedDoc => {
         returnedDoc.dataPoints.push(...doc.dataPoints);
         return returnedDoc;
@@ -420,7 +433,7 @@ var CurrentLogs = class CurrentLogs {
               resolve ([]);
             });
         }), new Promise ((resolve, revoke) => {
-          this.currentDB.get(pumpName)
+          this._getDocFromCurrentDB(pumpName)
             .then(doc => {
               try {
                 doc._id = doc.endTime = doc.dataPoints[doc.dataPoints.length - 1].date;

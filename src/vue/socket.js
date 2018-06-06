@@ -55,7 +55,6 @@ var pumpDataDefault = {
   timeCurrent: '--',
 };
 
-
 var setPumpData = function (data) {
   if (data) {
     if (data.state === 4) {
