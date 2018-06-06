@@ -24,11 +24,19 @@ PouchDB.plugin(require('pouchdb-find'));
 const currentDBLocation = path.resolve(__dirname + '/../../database/current');
 const dbLocation = path.resolve(__dirname + '/../../database/power');
 
+var initCurrentDB = function () {
+  return new PouchDB(currentDBLocation, {revs_limit: 1});
+};
+
+var initDB = function () {
+  return new PouchDB(dbLocation);
+};
+
 var CurrentLogs = class CurrentLogs {
   constructor (interval) {
     this.equipment = {};
-    this.currentDB = new PouchDB(currentDBLocation, {revs_limit: 0});
-    this.db = new PouchDB(dbLocation);
+    this.currentDB = initCurrentDB();
+    this.db = initDB();
     this.timerLength = interval || 300000;
   }
 
@@ -217,7 +225,7 @@ var CurrentLogs = class CurrentLogs {
           return this.currentDB.destroy();
         })
         .then(() => {
-          this.currentDB = new PouchDB(name, {revs_limit: 0});
+          this.currentDB = initCurrentDB();
           resolve();
         })
         .catch(revoke);
