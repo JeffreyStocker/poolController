@@ -35,8 +35,11 @@ var initDB = function () {
 var CurrentLogs = class CurrentLogs {
   constructor (interval) {
     this.equipment = {};
-    this.currentDB = initCurrentDB();
-    this.db = initDB();
+    this.currentDB = new PouchDB(currentDBLocation, {
+      revs_limit: 1,
+      auto_compaction: true
+    });
+    this.db = new PouchDB(dbLocation);
     this.timerLength = interval || 300000;
   }
 
