@@ -4,7 +4,7 @@ process.argv.forEach((val, index) => {
   let split = val.split('=');
   if (split.length > 1) {
     process.env[split[0]] = split[1];
-    console.log(split[0], ':', split[1]);
+    console.log(split[0] + ':', split[1]);
   }
 });
 
@@ -60,7 +60,11 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
   .then(() => {
     // console.log (process.env)
     if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'debug' ) {
-      requireGlob('pentairPumpCommands.js').runRepeatingStatus();
+      requireGlob('pentairPumpCommands.js').runRepeatingStatus('on', 'Pump1', 1000, (err) => {
+        if (err) {
+          console.log ('err with repeating status', err);
+        }
+      });
     }
 
     // var moment = require('moment');
@@ -80,8 +84,8 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
     //  .catch(err => console.log(err));
   })
   .catch(err => {
-    logger('system', 'error', 'err');
-    console.log ('test', err);
+    logger('system', 'error', err);
+    // console.log ('test', err);
     process.exit();
   });
 
@@ -107,6 +111,7 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
 // };
 
 var exitHandler = function(options, err) {
+  console.log ('Starting Exit');
   if (options.cleanup) { console.log('clean'); }
   if (err) { console.log(err.stack); }
   // let packet = Buffer.from([165, 0, 96, 16, 4, 1, 0, 1, 26, 1, 53]); //adds header, checksum and converts to a buffer
@@ -132,6 +137,7 @@ var exitHandler = function(options, err) {
       console.log('error exiting', err);
     })
     .then(() => {
+      console.log ('Exit Complete');
       process.exit();
     });
 };
