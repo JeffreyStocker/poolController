@@ -6,13 +6,16 @@ const TimeTracker = require(path.resolve(__dirname + '/../TimeTracker.js'));
 const Timer = require(path.resolve(__dirname + '/../Classes/Timer.js'));
 const WeightedAverage = require(path.resolve(__dirname + '/../Classes/WeightedAverage.js'));
 
+var log;
 try {
   const internalWinston = require(path.resolve(__dirname + '/winston.js'));
-  const log = internalWinston.sendToLogs;
+  log = internalWinston.sendToLogs;
 } catch (err) {
-  const log = (function () {
+  log = (function () {
     console.log ('missing logging function, will not log anything in CurrentLogs.js');
-    return function () {};
+    return function () {
+      console.log (...arguments);
+    };
   })();
 }
 
@@ -181,21 +184,12 @@ var CurrentLogs = class CurrentLogs {
       return data;
     } catch (err) {
       if (err.status === 400) {
-        console.log('invalid name:', doc._id);
-      } else {
-        console.log('err Main', err);
-      }
-
-      try {
-        var returnedDoc = await this.db.get(doc);
+        log ('warn', 'event', err);
+      } else if (err.status === 409 ) {
+        // console.log('err conflict:', err);
+        let returnedDoc = await this.db.get(doc._id);
         doc._rev = returnedDoc._rev;
-        await this.db.put(doc);
-      } catch (err) {
-        if (err.status === 400) {
-          console.log('invalide name:', doc._id);
-        } else {
-          console.log('err Main 2nd put', doc.endTime, err);
-        }
+        return await this.db.put(doc);
       }
     }
   }
@@ -211,8 +205,11 @@ var CurrentLogs = class CurrentLogs {
               // console.log('rows', alldocs.rows);
               groupOfPromises.push(new Promise ((resolve, revoke) => {
                 this._updateMainDatabase(docInfo.doc)
-                  .then (resolve)
-                  .catch(revoke);
+                  .then(resolve)
+                  .catch(err => {
+                    log ('error', 'system', err);
+                    revoke(err);
+                  });
               }));
             }
           }
@@ -235,10 +232,6 @@ var CurrentLogs = class CurrentLogs {
     });
   }
 
-  _convertNameToLocal (queueName) {
-    return '_local/' + queueName;
-  }
-
   _getDocFromCurrentDB (queueName) {
     return this.currentDB.get(queueName);
   }
@@ -255,9 +248,9 @@ var CurrentLogs = class CurrentLogs {
         }
         console.log('has watt and rpm');
         doc = this.equipment[queueName].data;
-        console.log('doc:', doc);
+        // console.log('doc:', doc);
         this.equipment[queueName].data = this._createDefault(queueName, rpm, watt);
-        console.log('equipment:', this.equipment[queueName].data);
+        // console.log('equipment:', this.equipment[queueName].data);
       } else {
         docDataPoints = this.equipment[queueName].data.dataPoints;
         this.equipment[queueName].data.dataPoints = [];
@@ -272,17 +265,15 @@ var CurrentLogs = class CurrentLogs {
       returnedDoc = await this._getDocFromCurrentDB(queueName);
       returnedDoc.dataPoints.push(...doc.dataPoints);
       this.equipment[queueName].data._rev = returnedDoc._rev;
-      this.currentDB.put(returnedDoc)
-        .then(data => {
-
-        })
+      this.currentDB.put(this.equipment[queueName].data)
+        .then()
         .catch(err => {
           console.log('err with updating currentDB with empty', err);
         });
-
     } catch (err) {
       returnedDoc = doc;
     }
+
     count = returnedDoc.dataPoints.length;
 
     try {
@@ -298,7 +289,6 @@ var CurrentLogs = class CurrentLogs {
       id: mainUpdateResults.id
     };
   }
-
 
 
   _updateCurrentDBFromCache(queueName) {
@@ -340,7 +330,7 @@ var CurrentLogs = class CurrentLogs {
   }
 
   addData(queueName, watt, rpm) {
-    var doc, count;
+    var count;
 
     if (typeof watt !== 'number' || typeof rpm !== 'number') {
       throw new Error ('Watt and RPM must be numbers');
