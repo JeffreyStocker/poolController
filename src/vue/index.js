@@ -34,10 +34,14 @@ const routes = [
   } },
   // { path: '/index', component: Pump },
   { path: '/Settings', component: UserSettings },
-  { path: '/Graph', component: Chart },
-  { path: '/:pumpName/:menuSelect', component: Pump, props: function (route) {
+  { path: '/Graph', component: Chart, props: function () {
     return {
-      equipmentName: route.params.pumpName,
+      equipmentName: 'Pump1'
+    };
+  } },
+  { path: '/:equipmentName/:menuSelect', component: Pump, props: function (route) {
+    return {
+      equipmentName: route.params.equipmentName,
       menuSelect: route.params.menuSelect
     };
   } },
@@ -46,7 +50,6 @@ const routes = [
 
 var getListOfEquipment = function () {
   socket.emit('listEquipment', function (err, data) {
-    var test = listEquipment;
     if (err) {
     } else {
       try {
