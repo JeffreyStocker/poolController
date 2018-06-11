@@ -68,4 +68,42 @@ describe ('Timer', function ( ) {
     });
   });
 
+  describe ('Method setDuration', function () {
+    it('should change _duration to 20ms', function (done) {
+      var timer = new Timer(100, function () {
+        timer.stop();
+        done();
+      });
+      timer.setDuration(20);
+      timer._duration.should.equal(20);
+    });
+
+    it('should change run for at least 20ms, but not more than 25ms', function (done) {
+      var startTime, endTime;
+      var timer = new Timer(100, function () {
+        endTime = Date.now();
+        (endTime - startTime).should.greaterThan(19);
+        (endTime - startTime).should.lessThan(25);
+        timer.stop();
+        done();
+      });
+      startTime = Date.now();
+      timer.setDuration(20);
+    });
+  });
+
+  describe ('Method setFunction', function () {
+    it ('should change function to new function', function (done) {
+      var timer = new Timer(10, function () {
+        timer.stop();
+        done('wrong function');
+      });
+
+      timer.setFunction(function () {
+        timer.stop();
+        done();
+      });
+    });
+  });
+
 });
