@@ -25,12 +25,15 @@ module.exports = {
     queues.addMessageToQueue(queueName, msg.defaultIntellicomMessage(speed, {timers: interval}, callback));
   },
 
-  pumpControlPanelState (powerState, queueName = 'Pump1', callback = () => {}) {
-    if (typeof arguments[arguments.length - 1] === 'function') {
-      callback = arguments[arguments.length - 1];
+  pumpControlPanelState (powerState, queueName, callback = () => {}) {
+    if (!powerState || typeof powerState !== 'string') {
+      return callback ('pumpControlPanelState requires a powerState and must be a string', null);
+    } else if (!queueName || typeof queueName !== 'string') {
+      return callback ('pumpControlPanelState requires a queueName and must be a string', null);
     }
+
     if (powerState === 'toggle') {
-      queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage('remote'));
+      queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage('remote', callback));
       // addToQueue(msg.defaultPumpControlPanelMessage('remote'));
       queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage('local', callback));
       // addToQueue(msg.defaultPumpControlPanelMessage('local', callback));
@@ -38,15 +41,18 @@ module.exports = {
       queues.addMessageToQueue(queueName, msg.defaultPumpControlPanelMessage(powerState, callback));
       // addToQueue(msg.defaultPumpControlPanelMessage(powerState, callback));
     } else {
-      return callback('Error: In order to change the pump Power state, you need to enter true/false or on/off', null);
+      return callback('Error: In order to change the pump control panel, "remote", "local", or "toggle" should be used', null);
     }
   },
 
 
-  pumpPower (powerState, queueName = 'Pump1', callback = () => {}) {
-    if (typeof arguments[arguments.length - 1] === 'function') {
-      callback = arguments[arguments.length - 1];
+  pumpPower (powerState, queueName, callback = () => {}) {
+    if (!powerState || typeof powerState !== 'string') {
+      return callback ('pumpControlPanelState requires a powerState and must be a string', null);
+    } else if (!queueName || typeof queueName !== 'string') {
+      return callback ('powerState requires a queueName and must be a string', null);
     }
+
     if (powerState === 'toggle') {
       queues.addMessageToQueue(queueName, msg.defaultPumpPowerMessage('off'));
       // addToQueue(msg.defaultPumpPowerMessage('off'));
@@ -56,15 +62,15 @@ module.exports = {
       queues.addMessageToQueue(queueName, msg.defaultPumpPowerMessage(powerState, callback));
       // addToQueue(msg.defaultPumpPowerMessage(powerState, callback));
     } else {
-      return callback('Error: In order to change the pump Power state, you need to enter true/false or on/off', null);
+      return callback('Error: In order to change the pump Power state, you need to enter "on" or "off" or "toggle"', null);
     }
   },
 
-  runRepeatingStatus(state = 'toggle', queueName = 'Pump1', callback = () => {}) {
-    if (typeof arguments[arguments.length - 1] === 'function') {
-      callback = arguments[arguments.length - 1];
-      queueName = typeof queueName === 'function' ? 'Pump1' : queueName;
-      state = typeof state === 'function' ? 'toggle' : state;
+  runRepeatingStatus(state = 'toggle', queueName, interval = 1000, callback = () => {}) {
+    if (!state || typeof state !== 'string') {
+      return callback ('runRepeatingStatus requires a state and must be a string', null);
+    } else if (!queueName || typeof queueName !== 'string') {
+      return callback ('runRepeatingStatus requires a queueName and must be a string', null);
     }
 
     if (state === 'toggle') {
@@ -72,11 +78,13 @@ module.exports = {
     }
 
     if (state === 'on') {
-      queues.addMessageToQueue(queueName, msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}, callback));
+      queues.addMessageToQueue(queueName, msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval}}, callback));
       // addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 1000}}, callback));
     } else if (state === 'off') {
       queues.addMessageToQueue(queueName, msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 0}}, callback));
       // addToQueue(msg.defaultStatusMessage(undefined, {timers: {name: 'status', interval: 0}}, callback));
+    } else {
+      callback ('runRepeatingStatus state variable must be "toggle", "on" or "off"', null);
     }
   },
 
