@@ -112,7 +112,7 @@ socket.on('connect', () => {
 });
 
 
-var getPumpDataBetweenTime = function (date1, date2, pumpName = 'Pump1') {
+var getPumpDataBetweenTime = function (date1, date2, pumpName) {
   return new Promise ((resolve, revoke) => {
     socket.emit('getPumpDataBetweenTime', date1, date2, pumpName, (err, data) => {
       if (err) {
@@ -138,7 +138,7 @@ var updatePumpData = function (powerData) {
   // console.log('Time Difference2', startTime.getTime() - new Date().getTime());
 };
 
-var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName = 'Pump1') {
+var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName) {
   // var startTime = new Date();
   console.log(time1, time2);
   getPumpDataBetweenTime(time1, time2, pumpName)
@@ -147,9 +147,9 @@ var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName = 'Pump1')
 };
 
 
-var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName = 'Pump1') {
+var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName) {
   // var startTime = new Date();
-  getPumpDataBetweenTime(new Date(), moment().startOf(startDateIntervalString).toDate())
+  getPumpDataBetweenTime(new Date(), moment().startOf(startDateIntervalString).toDate(), pumpName)
     .then(updatePumpData)
     .catch(err => console.log(err));
 };
