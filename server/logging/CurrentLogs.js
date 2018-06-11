@@ -240,13 +240,9 @@ var CurrentLogs = class CurrentLogs {
   }
 
   _getDocFromCurrentDB (queueName) {
-    return this.currentDB.get(this._convertNameToLocal(queueName));
+    return this.currentDB.get(queueName);
   }
 
-  _putDocToCurrentDB (queueName, doc) {
-
-    return this.currentDB.put(this._convertNameToLocal(queueName));
-  }
 
   async _updateMainDatabaseFromCacheAndCurrentDB (queueName, rpm, watt) {
     var doc, docDataPoints, returnedDoc, count, mainUpdateResults;
