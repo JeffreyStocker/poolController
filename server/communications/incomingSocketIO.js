@@ -19,23 +19,6 @@ const {
 } = require (process.env.NODE_PATH + '/server/equipment/pentair/pentairPumpCommands.js');
 
 
-var createMessage = function (message, name, logLevel = 'info', messageCallback = ()=>{}) {
-  return new Message (message, name, {logLevel}, messageCallback);
-};
-
-
-var sendMessage = function (queue, queueName, message, options = {}, callback = ()=>{}) {
-  var response = queue.addMessageToQueue (queueName, message, null, (err, data) => {
-    if (err) {
-
-    } else {
-      logger('events', 'info', data.name + 'was sent to:' + queueName);
-      callback(0);
-    }
-  });
-};
-
-
 socketServer.on('connection', function (socket) { // WebSocket Connection
   logger('events', 'verbose', 'socket connected:' + socket.id);
 
@@ -44,7 +27,7 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   // });
 
 
-  socket.on('manualPacket', function (message, callback) {
+  socket.on('manualPacket', function (message, queueName, callback) {
     message = Message.prototype.prepareMessageForSending(message);
 
     logger('events', 'info', 'emitting: ' + message);
@@ -101,46 +84,39 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
   });
 
 
-  socket.on ('pumpPower', function (powerState, queueName = 'pump1', callback) {
+  socket.on ('pumpPower', function (powerState, queueName, callback) {
     if (typeof arguments[arguments.length - 1] === 'function') {
       callback = arguments[arguments.length - 1];
       queueName = typeof queueName === 'function' ? 'pump1' : queueName;
     }
 
+    (!queueName || typeof queueName !== 'string') && callback ('Must supply the equipment name and should be a string', null);
+
     // logger.debug('pumpPower');
-    pumpPower(powerState, callback);
-    // socket.emit('confirm');
-    // callback(0);
+    pumpPower(powerState, queueName, callback);
   });
 
 
-  socket.on ('runPumpAtSpeed', function (rpm, callback) {
+  socket.on ('runPumpAtSpeed', function (rpm, queueName, callback) {
     // logger.debug('runPumpAtSpeed');
     runPumpAtSpeed(rpm, callback);
-    // socket.emit('confirm');
-    // callback(0);
   });
 
 
-  socket.on ('setPumpTimer', function (time, callback) {
+  socket.on ('setPumpTimer', function (time, queueName, callback) {
     // logger.debug('setPumpTimer');
     setPumpTimer(time, callback);
-    // socket.emit('confirm');
-    // callback(0);
   });
 
 
-  socket.on ('manualPumpControl', function (time, callback) {
+  socket.on ('manualPumpControl', function (time, queueName, callback) {
     // logger.debug('manualPumpControl');
     manualPumpControl(time, callback);
-    // socket.emit('confirm');
-    // callback(0);
   });
 
 
-  socket.on ('pumpControlPanelState', function (state, callback) {
-    pumpControlPanelState(state, callback);
-    // callback(0);
+  socket.on ('pumpControlPanelState', function (state, queueName, callback) {
+    pumpControlPanelState(state, queueName, callback);
   });
 
   // socket.on ('pumpControlSetToLocalOverride', function (state, callback) {
@@ -173,11 +149,14 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
 
 
-  socket.on ('toggleStatusUpdate', function (state, queueName, callback) {
-    if (typeof arguments[arguments.length - 1] === 'function') {
-      callback = arguments[arguments.length - 1];
-      queueName = typeof queueName === 'function' ? 'pump1' : queueName;
+  socket.on ('toggleStatusUpdate', function (state, queueName, callback = () => {}) {
+
+    if (!state || typeof state !== 'string') {
+      return callback ('toggleStatusUpdate requires a state and must be a string', null);
+    } else if (!queueName || typeof queueName !== 'string') {
+      return callback ('toggleStatusUpdate requires a queueName and must be a string', null);
     }
+
     runRepeatingStatus(state, callback);
   });
 
