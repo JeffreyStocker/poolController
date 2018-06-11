@@ -21,8 +21,8 @@ const currentLogs = require(__dirname + '/../../server/logging/currentLogs.js');
 const standardDatabaseEntryTests = function (databaseEntry) {
   expect(databaseEntry).to.haveOwnProperty('equipment');
   expect(databaseEntry).to.haveOwnProperty('_id');
-  expect(databaseEntry).to.haveOwnProperty('startDate');
-  expect(databaseEntry).to.haveOwnProperty('endDate');
+  expect(databaseEntry).to.haveOwnProperty('startTime');
+  expect(databaseEntry).to.haveOwnProperty('endTime');
   expect(databaseEntry).to.haveOwnProperty('rpm');
   expect(databaseEntry).to.haveOwnProperty('watts');
   expect(databaseEntry).to.haveOwnProperty('standardDeviation');
@@ -119,7 +119,7 @@ describe ('CurrentLogs', function () {
       var data = currentLogs.equipment['test1'].data;
       var datapoint = data.dataPoints[data.dataPoints.length - 1];
 
-      expect(Object.keys(data)).to.deep.equal(['startTime', '_id', 'dataPoints', 'rpm']);
+      expect(Object.keys(data)).to.deep.equal(['startTime', '_id', 'equipment', 'dataPoints', 'rpm']);
       expect(datapoint.watt).to.equal(500);
       expect(data.rpm).to.equal(300);
       expect(spy.calledOnce).to.be.equal(true);
@@ -221,7 +221,7 @@ describe ('CurrentLogs', function () {
   });
 
   describe ('_processInfo', function ( ) {
-    var testStart, testData;
+    var testData;
     var watts = [100, 200, 300, 100, 200, 300];
     var rpm = 200;
     var startTime = moment().subtract(100, 'minutes');
@@ -240,17 +240,17 @@ describe ('CurrentLogs', function () {
     });
 
     it('should have 3 new property, watts, wattTotal and standardDeviation', function () {
-      expect(testData).to.not.haveOwnProperty('watts');
-      expect(testData).to.not.haveOwnProperty('standardDeviation');
-      expect(testData).to.not.haveOwnProperty('wattsTotal');
+      expect(testData).to.not.haveOwnProperty('watt');
+      expect(testData).to.not.haveOwnProperty('wattStandardDeviation');
+      expect(testData).to.not.haveOwnProperty('powerUsed');
 
       var processedData = currentLogs._processData(testData);
 
-      expect(processedData).to.haveOwnProperty('watts');
-      expect(processedData).to.haveOwnProperty('standardDeviation');
-      expect(processedData).to.haveOwnProperty('wattsTotal');
+      expect(processedData).to.haveOwnProperty('watt');
+      expect(processedData).to.haveOwnProperty('wattStandardDeviation');
+      expect(processedData).to.haveOwnProperty('powerUsed');
 
-      var test = standardDatabaseEntryTests(processedData);
+      // var test = standardDatabaseEntryTests(processedData);
       // expect(processedData.watts).to.haveOwnProperty('watts');
       // expect(processedData.standardDeviation).to.haveOwnProperty('standardDeviation');
       // expect(processedData.wattsTotal).to.haveOwnProperty('wattsTotal');
@@ -265,9 +265,55 @@ describe ('CurrentLogs', function () {
     });
   });
 
-  // describe ('_updateMainDatabase', function () {
-  //   it('should ', function () {
-  //   });
-  // });
+  describe ('changing pump speed', function () {
+    it('should save to main database when changing speeds', function (done) {
+      currentLogs.addData('test1', 100, 100);
+      currentLogs.equipment['test1'].timer.stop();
+      currentLogs.addData('test1', 100, 100);
+      currentLogs.addData('test1', 100, 100);
+      currentLogs.addData('test1', 100, 100);
+      currentLogs.addData('test1', 200, 200);
+      currentLogs.addData('test1', 200, 200);
+      currentLogs.addData('test1', 200, 200);
 
+      setTimeout(() => {
+        currentLogs['db'].info()
+          .then(data => {
+            expect(data.doc_count).to.equal(1);
+          })
+          .then (() => {
+            done();
+          })
+          .catch(err => {
+            done(err);
+          });
+      }, 200);
+    });
+  });
+
+  describe ('save every interval', function () {
+    var spy;
+    before ( (done) => {
+      currentLogs.addData('test1', 100, 100);
+      spy = sinon.spy(currentLogs.equipment['test1'].timer, '_callback');
+      currentLogs.addData('test1', 100, 100);
+      currentLogs.addData('test1', 100, 100);
+      currentLogs.addData('test1', 100, 100);
+
+      currentLogs.equipment['test1'].timer.setDuration(100);
+      setTimeout(function () {
+        currentLogs.equipment['test1'].timer.stop();
+        done();
+      }, 105);
+    });
+    after (() => {
+      spy.restore();
+    });
+
+    it('should run once after set interval', function () {
+      expect(spy.calledOnce).to.be.true;
+    });
+
+
+  });
 });
