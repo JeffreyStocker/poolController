@@ -46,11 +46,12 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
           });
           groupOfQueues.addQueue(queue, queueInfo.name, queueInfo.communications.hardwareAddress);
           // SerialPort.serialPortEvents.on(queueInfo.communications.hardwareAddress, (dataFromSerialPort) => {
+          //   console.log('process serial Port Data'); //... now its working??!?!?!?!
           //   queue.processData(dataFromSerialPort);
           // });
         }
       } catch (err) {
-        logger('system', 'error', 'Could not create a new queue with this name: ' + name);
+        logger('system', 'error', 'Could not create a new queue with this name: ' + name, err);
       }
     }
     logStatus.init('./database/powerOld', 5 );
@@ -60,7 +61,7 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
   .then(() => {
     // console.log (process.env)
     if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'debug' ) {
-      requireGlob('pentairPumpCommands.js').runRepeatingStatus('on', 'Pump1', 1000, (err) => {
+      requireGlob('pentairPumpCommands.js').runRepeatingStatus('on', 'Pump1', configureFile.config.system.queue.statusRequestUpdateInverval, (err) => {
         if (err) {
           console.log ('err with repeating status', err);
         }
@@ -85,7 +86,6 @@ SerialPort.initPromise(configureFile.config.system.communications, logger)
   })
   .catch(err => {
     logger('system', 'error', err);
-    // console.log ('test', err);
     process.exit();
   });
 
