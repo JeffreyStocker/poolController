@@ -7,6 +7,7 @@ var savedPumpData = {
   watts: [],
   rpms: [],
   dates: [],
+  power: []
 };
 var alerts = {
   'Pump1': {
@@ -87,6 +88,7 @@ var storePumpData = function (pumpData) {
 socket.on('connect', () => {
   console.log ('connected');
   serverConnected.status = true;
+
   socket.on('pumpDataReturn', function (data) {
     console.log('New Pump Data');
     storePumpData(data);
@@ -131,10 +133,12 @@ var updatePumpData = function (powerData) {
     savedPumpData.watts[i] = powerData[i].watt;
     savedPumpData.rpms[i] = powerData[i].rpm;
     savedPumpData.dates[i] = new Date(powerData[i]._id);
+    savedPumpData.power[i] = powerData[i].powerUsed === undefined ? 0 : powerData[i].power;
   }
   savedPumpData.watts.splice(length);
   savedPumpData.rpms.splice(length);
   savedPumpData.dates.splice(length);
+  savedPumpData.power.splice(length);
   // console.log('Time Difference2', startTime.getTime() - new Date().getTime());
 };
 
@@ -156,7 +160,8 @@ var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName)
 
 
 export default pumpData;
-export { socket,
+export {
+  socket,
   pumpData,
   setPumpData,
   alerts,
