@@ -34,9 +34,13 @@ module.exports = class PentairQueue extends ActionQueue {
     this.serialPort = options.serialPort || (() => {});
     //note need to get rid of this later
     if (options.serialPort && options.serialPort.constructor.name === 'SerialPort') {
-      options.serialPort.on('data', (dataFromSerialPort) => {
-        this.processData(dataFromSerialPort);
-      });
+      try {
+        options.serialPort.on('data', (dataFromSerialPort) => {
+          this.processData(dataFromSerialPort);
+        });
+      } catch (err) {
+        logger ('system', 'warn', 'Unable to set event for ' + this.name + '\'s serialport');
+      }
     }
     this.source = options.source || 16;
     this.logger = options.logger || logger;
@@ -145,9 +149,6 @@ module.exports = class PentairQueue extends ActionQueue {
     var checkQueueResults = this.checkQueue(processedData);
 
     this.checkForExternalMessasgeToSameSource(processedData);
-    if (!processedData) {
-
-    }
 
     if (Message.prototype.isStatusMessage(processedData)) {
       var pumpData = Message.prototype.parsePumpStatus(processedData);
@@ -169,6 +170,8 @@ module.exports = class PentairQueue extends ActionQueue {
       if (this.currentMessage.name === 'Get Pump Status') {
         this.clearCurrentMessage(null, 'success');
       }
+    } else if (processedData === null) {
+      logger('events', 'info', 'Message Received but not a packet: ' + data);
     } else if (checkQueueResults === true) {
       this.logger('events', this.currentMessage.logLevel, 'Acknowledged: ' + this.currentMessage.name + ': [' + processedData + ']');
       this.clearCurrentMessage(null, 'success');
@@ -176,8 +179,6 @@ module.exports = class PentairQueue extends ActionQueue {
       this.logger('events', 'warn', 'Packet was not an acknowledgment: ' + processedData);
     } else if (checkQueueResults === null) {
       logger('events', 'info', 'Message Received: ' + processedData);
-    } else if (processedData === null) {
-      logger('events', 'info', 'Message Received but not a packet: ' + data);
     } else {
     }
     this.runQueue();
