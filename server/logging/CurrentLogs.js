@@ -20,7 +20,6 @@ try {
 }
 
 
-
 var PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find'));
 
@@ -198,35 +197,41 @@ var CurrentLogs = class CurrentLogs {
     return new Promise ((resolve, revoke) => {
       var name;
       var groupOfPromises = [];
-      this.currentDB.allDocs({include_docs: true})
-        .then(alldocs => {
-          if (alldocs.rows.length > 0) {
-            for (let docInfo of alldocs.rows) {
-              // console.log('rows', alldocs.rows);
-              groupOfPromises.push(new Promise ((resolve, revoke) => {
-                this._updateMainDatabase(docInfo.doc)
-                  .then(resolve)
-                  .catch(err => {
-                    log ('error', 'system', err);
-                    revoke(err);
-                  });
-              }));
-            }
+      this.currentDB.info()
+        .then(info => {
+          if (info.doc_count > 0) {
+            this.currentDB.allDocs({include_docs: true})
+              .then(alldocs => {
+                if (alldocs.rows.length > 0) {
+                  for (let docInfo of alldocs.rows) {
+                    groupOfPromises.push(new Promise ((resolve, revoke) => {
+                      this._updateMainDatabase(docInfo.doc)
+                        .then(resolve)
+                        .catch(err => {
+                          log ('error', 'system', err);
+                          revoke(err);
+                        });
+                    }));
+                  }
+                }
+                return Promise.all(groupOfPromises);
+              })
+              .then(results => {
+                results.forEach(element => {
+                  console.log('current Logs started: Updated to main DB:', element.id);
+                });
+              })
+              .then(() => {
+                name = this.currentDB.name;
+                return this.currentDB.destroy();
+              })
+              .then(() => {
+                this.currentDB = initCurrentDB();
+                resolve();
+              });
+          } else {
+            resolve();
           }
-          return Promise.all(groupOfPromises);
-        })
-        .then(results => {
-          results.forEach(element => {
-            console.log('current Logs started: Updated to main DB:', element.id);
-          });
-        })
-        .then(() => {
-          name = this.currentDB.name;
-          return this.currentDB.destroy();
-        })
-        .then(() => {
-          this.currentDB = initCurrentDB();
-          resolve();
         })
         .catch(revoke);
     });
@@ -488,6 +493,7 @@ var CurrentLogs = class CurrentLogs {
       return element;
     });
 
+    await this.currentDB.destroy();
     console.log('exit results:', results);
     return results;
   }
