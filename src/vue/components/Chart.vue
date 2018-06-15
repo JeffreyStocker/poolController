@@ -1,6 +1,7 @@
 <script>
   import {savedPumpData, updatePumpDataFromStartOfTime, updatePumpDataFromBetweenTimes} from '../socket.js'
   import Moment from 'moment';
+
   export default {
     beforeDestroy: function () {
       window.removeEventListener('resize', this.__resizeListener)
@@ -13,14 +14,14 @@
         {
           x: this.dates,
           y: this.watts,
-          name: this.pumpName + ' Watts',
+          name: this.equipmentName + ' Watts',
           type: 'scatter',
           line: {shape: 'vh'},
         },
         {
           x: this.dates,
           y: this.rpms,
-          name: this.pumpName + ' RPM',
+          name: this.equipmentName + ' RPM',
           yaxis: 'y2',
           type: 'scatter',
           line: {shape: 'vh'},
@@ -37,16 +38,21 @@
         rpms: savedPumpData.rpms,
         dates: savedPumpData.dates,
         watts: savedPumpData.watts,
+        powerArray: savedPumpData.power,
+        totalPower: 0,
+        displayPower: 0,
         timer: null,
         graph: null,
         element: null,
         placeholder: null,
         layout: {
           title: 'Double Y Axis Example',
+          // hoverdistance: -1,
           yaxis: {
             title: 'Watts',
             // domain: [0, 5],
             scaleratio: 0.5,
+            // range: [0, 3200]
             // scaleanchor: "x",
           },
           yaxis2: {
@@ -54,6 +60,7 @@
             titlefont: {color: 'rgb(148, 103, 189)'},
             tickfont: {color: 'rgb(148, 103, 189)'},
             overlaying: 'y',
+            range: [0, 3200],
             side: 'right',
           },
           xaxis: {
@@ -100,10 +107,19 @@
               } else {
                 console.log('????:', eventdata);
               }
+              console.log('eventdata:', eventdata);
             });
+
+          graph.on('plotly_hover', (event) => {
+            console.log('hover:', event);
+          });
+          graph.on('plotly_click', (event) => {
+            console.log('click:', event);
+          });
+
         })
     },
-    props: [],
+    props: ['equipmentName'],
     methods: {
       getFromStartData: function (startString) {
         updatePumpDataFromStartOfTime(startString, this.pumpName);
@@ -117,8 +133,11 @@
     },
     watch: {
       dates: function() {
-        Plotly.update(this.$refs.polar, this.plotCombinedData, this.layout);
+        Plotly.react(this.$refs.polar, this.plotCombinedData, this.layout);
       },
+      // totalPower: function () {
+      //   return this.powerArray.reduce((sum, element) => sum + element);
+      // }
     },
   }
 </script>
@@ -136,6 +155,8 @@
     <button @click="getFromStartData('week')">From Week</button>
     <button @click="getFromStartData('month')">From Month</button>
     <button @click="getFromStartData('year')">From Year</button>
+    <div>Power: {{this.totalPower}}</div>
+    <div>Current View Power: {{this.displayPower}}</div>
     <div ref="polar"></div>
   </div>
 
