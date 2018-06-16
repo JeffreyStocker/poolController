@@ -1,4 +1,4 @@
-var StandardDeviation = require('../server/StandardDeviation.js');
+var StandardDeviation = require('../server/math/StandardDeviation.js');
 
 var assert = require('assert');
 var chai = require('chai');
