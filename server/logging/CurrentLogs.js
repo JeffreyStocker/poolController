@@ -1,10 +1,10 @@
-// const Average = require ('../Average.js');
+// const Average = require ('../math/Average.js');
 // var moment = require('moment');
+// const TimeTracker = require(path.resolve(__dirname + '/../TimeTracker.js'));
 const path = require('path');
-const StandardDeviation = require (path.resolve(__dirname + '/../StandardDeviation.js'));
-const TimeTracker = require(path.resolve(__dirname + '/../TimeTracker.js'));
+const StandardDeviation = require (path.resolve(__dirname + '/../math/StandardDeviation.js'));
 const Timer = require(path.resolve(__dirname + '/../Classes/Timer.js'));
-const WeightedAverage = require(path.resolve(__dirname + '/../Classes/WeightedAverage.js'));
+const WeightedAverage = require(path.resolve(__dirname + '/../math/WeightedAverage.js'));
 
 var log;
 try {
@@ -110,8 +110,6 @@ var CurrentLogs = class CurrentLogs {
 
     var length = data.dataPoints.length;
     if (length === 1) {
-      data.watt = sum / data.dataPoints.length;
-      data.powerUsed = totalPower;
       data.wattStandardDeviation = 0;
     } else {
       for (var i = 0; i < length; i++) {
@@ -125,10 +123,11 @@ var CurrentLogs = class CurrentLogs {
         sum += data.dataPoints[i].watt;
         sd.addDataPoint(data.dataPoints[i].watt);
       }
-      data.watt = sum / data.dataPoints.length;
-      data.powerUsed = totalPower;
       data.wattStandardDeviation = sd.return(sum / data.dataPoints.length);
+      data.datapointsCount = data.dataPoints.length;
     }
+    data.watt = sum / data.dataPoints.length;
+    data.powerUsed = totalPower;
 
     delete data.dataPoints;
     return data;
