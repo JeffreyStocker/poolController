@@ -1,12 +1,14 @@
 <script>
   import {savedPumpData, updatePumpDataFromStartOfTime, updatePumpDataFromBetweenTimes} from '../socket.js'
   import Moment from 'moment';
+  import DisplayPower from './DisplayPower.vue';
+  import Cost from './Cost.vue';
 
   export default {
     beforeDestroy: function () {
       window.removeEventListener('resize', this.__resizeListener)
-      this.__generalListeners.forEach(obj => this.$refs.container.removeAllListeners(obj.fullName))
-      Plotly.purge(this.$refs.container)
+      // this.__generalListeners.forEach(obj => this.$refs.container.removeAllListeners(obj.fullName))
+      // Plotly.purge(this.$refs.container)
     },
     computed: {
       plotCombinedData: function () {
@@ -28,32 +30,30 @@
         }
       ]}
     },
-    components: {},
+    components: { DisplayPower, Cost },
     created: function () {
       updatePumpDataFromStartOfTime('day', 'Pump1');
     },
     data: function () {
       return {
-        pumpName: 'Pump1',
         rpms: savedPumpData.rpms,
         dates: savedPumpData.dates,
         watts: savedPumpData.watts,
         powerArray: savedPumpData.power,
         totalPower: 0,
+        powerUnits: 'watts',
         displayPower: 0,
-        timer: null,
         graph: null,
         element: null,
-        placeholder: null,
         layout: {
           title: 'Double Y Axis Example',
           // hoverdistance: -1,
           yaxis: {
             title: 'Watts',
             // domain: [0, 5],
-            scaleratio: 0.5,
-            // range: [0, 3200]
-            // scaleanchor: "x",
+            // scaleratio: 0.5,
+            // // range: [0, 3200]
+            // // scaleanchor: "x",
           },
           yaxis2: {
             title: 'RPMs',
@@ -97,9 +97,7 @@
 
       this.graph
         .then(graph => {
-          graph.on('plotly_relayout',
-            (eventdata) => {
-              // eventdata.then( () => { console.log('test');})
+          graph.on('plotly_relayout', (eventdata) => {
               if (eventdata.autosize) {
                 console.log('autoresized', eventdata);
               } else if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
@@ -107,7 +105,6 @@
               } else {
                 console.log('????:', eventdata);
               }
-              console.log('eventdata:', eventdata);
             });
 
           graph.on('plotly_hover', (event) => {
@@ -122,22 +119,34 @@
     props: ['equipmentName'],
     methods: {
       getFromStartData: function (startString) {
-        updatePumpDataFromStartOfTime(startString, this.pumpName);
+        updatePumpDataFromStartOfTime(startString, this.equipmentName);
       },
       getFromNow (timeString) {
-        updatePumpDataFromBetweenTimes(new Date(), Moment().subtract(1, timeString).toDate());
+        updatePumpDataFromBetweenTimes(new Date(), Moment().subtract(1, timeString).toDate(), this.equipmentName);
       },
       updateGraph() {
         Plotly.Plots.resize(this.element);
-      }
+      },
+
     },
     watch: {
       dates: function() {
         Plotly.react(this.$refs.polar, this.plotCombinedData, this.layout);
       },
-      // totalPower: function () {
-      //   return this.powerArray.reduce((sum, element) => sum + element);
-      // }
+      powerArray: function () {
+        var power = this.powerArray.reduce((sum, element) => {
+          if (element === undefined) {
+            return sum;
+          }
+          return sum + element
+          }, 0);
+
+        if (power < 10) {
+          this.totalPower = power;
+        } else {
+          this.totalPower = Math.round(power);
+        }
+      }
     },
   }
 </script>
@@ -155,8 +164,10 @@
     <button @click="getFromStartData('week')">From Week</button>
     <button @click="getFromStartData('month')">From Month</button>
     <button @click="getFromStartData('year')">From Year</button>
-    <div>Power: {{this.totalPower}}</div>
-    <div>Current View Power: {{this.displayPower}}</div>
+    <DisplayPower :watts='this.totalPower'/>
+    <Cost :watts='this.totalPower' />
+    <!-- <div>Power: {{this.totalPower}}</div>
+    <div>Current View Power: {{this.displayPower}} {{this.powerUnits}}</div> -->
     <div ref="polar"></div>
   </div>
 
