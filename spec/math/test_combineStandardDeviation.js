@@ -1,6 +1,6 @@
 const chai = require('chai');
 const expect = chai.expect;
-const PoolSD = require (__dirname + '/../../server/math/combineStandardDeviation');
+const PoolSD = require (__dirname + '/../../server/math/combineStandardDeviation.js');
 // const fs = require('fs');
 // const sinon = require ('sinon');
 

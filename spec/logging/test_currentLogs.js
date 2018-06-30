@@ -193,7 +193,7 @@ describe ('CurrentLogs', function () {
           mainDatabaseRecords = rows.map((doc) => {
             return Object.assign({}, doc.doc);
           });
-          console.log('mainDatabaseRecords:', mainDatabaseRecords);
+          // console.log('mainDatabaseRecords:', mainDatabaseRecords);
           done();
         })
         .catch(err => {
@@ -235,7 +235,7 @@ describe ('CurrentLogs', function () {
           date: startTime.add( 0.5, 'seconds').toDate()
         });
       }
-      console.log(testData);
+      // console.log(testData);
       // currentLogs._processData;
     });
 

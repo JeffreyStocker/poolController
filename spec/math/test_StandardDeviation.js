@@ -1,9 +1,8 @@
-var StandardDeviation = require('../server/math/StandardDeviation.js');
-
-var assert = require('assert');
+var StandardDeviation = require(__dirname + '/../../server/math/StandardDeviation.js');
+// var assert = require('assert');
 var chai = require('chai');
 var should = chai.should();
-const MathUtils = require('../server/MathUtils.js');
+const MathUtils = require('../../server/math/MathUtils.js');
 
 describe ('Standard Deviation function', function ( ) {
   it('should create a new object ', function () {
