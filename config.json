@@ -6,7 +6,7 @@
     "queue": {
       "mainLoopInterval": 25,
       "numberOfRetriesForMissingMessages": 3,
-      "statusRequestUpdateInverval": 1500,
+      "statusRequestUpdateInverval": 3000,
       "timeBetweenQueueSending": 100
     },
     "logs": {
