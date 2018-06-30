@@ -34,6 +34,35 @@ var initDB = function () {
   return new PouchDB(dbLocation);
 };
 
+// var updateDeletedDoc = function (database, doc) {
+//   return new Promise ((resolve, revoke) => {
+//     database.put(doc)
+//       .then(resolve())
+//       .catch(err => {
+//         if (err.reason === 'deleted') {
+//           database.get(doc._id, {revs: true})
+//             .then(results => {
+
+//             });
+//         } else if (err) {
+
+//         }
+//       });
+//     resolve();
+//     revoke();
+//   });
+// };
+
+// var _checkForValidDataRange = function (watt, rpm) {
+//   if (watt > 3000 || watt < 0) {
+//     return false;
+//   }
+//   if (rpm > 3500 || rpm < 0) {
+//     return false;
+//   }
+//   return true;
+// };
+
 var CurrentLogs = class CurrentLogs {
   constructor (interval) {
     this.equipment = {};
@@ -124,8 +153,8 @@ var CurrentLogs = class CurrentLogs {
         sd.addDataPoint(data.dataPoints[i].watt);
       }
       data.wattStandardDeviation = sd.return(sum / data.dataPoints.length);
-      data.datapointsCount = data.dataPoints.length;
     }
+    data.datapointsCount = data.dataPoints.length;
     data.watt = sum / data.dataPoints.length;
     data.powerUsed = totalPower;
 
@@ -250,7 +279,6 @@ var CurrentLogs = class CurrentLogs {
         if (typeof rpm !== 'number' && typeof watt !== 'number') {
           throw new Error('rpm and watt must be numbers');
         }
-        console.log('has watt and rpm');
         doc = this.equipment[queueName].data;
         // console.log('doc:', doc);
         this.equipment[queueName].data = this._createDefault(queueName, rpm, watt);
@@ -340,6 +368,10 @@ var CurrentLogs = class CurrentLogs {
       throw new Error ('Watt and RPM must be numbers');
     }
 
+    if (!_checkForValidDataRange(watt, rpm)) {
+      return;
+    }
+
     if (!this._isQueueNameExist(queueName)) {
       this._createEquipmentInfo(queueName, rpm, watt);
 
@@ -368,7 +400,7 @@ var CurrentLogs = class CurrentLogs {
       database.find({
         selector: {
           _id: { $lte: startTime, $gte: endTime },
-          // equipment: { $eq: pumpName }
+          equipment: { $eq: pumpName }
         }
       })
         .then(results => {
@@ -385,7 +417,11 @@ var CurrentLogs = class CurrentLogs {
 
 
 
-  findBetweenTime (earlierTime = new Date(), laterTime = new Date(), pumpName = 'Pump1') {
+  findBetweenTime (earlierTime = new Date(), laterTime = new Date(), pumpName) {
+    if (!pumpName) {
+      return Promise.reject(new Error('findBetweenTime should have a pumpName'));
+    }
+
     return new Promise ((resolve, revoke) => {
       earlierTime = typeof earlierTime === 'string' ? new Date (earlierTime) : earlierTime;
       laterTime = typeof laterTime === 'string' ? new Date (laterTime) : laterTime;
@@ -395,20 +431,6 @@ var CurrentLogs = class CurrentLogs {
       if (earlierTime < laterTime) {
         [earlierTime, laterTime] = [laterTime, earlierTime];
       }
-      // this.currentDB.allDocs({include_docs: true})
-      //   .then(data => {
-      //     console.log('all documents:', data.rows);
-      //   })
-      //   .catch(err => {
-      //     console.log('err:', err);
-      //   });
-
-      // results.docs.reduce((combinedDocs, doc) => {
-      //   combinedDocs.push (doc.dataPoints);
-      //   return combinedDocs;
-      // }, [])
-
-      console.log('pumpName:', pumpName);
 
       Promise.all([
         new Promise ((resolve, revoke) => {
@@ -425,7 +447,7 @@ var CurrentLogs = class CurrentLogs {
               console.log (err);
               resolve ([]);
             });
-        }), new Promise ((resolve, revoke) => {
+        }), new Promise ((resolve) => {
           this._getDocFromCurrentDB(pumpName)
             .then(doc => {
               try {
@@ -434,14 +456,21 @@ var CurrentLogs = class CurrentLogs {
                 doc._id = doc.endTime = new Date();
               }
               resolve (this._processData(doc));
+            })
+            .catch(err => {
+              console.log (err);
+              resolve ();
             });
         })
       ])
         .then(searchResults => {
           console.log('searchResults', searchResults[0].length);
-          console.log('searchResults', );
-
-          searchResults[0].push(searchResults[1]);
+          for (var i = 1; i < searchResults.length; i++) {
+            if (!searchResults[i]) {
+              continue;
+            }
+            searchResults[0].push(searchResults[i]);
+          }
 
           return searchResults[0];
         })
