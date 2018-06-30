@@ -6,25 +6,22 @@
       },
       cost () {
         var cost = (~~(this.kilowatt * 0.33 * 100)) / 100;
-        var costStr = ('' + cost).split('.')
+        var costStr = ('' + cost).split('.');
         if (costStr[1] !== undefined) {
 
           while(costStr[1].length < 2) {
             costStr[1] += '0';
           }
         } else {
-          costStr[1] = '00'
+          costStr[1] = '00';
         }
         return costStr.join('.');
       }
     },
-    components: {},
     data: function () {
       return {}
     },
     props: ['watts'],
-    methods: {},
-    watch: {}
   }
 </script>
 
