@@ -26,6 +26,11 @@
             <span @click="toggleState">Power Graphs</span>
           </router-link>
         </li>
+        <li>
+          <router-link :to="'/' + equipmentName + '/GraphBar'" >
+            <span @click="toggleState">Power Graphs Bar</span>
+          </router-link>
+        </li>
       </ul>
     </div>
     </transition>
