@@ -133,7 +133,7 @@ var updatePumpData = function (powerData) {
     savedPumpData.watts[i] = powerData[i].watt;
     savedPumpData.rpms[i] = powerData[i].rpm;
     savedPumpData.dates[i] = new Date(powerData[i]._id);
-    savedPumpData.power[i] = powerData[i].powerUsed === undefined ? 0 : powerData[i].power;
+    savedPumpData.power[i] = powerData[i].powerUsed === undefined ? 0 : powerData[i].powerUsed;
   }
   savedPumpData.watts.splice(length);
   savedPumpData.rpms.splice(length);
@@ -147,15 +147,16 @@ var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName) {
   console.log(time1, time2);
   getPumpDataBetweenTime(time1, time2, pumpName)
     .then(updatePumpData)
-    .catch(err => console.log(err));
+    .catch(err => console.error(err));
 };
 
 
 var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName) {
   // var startTime = new Date();
+
   getPumpDataBetweenTime(new Date(), moment().startOf(startDateIntervalString).toDate(), pumpName)
     .then(updatePumpData)
-    .catch(err => console.log(err));
+    .catch(err => console.error(err));
 };
 
 
