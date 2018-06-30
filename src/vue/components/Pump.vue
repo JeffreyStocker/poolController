@@ -5,6 +5,7 @@
   import PumpStatus from './PumpStatus.vue';
   import PumpPower from './PumpPower.vue';
   import Chart from './Chart.vue';
+  import ChartBar from './ChartBar.vue';
   import SelectedPumpControl from './SelectedPumpControl.vue';
   import StatusMessage from './statusMessage.vue';
   import { clearTimeout } from 'timers';
@@ -17,6 +18,7 @@
     components: {
       DoubleButton,
       Chart,
+      ChartBar,
       PumpStatus,
       OnlyButtons,
       PumpPower,
@@ -110,7 +112,8 @@
         </SelectedPumpControl>
       </div>
     </div>
-    <Chart v-if="menuSelect==='Graph'"/>
+    <Chart v-if="menuSelect==='Graph'" :equipmentName='this.equipmentName'/>
+    <ChartBar v-if="menuSelect==='GraphBar'" :equipmentName='this.equipmentName'/>
   </div>
 </template>
 
