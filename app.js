@@ -1,5 +1,8 @@
 process.env.NODE_PATH = __dirname;
 
+const configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('./config.json');
+
+//load arguments passed into the commandline as env var
 process.argv.forEach((val, index) => {
   let split = val.split('=');
   if (split.length > 1) {
@@ -10,7 +13,6 @@ process.argv.forEach((val, index) => {
 
 // var Promise = require('bluebird');
 const glob = require(process.env.NODE_PATH + '/requireGlob').init(['node_modules', 'spec', 'testingRandomStuff', 'public', 'logs']);
-const configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('./config.json');
 // const configureFile = require(process.env.NODE_PATH + '/server/configureFile').init('default');
 const logger = require(process.env.NODE_PATH + '/server/logging/winston.js').init(configureFile.config.system.logs);
 configureFile.initLogging(logger);
