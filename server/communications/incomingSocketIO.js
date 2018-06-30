@@ -134,17 +134,22 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
 
   socket.on('getPumpDataBetweenTime', function (time1, time2, pumpName, callback) {
     // pumpLogger.findBetweenTime(time1, time2)
-    statusLogs.findBetweenTime(time1, time2)
-      .then(results => {
-        callback (null, results);
-        // var data = results.map(currentDoc => {
-        //   return { watt: currentDoc.watt, rpm: currentDoc.rpm, date: currentDoc._id };
-        // });
-        // callback (null, data);
-      })
-      .catch (err => {
-        callback({message: err.message}, null);
-      });
+    try {
+      statusLogs.findBetweenTime(time1, time2, pumpName)
+        .then(results => {
+          callback (null, results);
+          // var data = results.map(currentDoc => {
+          //   return { watt: currentDoc.watt, rpm: currentDoc.rpm, date: currentDoc._id };
+          // });
+          // callback (null, data);
+        })
+        .catch (err => {
+          callback({message: err.message}, null);
+        });
+
+    } catch (err) {
+      console.error(err);
+    }
   });
 
 
