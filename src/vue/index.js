@@ -1,5 +1,7 @@
 import Vue from 'vue';
-import VueRouter from 'vue-router';
+// import Vue from 'vue/dist/vue.min.js';
+
+import VueRouter from 'vue-router/dist/vue-router.min.js';
 
 import {socket} from './socket.js';
 

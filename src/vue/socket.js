@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'moment/min/moment.min';
 
 var sendDataToServer, pumpData;
 var socket = io.connect();
@@ -143,8 +143,6 @@ var updatePumpData = function (powerData) {
 };
 
 var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName) {
-  // var startTime = new Date();
-  console.log(time1, time2);
   getPumpDataBetweenTime(time1, time2, pumpName)
     .then(updatePumpData)
     .catch(err => console.error(err));
@@ -152,8 +150,6 @@ var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName) {
 
 
 var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName) {
-  // var startTime = new Date();
-
   getPumpDataBetweenTime(new Date(), moment().startOf(startDateIntervalString).toDate(), pumpName)
     .then(updatePumpData)
     .catch(err => console.error(err));
