@@ -25,15 +25,18 @@
 }
 
 
-.btn, .navBarDropdown li {
+.btn, .navBarDropdown button {
 	background-color: #333;
 	border:none;
 	color: white;
 	margin: 2px 0px;
-	padding: 7px;
-	white-space: pre-wrap;
+	/* white-space: pre-wrap; */
+}
+
+.fullWidth {
 	width: 100%;
 }
+
 .btn:hover {
 	background-color: #5C5C5C;
 	/* text-decoration-color: white; */
