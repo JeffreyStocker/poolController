@@ -15,7 +15,7 @@
 
 <template>
   <button
-    class="btn"
+    class="btn fullWidth"
     v-on:click="button"
   > {{name}}
   </button>

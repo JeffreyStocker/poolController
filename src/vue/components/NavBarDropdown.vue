@@ -14,25 +14,19 @@
 <template>
   <div>
     <transition name="slide-fade" appear>
-    <div class="navBarDropdown">
-      <ul>
-        <li>
-          <router-link :to="'/' + equipmentName + '/controls'" >
-            <span @click="toggleState">Power Controls</span>
-          </router-link>
-        </li>
-        <li>
-          <router-link :to="'/' + equipmentName + '/Graph'" >
-            <span @click="toggleState">Power Graphs</span>
-          </router-link>
-        </li>
-        <li>
-          <router-link :to="'/' + equipmentName + '/GraphBar'" >
-            <span @click="toggleState">Power Graphs Bar</span>
-          </router-link>
-        </li>
-      </ul>
-    </div>
+      <div class="navBarDropdown">
+        <router-link :to="'/' + equipmentName + '/controls'" >
+          <button class="btn fullWidth"  @click="toggleState">Power Controls</button>
+        </router-link>
+
+        <router-link :to="'/' + equipmentName + '/Graph'" >
+          <button class="btn fullWidth"  @click="toggleState">Power Graphs</button>
+        </router-link>
+
+        <router-link :to="'/' + equipmentName + '/GraphBar'" >
+          <button class="btn fullWidth"  @click="toggleState">Power Graphs Bar</button>
+        </router-link>
+      </div>
     </transition>
     <div class="offClickElement" @click="toggleState" />
   </div>
