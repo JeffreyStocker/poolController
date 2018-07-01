@@ -30,6 +30,7 @@
         displayPower: 0,
         graph: null,
         element: null,
+        routerError: false,
         layout: {
           title: 'Double Y Axis Example',
           yaxis: {
@@ -106,7 +107,7 @@
 
 Plotly.newPlot('myDiv', data);
     },
-    props: ['equipmentName'],
+    props: ['equipmentName', 'subSelect'],
     methods: {
       getBy (range) {
 
@@ -144,7 +145,9 @@ Plotly.newPlot('myDiv', data);
     <button @click="getFromNow('week')">Month</button>
     <button @click="getFromNow('month')">Year</button>
     <button @click="getFromNow('year')">Year</button>
-
+    <div v-if='this.routerError'>Wrong Selection</div>
+    <div v-else-if='!this.routerError'>
+    </div>
     <div id="myDiv"> </div>
     <div ref="polar"></div>
   </div>

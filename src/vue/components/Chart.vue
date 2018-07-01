@@ -1,8 +1,16 @@
 <script>
   import {savedPumpData, updatePumpDataFromStartOfTime, updatePumpDataFromBetweenTimes} from '../socket.js'
-  import Moment from 'moment';
+  import Moment from 'moment/min/moment.min';
   import DisplayPower from './DisplayPower.vue';
   import Cost from './Cost.vue';
+
+  var errorCheckParam = function ($route) {
+      var params = typeof $route.params[0] === 'string' ? $route.params[0].toLowerCase() : null;
+      if (params === null || !['day', 'week', 'month', 'year'].some(el => params === el)) {
+        params = 'week';
+      }
+      return params;
+  };
 
   export default {
     beforeDestroy: function () {
@@ -17,22 +25,23 @@
           x: this.dates,
           y: this.watts,
           name: this.equipmentName + ' Watts',
-          type: 'scatter',
+          type: 'line',
           line: {shape: 'vh'},
+          // line: {shape: 'linear'},
         },
         {
           x: this.dates,
           y: this.rpms,
           name: this.equipmentName + ' RPM',
           yaxis: 'y2',
-          type: 'scatter',
+          type: 'line',
           line: {shape: 'vh'},
         }
       ]}
     },
     components: { DisplayPower, Cost },
     created: function () {
-      updatePumpDataFromStartOfTime('day', 'Pump1');
+      this.getFromNow(errorCheckParam(this.$route));
     },
     data: function () {
       return {
@@ -40,6 +49,10 @@
         dates: savedPumpData.dates,
         watts: savedPumpData.watts,
         powerArray: savedPumpData.power,
+        // rpms: [100],
+        // dates: [new Date()],
+        // watts: [50],
+        // powerArray: [],
         totalPower: 0,
         powerUnits: 'watts',
         displayPower: 0,
@@ -93,30 +106,29 @@
         this.updateGraph();
       });
 
-      this.graph = Plotly.react(this.element, this.plotCombinedData, this.layout);
+      this.graph = Plotly.newPlot(this.element, this.plotCombinedData); //, this.layout
 
-      this.graph
-        .then(graph => {
-          graph.on('plotly_relayout', (eventdata) => {
-              if (eventdata.autosize) {
-                console.log('autoresized', eventdata);
-              } else if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
-                console.log('x axis changed:', eventdata);
-              } else {
-                console.log('????:', eventdata);
-              }
-            });
+      this.graph.then(graph => {
+        console.log('runn:');
+        graph.on('plotly_relayout', function (eventdata) {
+          if (eventdata.autosize) {
+            console.log('autoresized', eventdata);
+          } else if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
+            console.log('x axis changed:', eventdata);
+          } else {
+            console.log('????:', eventdata);
+          }
+        });
 
-          graph.on('plotly_hover', (event) => {
-            console.log('hover:', event);
-          });
-          graph.on('plotly_click', (event) => {
-            console.log('click:', event);
-          });
-
-        })
+        graph.on('plotly_hover', (event) => {
+          console.log('hover:', event);
+        });
+        graph.on('plotly_click', (event) => {
+          console.log('click:', event);
+        });
+      })
     },
-    props: ['equipmentName'],
+    props: ['equipmentName', 'subSelect'],
     methods: {
       getFromStartData: function (startString) {
         updatePumpDataFromStartOfTime(startString, this.equipmentName);
@@ -126,8 +138,7 @@
       },
       updateGraph() {
         Plotly.Plots.resize(this.element);
-      },
-
+      }
     },
     watch: {
       dates: function() {
@@ -146,6 +157,11 @@
         } else {
           this.totalPower = Math.round(power);
         }
+      },
+      $route (to, from) {
+        console.log('to:', to);
+        console.log('from', from);
+        this.getFromNow(errorCheckParam(to));
       }
     },
   }
@@ -153,17 +169,21 @@
 
 <template>
   <div>
-    <button @click="getFromNow('hour')">Hour</button>
-    <button @click="getFromNow('day')">Day</button>
-    <button @click="getFromNow('week')">Week</button>
-    <button @click="getFromNow('month')">Month</button>
-    <button @click="getFromNow('year')">Year</button>
+    <button class="btn" @click="getFromNow('hour')">Hour</button>
+    <button class="btn" @click="getFromNow('day')">Day</button>
+    <button class="btn" @click="getFromNow('week')">Week</button>
+    <button class="btn" @click="getFromNow('month')">Month</button>
+    <button class="btn" @click="getFromNow('year')">Year</button>
+    <button class="btn" @click="getFromNow('year')">
+      <router-link to="Graph/Year">User</router-link>
+      Year
+    </button>
     <br>
-    <button @click="getFromStartData('hour')">From Hour</button>
-    <button @click="getFromStartData('day')">From Day</button>
-    <button @click="getFromStartData('week')">From Week</button>
-    <button @click="getFromStartData('month')">From Month</button>
-    <button @click="getFromStartData('year')">From Year</button>
+    <button class="btn" @click="getFromStartData('hour')">From Hour</button>
+    <button class="btn" @click="getFromStartData('day')">From Day</button>
+    <button class="btn" @click="getFromStartData('week')">From Week</button>
+    <button class="btn" @click="getFromStartData('month')">From Month</button>
+    <button class="btn" @click="getFromStartData('year')">From Year</button>
     <DisplayPower :watts='this.totalPower'/>
     <Cost :watts='this.totalPower' />
     <!-- <div>Power: {{this.totalPower}}</div>

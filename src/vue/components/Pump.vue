@@ -52,7 +52,7 @@
         },
       }
     },
-    props: ['equipmentName', 'menuSelect', 'setMaintenanceMode'],
+    props: ['equipmentName', 'menuSelect', 'setMaintenanceMode', 'subSelect'],
     methods: {
       setMessage(message) {
         if (messageTimer) {
@@ -112,8 +112,8 @@
         </SelectedPumpControl>
       </div>
     </div>
-    <Chart v-if="menuSelect==='Graph'" :equipmentName='this.equipmentName'/>
-    <ChartBar v-if="menuSelect==='GraphBar'" :equipmentName='this.equipmentName'/>
+    <Chart v-if="menuSelect==='Graph'" :equipmentName='this.equipmentName' :subSelect='this.subSelect'/>
+    <ChartBar v-if="menuSelect==='GraphBar'" :equipmentName='this.equipmentName' :subSelect='this.subSelect'/>
   </div>
 </template>
 

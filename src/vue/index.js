@@ -41,10 +41,13 @@ const routes = [
       equipmentName: 'Pump1'
     };
   } },
-  { path: '/:equipmentName/:menuSelect', component: Pump, props: function (route) {
+  { path: '/:equipmentName/:menuSelect', component: Pump, props: true},
+  { path: '/:equipmentName/:menuSelect/*', component: Pump, props: function (route) {
+    // console.log('rout:', route.params.subSelect);
     return {
       equipmentName: route.params.equipmentName,
-      menuSelect: route.params.menuSelect
+      menuSelect: route.params.menuSelect,
+      // subSelect: route.params.subSelect || null
     };
   } },
 ];
