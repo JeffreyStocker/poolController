@@ -4,8 +4,11 @@
       kilowatt () {
         return this.watts / 1000;
       },
+      centsPerKwatt () {
+        return this.costOfPower || 40;
+      },
       cost () {
-        var cost = (~~(this.kilowatt * 0.33 * 100)) / 100;
+        var cost = (~~(this.kilowatt * this.centsPerKwatt)) / 100;
         var costStr = ('' + cost).split('.');
         if (costStr[1] !== undefined) {
 
@@ -21,13 +24,13 @@
     data: function () {
       return {}
     },
-    props: ['watts'],
+    props: ['watts', 'costOfPower'],
   }
 </script>
 
 <template>
   <div>
-    This cost you: ${{ this.cost }}
+    This cost you: ${{ this.cost }} at {{this.centsPerKwatt}}¢ per kwatt
   </div>
 </template>
 
