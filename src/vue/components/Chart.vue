@@ -63,9 +63,9 @@
           // hoverdistance: -1,
           yaxis: {
             title: 'Watts',
-            // domain: [0, 5],
+            domain: [0, 5],
             // scaleratio: 0.5,
-            // // range: [0, 3200]
+            range: [0, 3200]
             // // scaleanchor: "x",
           },
           yaxis2: {
@@ -142,7 +142,7 @@
     },
     watch: {
       dates: function() {
-        Plotly.react(this.$refs.polar, this.plotCombinedData, this.layout);
+        Plotly.react(this.element, this.plotCombinedData, this.layout);
       },
       powerArray: function () {
         var power = this.powerArray.reduce((sum, element) => {
