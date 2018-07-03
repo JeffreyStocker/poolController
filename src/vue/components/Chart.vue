@@ -27,6 +27,7 @@
           name: this.equipmentName + ' Watts',
           type: 'line',
           line: {shape: 'vh'},
+          mode: 'lines+markers',
           // line: {shape: 'linear'},
         },
         {
@@ -36,6 +37,7 @@
           yaxis: 'y2',
           type: 'line',
           line: {shape: 'vh'},
+          mode: 'lines+markers',
         }
       ]}
     },
@@ -58,6 +60,8 @@
         displayPower: 0,
         graph: null,
         element: null,
+        allowUpdateGraph: true,
+        allowUpdateGraphTimer: null,
         layout: {
           title: 'Double Y Axis Example',
           // hoverdistance: -1,
@@ -106,7 +110,7 @@
         this.updateGraph();
       });
 
-      this.graph = Plotly.newPlot(this.element, this.plotCombinedData); //, this.layout
+      this.graph = Plotly.react(this.element, this.plotCombinedData, this.layout); //, this.layout
 
       this.graph.then(graph => {
         console.log('runn:');
@@ -121,10 +125,10 @@
         });
 
         graph.on('plotly_hover', (event) => {
-          console.log('hover:', event);
+          // console.log('hover:', event);
         });
         graph.on('plotly_click', (event) => {
-          console.log('click:', event);
+          // console.log('click:', event);
         });
       })
     },
@@ -138,11 +142,27 @@
       },
       updateGraph() {
         Plotly.Plots.resize(this.element);
+      },
+      allowUpdate(newStatus) {
+        if (typeof newStatus !== 'boolean') {
+          throw new Error ('newSttatus must be a boolean');
+        }
+        this.allowUpdateGraph = newStatus;
+        if (newStatus === false) {
+          this.allowUpdateGraphTimer = setTimeout( function () {
+            this.allowUpdateGraph = true;
+
+          }.bind(this), 3000)
+        } else {
+          clearTimeout(this.allowUpdateGraphTimer);
+        }
       }
     },
     watch: {
       dates: function() {
-        Plotly.react(this.element, this.plotCombinedData, this.layout);
+        if (this.allowUpdateGraph) {
+          Plotly.react(this.element, this.plotCombinedData, this.layout);
+        }
       },
       powerArray: function () {
         var power = this.powerArray.reduce((sum, element) => {
@@ -174,10 +194,7 @@
     <button class="btn" @click="getFromNow('week')">Week</button>
     <button class="btn" @click="getFromNow('month')">Month</button>
     <button class="btn" @click="getFromNow('year')">Year</button>
-    <button class="btn" @click="getFromNow('year')">
-      <router-link to="Graph/Year">User</router-link>
-      Year
-    </button>
+    <button class="btn"><router-link to="Graph/Year">Year</router-link></button>
     <br>
     <button class="btn" @click="getFromStartData('hour')">From Hour</button>
     <button class="btn" @click="getFromStartData('day')">From Day</button>
@@ -188,7 +205,9 @@
     <Cost :watts='this.totalPower' />
     <!-- <div>Power: {{this.totalPower}}</div>
     <div>Current View Power: {{this.displayPower}} {{this.powerUnits}}</div> -->
-    <div ref="polar"></div>
+    <div  >
+      <div ref="polar" @mousedown="allowUpdate(false)" />
+    </div>
   </div>
 
 </template>
