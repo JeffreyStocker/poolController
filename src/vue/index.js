@@ -1,5 +1,6 @@
 import Vue from 'vue';
 // import Vue from 'vue/dist/vue.min.js';
+import AsyncComputed from 'vue-async-computed';
 
 import VueRouter from 'vue-router/dist/vue-router.min.js';
 
@@ -11,6 +12,8 @@ import Chart from './components/Chart.vue';
 import Pump from './components/Pump.vue';
 import UserSettings from './components/UserSettings.vue';
 
+
+Vue.use(AsyncComputed);
 Vue.use(VueRouter);
 
 var messageTimer;
