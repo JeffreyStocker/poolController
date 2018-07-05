@@ -158,17 +158,19 @@ var updatePumpData = function (powerData) {
   // console.log('Time Difference2', startTime.getTime() - new Date().getTime());
 };
 
-var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName) {
+var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName, callback = () => {}) {
   getPumpDataBetweenTime(time1, time2, pumpName)
     .then(updatePumpData)
-    .catch(err => console.error(err));
+    .catch(err => console.error(err))
+    .then (() => { callback (); });
 };
 
 
-var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName) {
+var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName, callback = () => {}) {
   getPumpDataBetweenTime(new Date(), moment().startOf(startDateIntervalString).toDate(), pumpName)
     .then(updatePumpData)
-    .catch(err => console.error(err));
+    .catch(err => console.error(err))
+    .then (() => { callback (); });
 };
 
 
