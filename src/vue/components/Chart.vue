@@ -6,32 +6,35 @@
   import {asyncBinarySearch} from '../binarySearch.js'
 
   var errorCheckParam = function ($route) {
-      var params = typeof $route.params[0] === 'string' ? $route.params[0].toLowerCase() : null;
+    console.log('$route:', $route);
+    var params = $route.params[0];
+    if (params === undefined) {
+      params = 'week'
+    } else {
       if (params === null || !['day', 'week', 'month', 'year'].some(el => params === el)) {
-        params = 'week';
+        params = typeof $route.params[0] === 'string' ? $route.params[0].toLowerCase() : null;
+      } else {
+        params = null;
       }
-      return params;
+    }
+    console.log('params:', params);
+    return params;
   };
 
   export default {
     asyncComputed: {
       currentPower: async function () {
         var total = 0;
-        console.log('element:', this.currentPowerDateRangeEarlier, this.currentPowerDateRangeLater);
-
-        if (this.currentPowerDateRangeEarlier === null || this.currentPowerDateRangeLater === null ) { return 0; };
-        console.log('date:', typeof this.currentPowerDateRangeEarlier, typeof this.currentPowerDateRangeLater);
+        if (!this.currentPowerDateRangeEarlier || !this.currentPowerDateRangeLater ) { return 0; };
+        if (this.currentPowerDateRangeEarlier === 'Invalid Date' || !this.currentPowerDateRangeLater === 'Invalid Date') { return 0; };
 
         var earlierDatePosition = await asyncBinarySearch(this.dates, function (val) { return this.currentPowerDateRangeEarlier - val;}.bind(this), {exactMatch: false} );
         var laterDatePosition = await asyncBinarySearch(this.dates, function (val) { return this.currentPowerDateRangeLater - val;}.bind(this), {exactMatch: false} );
 
-        console.log('positions:', earlierDatePosition, ':', laterDatePosition);
-
+        // console.log('positions:', earlierDatePosition, ':', laterDatePosition);
         for (var i = earlierDatePosition; i < laterDatePosition + 1; i ++) {
           total += this.powerArray[i];
         }
-        console.log('total:', total);
-
         return total;
       },
     },
@@ -65,7 +68,14 @@
     },
     components: { DisplayPower, Cost },
     created: function () {
-      this.getFromNow(errorCheckParam(this.$route));
+      // this.getFromNow(errorCheckParam(this.$route));
+      var params = errorCheckParam(this.$route);
+      if (params !== null) {
+        this.getFromNow(params);
+        this.viewError = false;
+      } else {
+        this.viewError = true;
+      }
     },
     data: function () {
       return {
@@ -77,13 +87,9 @@
         // dates: [new Date() - 100, new Date() - 80, new Date() - 60, new Date () - 40, new Date() - 20, new Date()],
         // watts: [100, 100, 100, 100, 100, 100],
 
-        // powerArray: [],
-
         currentPowerDateRangeEarlier: null,
         currentPowerDateRangeLater: null,
         totalPower: 0,
-        powerUnits: 'watts',
-        displayPower: 0,
         graph: null,
         element: null,
         allowUpdateGraph: true,
@@ -108,8 +114,9 @@
             type: 'date',
             title: 'Dates'
           }
-        }
-      }
+        },
+      viewError: false
+      };
     },
     mounted: function () {
       var element = this.$el,
@@ -137,15 +144,14 @@
       this.graph = Plotly.react(this.element, this.plotCombinedData, this.layout); //, this.layout
 
       this.graph.then(graph => {
-        console.log('runn:');
         graph.on('plotly_relayout', function (eventdata) {
           if (eventdata.autosize) {
             console.log('autoresized', eventdata);
           } else if (eventdata['xaxis.autorange'] === true) {
-            console.log('x axis changed:', eventdata);
+            // console.log('x axis changed:', eventdata);
             this.updateDateRange(this.dates[0], this.dates[this.dates.length - 1]);
           } else if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
-            console.log('x axis changed:', eventdata);
+            // console.log('x axis changed:', eventdata);
             this.updateDateRange(eventdata['xaxis.range[0]'], eventdata['xaxis.range[1]']);
           } else {
             console.log('????:', eventdata);
@@ -166,7 +172,13 @@
         updatePumpDataFromStartOfTime(startString, this.equipmentName);
       },
       getFromNow (timeString) {
-        updatePumpDataFromBetweenTimes(new Date(), Moment().subtract(1, timeString).toDate(), this.equipmentName);
+        updatePumpDataFromBetweenTimes(new Date(), Moment().subtract(1, timeString).toDate(), this.equipmentName, function () {
+          try {
+            this.updateDateRange(this.dates[0], this.dates[this.dates.length - 1]);
+          } catch (err) {
+            console.log('err:', err);
+          }
+        }.bind(this));
       },
       updateGraph() {
         Plotly.Plots.resize(this.element);
@@ -186,8 +198,8 @@
         }
       },
       updateDateRange(earlierDate, laterDate) {
-        this.currentPowerDateRangeEarlier = new Date(earlierDate);
-        this.currentPowerDateRangeLater = new Date(laterDate);
+        this.currentPowerDateRangeEarlier = new Date(earlierDate).toString() !== 'Invalid Date' ? earlierDate : null;
+        this.currentPowerDateRangeEarlier = new Date(laterDate).toString() !== 'Invalid Date' ? laterDate : null;
       }
     },
     watch: {
@@ -196,20 +208,18 @@
           Plotly.react(this.element, this.plotCombinedData, this.layout);
         }
       },
-      powerArray: function () {
-        var power = this.powerArray.reduce((sum, element) => {
-          if (element === undefined) {
-            return sum;
-          }
-          return sum + element;
-          }, 0);
-
-        this.totalPower = power;
-      },
       $route (to, from) {
         console.log('to:', to);
         console.log('from', from);
-        this.getFromNow(errorCheckParam(to));
+        var params = errorCheckParam(to);
+        console.log('params:', params);
+
+        if (params !== null) {
+          this.getFromNow(params);
+          this.viewError = false;
+        } else {
+          this.viewError = true;
+        }
       }
     },
   }
@@ -217,24 +227,22 @@
 
 <template>
   <div>
-    <button class="btn" @click="getFromNow('hour')">Hour</button>
-    <button class="btn" @click="getFromNow('day')">Day</button>
-    <button class="btn" @click="getFromNow('week')">Week</button>
-    <button class="btn" @click="getFromNow('month')">Month</button>
-    <button class="btn" @click="getFromNow('year')">Year</button>
-    <button class="btn"><router-link to="Graph/Year">Year</router-link></button>
-    <br>
-    <button class="btn" @click="getFromStartData('hour')">From Hour</button>
-    <button class="btn" @click="getFromStartData('day')">From Day</button>
-    <button class="btn" @click="getFromStartData('week')">From Week</button>
-    <button class="btn" @click="getFromStartData('month')">From Month</button>
-    <button class="btn" @click="getFromStartData('year')">From Year</button>
-    <DisplayPower :watts='this.totalPower'/>
-    <DisplayPower :watts='currentPower'/>
-    <Cost :watts='this.totalPower' />
-    <!-- <div>Power: {{this.totalPower}}</div>
-    <div>Current View Power: {{this.displayPower}} {{this.powerUnits}}</div> -->
-    <div>
+    <div v-show="this.viewError">
+      <button class="btn" @click="getFromNow('hour')">Hour</button>
+      <button class="btn" @click="getFromNow('day')">Day</button>
+      <button class="btn" @click="getFromNow('week')">Week</button>
+      <button class="btn" @click="getFromNow('month')">Month</button>
+      <button class="btn" @click="getFromNow('year')">Year</button>
+      <button class="btn"><router-link to="Year">Year</router-link></button>
+      <br>
+      <button class="btn" @click="getFromStartData('hour')">From Hour</button>
+      <button class="btn" @click="getFromStartData('day')">From Day</button>
+      <button class="btn" @click="getFromStartData('week')">From Week</button>
+      <button class="btn" @click="getFromStartData('month')">From Month</button>
+      <button class="btn" @click="getFromStartData('year')">From Year</button>
+
+      <DisplayPower :watts='currentPower'/>
+      <Cost :watts='this.currentPower' />
       <div ref="polar" @mousedown="allowUpdate(false)" />
     </div>
   </div>
