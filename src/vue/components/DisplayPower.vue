@@ -19,6 +19,7 @@
           count++;
           watts = watts / 1000;
         }
+        watts = Math.round (watts * 100) / 100;
         return [prefix[count] + base, watts];
       }
     },
