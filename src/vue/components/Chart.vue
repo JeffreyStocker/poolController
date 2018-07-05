@@ -3,6 +3,7 @@
   import Moment from 'moment/min/moment.min';
   import DisplayPower from './DisplayPower.vue';
   import Cost from './Cost.vue';
+  import {asyncBinarySearch} from '../binarySearch.js'
 
   var errorCheckParam = function ($route) {
       var params = typeof $route.params[0] === 'string' ? $route.params[0].toLowerCase() : null;
@@ -13,6 +14,27 @@
   };
 
   export default {
+    asyncComputed: {
+      currentPower: async function () {
+        var total = 0;
+        console.log('element:', this.currentPowerDateRangeEarlier, this.currentPowerDateRangeLater);
+
+        if (this.currentPowerDateRangeEarlier === null || this.currentPowerDateRangeLater === null ) { return 0; };
+        console.log('date:', typeof this.currentPowerDateRangeEarlier, typeof this.currentPowerDateRangeLater);
+
+        var earlierDatePosition = await asyncBinarySearch(this.dates, function (val) { return this.currentPowerDateRangeEarlier - val;}.bind(this), {exactMatch: false} );
+        var laterDatePosition = await asyncBinarySearch(this.dates, function (val) { return this.currentPowerDateRangeLater - val;}.bind(this), {exactMatch: false} );
+
+        console.log('positions:', earlierDatePosition, ':', laterDatePosition);
+
+        for (var i = earlierDatePosition; i < laterDatePosition + 1; i ++) {
+          total += this.powerArray[i];
+        }
+        console.log('total:', total);
+
+        return total;
+      },
+    },
     beforeDestroy: function () {
       window.removeEventListener('resize', this.__resizeListener)
       // this.__generalListeners.forEach(obj => this.$refs.container.removeAllListeners(obj.fullName))
@@ -39,7 +61,7 @@
           line: {shape: 'vh'},
           mode: 'lines+markers',
         }
-      ]}
+      ]},
     },
     components: { DisplayPower, Cost },
     created: function () {
@@ -51,10 +73,14 @@
         dates: savedPumpData.dates,
         watts: savedPumpData.watts,
         powerArray: savedPumpData.power,
-        // rpms: [100],
-        // dates: [new Date()],
-        // watts: [50],
+        // rpms: [100, 200, 300, 400 ,500, 600],
+        // dates: [new Date() - 100, new Date() - 80, new Date() - 60, new Date () - 40, new Date() - 20, new Date()],
+        // watts: [100, 100, 100, 100, 100, 100],
+
         // powerArray: [],
+
+        currentPowerDateRangeEarlier: null,
+        currentPowerDateRangeLater: null,
         totalPower: 0,
         powerUnits: 'watts',
         displayPower: 0,
@@ -68,9 +94,7 @@
           yaxis: {
             title: 'Watts',
             domain: [0, 5],
-            // scaleratio: 0.5,
             range: [0, 3200]
-            // // scaleanchor: "x",
           },
           yaxis2: {
             title: 'RPMs',
@@ -117,12 +141,16 @@
         graph.on('plotly_relayout', function (eventdata) {
           if (eventdata.autosize) {
             console.log('autoresized', eventdata);
+          } else if (eventdata['xaxis.autorange'] === true) {
+            console.log('x axis changed:', eventdata);
+            this.updateDateRange(this.dates[0], this.dates[this.dates.length - 1]);
           } else if (eventdata['xaxis.range[0]'] && eventdata['xaxis.range[1]']) {
             console.log('x axis changed:', eventdata);
+            this.updateDateRange(eventdata['xaxis.range[0]'], eventdata['xaxis.range[1]']);
           } else {
             console.log('????:', eventdata);
           }
-        });
+        }.bind(this));
 
         graph.on('plotly_hover', (event) => {
           // console.log('hover:', event);
@@ -156,6 +184,10 @@
         } else {
           clearTimeout(this.allowUpdateGraphTimer);
         }
+      },
+      updateDateRange(earlierDate, laterDate) {
+        this.currentPowerDateRangeEarlier = new Date(earlierDate);
+        this.currentPowerDateRangeLater = new Date(laterDate);
       }
     },
     watch: {
@@ -169,14 +201,10 @@
           if (element === undefined) {
             return sum;
           }
-          return sum + element
+          return sum + element;
           }, 0);
 
-        if (power < 10) {
-          this.totalPower = power;
-        } else {
-          this.totalPower = Math.round(power);
-        }
+        this.totalPower = power;
       },
       $route (to, from) {
         console.log('to:', to);
@@ -202,10 +230,11 @@
     <button class="btn" @click="getFromStartData('month')">From Month</button>
     <button class="btn" @click="getFromStartData('year')">From Year</button>
     <DisplayPower :watts='this.totalPower'/>
+    <DisplayPower :watts='currentPower'/>
     <Cost :watts='this.totalPower' />
     <!-- <div>Power: {{this.totalPower}}</div>
     <div>Current View Power: {{this.displayPower}} {{this.powerUnits}}</div> -->
-    <div  >
+    <div>
       <div ref="polar" @mousedown="allowUpdate(false)" />
     </div>
   </div>
