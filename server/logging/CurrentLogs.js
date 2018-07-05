@@ -53,15 +53,15 @@ var initDB = function () {
 //   });
 // };
 
-// var _checkForValidDataRange = function (watt, rpm) {
-//   if (watt > 3000 || watt < 0) {
-//     return false;
-//   }
-//   if (rpm > 3500 || rpm < 0) {
-//     return false;
-//   }
-//   return true;
-// };
+var _checkForValidDataRange = function (watt, rpm) {
+  if (watt > 3000 || watt < 0) {
+    return false;
+  }
+  if (rpm > 3500 || rpm < 0) {
+    return false;
+  }
+  return true;
+};
 
 var CurrentLogs = class CurrentLogs {
   constructor (interval) {
@@ -143,9 +143,9 @@ var CurrentLogs = class CurrentLogs {
     } else {
       for (var i = 0; i < length; i++) {
         if (i !== length - 1) {
-          var dateLength = Math.abs(new Date(data.dataPoints[i].date) - new Date(data.dataPoints[i + 1].date));
-          var averageWattBetweenTwoTimes = data.dataPoints[i].watt + data.dataPoints[i + 1].watt;
-          var adjustedPower = (averageWattBetweenTwoTimes) / 2 / 60 / 60 / 1000 * dateLength;
+          let dateLength = Math.abs(new Date(data.dataPoints[i].date) - new Date(data.dataPoints[i + 1].date));
+          let averageWattBetweenTwoTimes = (data.dataPoints[i].watt + data.dataPoints[i + 1].watt) / 2;
+          let adjustedPower = averageWattBetweenTwoTimes / 60 / 60 / 1000 * dateLength;
           totalPower += adjustedPower;
           weightedAverage.add(averageWattBetweenTwoTimes, dateLength);
         }
