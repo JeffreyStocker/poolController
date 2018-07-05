@@ -125,14 +125,30 @@ var getPumpDataBetweenTime = function (date1, date2, pumpName) {
   });
 };
 
+var resetArrays = function (savedPumpData) {
+  savedPumpData.watts.length = 0;
+  savedPumpData.rpms.length = 0;
+  savedPumpData.dates.length = 0;
+  savedPumpData.power.length = 0;
+};
 
 var updatePumpData = function (powerData) {
   console.log('DataSize=' + powerData.length);
   var length = powerData.length;
+  resetArrays(savedPumpData);
   for (var i = 0; i < length; i++) {
     savedPumpData.watts[i] = powerData[i].watt;
     savedPumpData.rpms[i] = powerData[i].rpm;
     savedPumpData.dates[i] = new Date(powerData[i]._id);
+
+    // savedPumpData.watts.push(powerData[i].watt);
+    // savedPumpData.rpms.push(powerData[i].rpm);
+    // savedPumpData.dates.push(new Date(powerData[i].endTime));
+
+    // savedPumpData.watts.push(powerData[i].watt);
+    // savedPumpData.rpms.push(powerData[i].rpm);
+    // savedPumpData.dates.push(new Date(powerData[i].startTime));
+
     savedPumpData.power[i] = powerData[i].powerUsed === undefined ? 0 : powerData[i].powerUsed;
   }
   savedPumpData.watts.splice(length);
