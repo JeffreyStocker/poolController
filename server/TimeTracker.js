@@ -1,19 +1,29 @@
-var _defaultArray = function (time, message) {
-  return [time, message];
+var _defaultArray = function (time, message, difference) {
+  var output = [time, message, difference || 0];
+  return output;
 };
 module.exports = class TimeTracker {
-  constructor(message) {
+  constructor(name = 'Start') {
     this.start = Date.now();
-    this.times = [_defaultArray(this.start, message)];
+    this.name = name;
+    this.times = [_defaultArray(this.start, 'Start')];
+  }
+
+  get last() {
+    return this.times[this.times.length - 1];
   }
 
   mark(message) {
-    this.times.push(Date.now(), _defaultArray(message));
+    var time = Date.now();
+    this.times.push(_defaultArray(time, message, time - this.last[0]));
   }
 
   end(message) {
-    this.end = Date.now();
-    this.times.push(this.end, _defaultArray(message));
-    console.log('Total Time Difference:', this.end - this.start);
+    var time = Date.now();
+    this.times.push(_defaultArray(time, message, time - this.last[0]));
+    console.log(this.name + 'Difference :', this.end - this.start);
+  }
+  list() {
+    returnconsole.table(this.times);
   }
 };
