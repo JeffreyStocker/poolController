@@ -444,7 +444,7 @@ var CurrentLogs = class CurrentLogs {
               resolve(results.docs);
             })
             .catch (err => {
-              console.log (err);
+              console.log ('this.db', err);
               resolve ([]);
             });
         }), new Promise ((resolve) => {
@@ -458,13 +458,12 @@ var CurrentLogs = class CurrentLogs {
               resolve (this._processData(doc));
             })
             .catch(err => {
-              console.log (err);
+              console.log ('_getDocFromCurrentDB', err);
               resolve ();
             });
         })
       ])
         .then(searchResults => {
-          console.log('searchResults', searchResults[0].length);
           for (var i = 1; i < searchResults.length; i++) {
             if (!searchResults[i]) {
               continue;
@@ -475,11 +474,12 @@ var CurrentLogs = class CurrentLogs {
           return searchResults[0];
         })
         .then (pumpData => {
-          console.log (pumpData.length);
+          console.log('searchResults', pumpData.length);
           resolve(pumpData);
         })
         .catch (err => {
-          console.log(err);
+          console.log('findBetweenTime');
+          console.table(err);
           revoke(err);
         });
     });
