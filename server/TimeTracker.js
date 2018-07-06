@@ -21,7 +21,7 @@ module.exports = class TimeTracker {
   end(message = 'End') {
     var time = Date.now();
     this.times.push(_defaultArray(time, message, time - this.last[0]));
-    console.log(this.name + 'Difference :', this.end - this.start);
+    console.log(this.name + ' Difference:', time - this.start);
   }
   list() {
     returnconsole.table(this.times);
