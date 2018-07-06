@@ -30,7 +30,7 @@
         var total = 0;
         if (!this.currentPowerDateRangeEarlier || !this.currentPowerDateRangeLater ) { return 0; };
         if (this.currentPowerDateRangeEarlier === 'Invalid Date' || !this.currentPowerDateRangeLater === 'Invalid Date') { return 0; };
-        var earlierDatePosition = await asyncBinarySearch(this.dates, function (val) { console.log (val, this.currentPowerDateRangeEarlier); return this.currentPowerDateRangeEarlier - val;}.bind(this), {exactMatch: false} );
+        var earlierDatePosition = await asyncBinarySearch(this.dates, function (val) { return this.currentPowerDateRangeEarlier - val;}.bind(this), {exactMatch: false} );
         var laterDatePosition = await asyncBinarySearch(this.dates, function (val) { return this.currentPowerDateRangeLater - val;}.bind(this), {exactMatch: false} );
         // console.log('positions:', earlierDatePosition, ':', laterDatePosition);
         for (var i = earlierDatePosition; i < laterDatePosition + 1; i ++) {
