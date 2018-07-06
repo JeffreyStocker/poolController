@@ -33,7 +33,7 @@ var search = function (inputArray, testCallback, options = {exactMatch: true}) {
     } else if (callbackResults < 0) {
       return test(low, middle, middle);
     } else {
-      throw new Error ('invalid callback test');
+      throw new Error ('invalid callback test results: ' + callbackResults);
     }
   };
   return test (0, inputArray.length);
