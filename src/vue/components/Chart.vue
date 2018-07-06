@@ -1,9 +1,11 @@
 <script>
-  import {savedPumpData, updatePumpDataFromStartOfTime, updatePumpDataFromBetweenTimes} from '../socket.js'
+  import {savedPumpData, updatePumpDataFromStartOfTime, updatePumpDataFromBetweenTimes} from '../socket.js';
   import Moment from 'moment/min/moment.min';
   import DisplayPower from './DisplayPower.vue';
   import Cost from './Cost.vue';
-  import {asyncBinarySearch} from '../binarySearch.js'
+  import {asyncBinarySearch} from '../binarySearch.js';
+  // import {debounce} from 'lodash';
+  import timer from '../../../server/TimeTracker.js';
 
   var errorCheckParam = function ($route) {
     console.log('$route:', $route);
@@ -24,17 +26,18 @@
   export default {
     asyncComputed: {
       currentPower: async function () {
+        var time = new timer('start');
         var total = 0;
         if (!this.currentPowerDateRangeEarlier || !this.currentPowerDateRangeLater ) { return 0; };
         if (this.currentPowerDateRangeEarlier === 'Invalid Date' || !this.currentPowerDateRangeLater === 'Invalid Date') { return 0; };
-
-        var earlierDatePosition = await asyncBinarySearch(this.dates, function (val) { return this.currentPowerDateRangeEarlier - val;}.bind(this), {exactMatch: false} );
+        var earlierDatePosition = await asyncBinarySearch(this.dates, function (val) { console.log (val, this.currentPowerDateRangeEarlier); return this.currentPowerDateRangeEarlier - val;}.bind(this), {exactMatch: false} );
         var laterDatePosition = await asyncBinarySearch(this.dates, function (val) { return this.currentPowerDateRangeLater - val;}.bind(this), {exactMatch: false} );
-
         // console.log('positions:', earlierDatePosition, ':', laterDatePosition);
         for (var i = earlierDatePosition; i < laterDatePosition + 1; i ++) {
           total += this.powerArray[i];
         }
+        time.end('end');
+        // console.log('test');
         return total;
       },
     },
@@ -198,8 +201,10 @@
         }
       },
       updateDateRange(earlierDate, laterDate) {
+        earlierDate = new Date(earlierDate);
+        laterDate = new Date (laterDate);
         this.currentPowerDateRangeEarlier = new Date(earlierDate).toString() !== 'Invalid Date' ? earlierDate : null;
-        this.currentPowerDateRangeEarlier = new Date(laterDate).toString() !== 'Invalid Date' ? laterDate : null;
+        this.currentPowerDateRangeLater = new Date(laterDate).toString() !== 'Invalid Date' ? laterDate : null;
       }
     },
     watch: {
@@ -227,7 +232,7 @@
 
 <template>
   <div>
-    <div v-show="this.viewError">
+    <div v-show="!this.viewError">
       <button class="btn" @click="getFromNow('hour')">Hour</button>
       <button class="btn" @click="getFromNow('day')">Day</button>
       <button class="btn" @click="getFromNow('week')">Week</button>
@@ -241,7 +246,7 @@
       <button class="btn" @click="getFromStartData('month')">From Month</button>
       <button class="btn" @click="getFromStartData('year')">From Year</button>
 
-      <DisplayPower :watts='currentPower'/>
+      <DisplayPower :watts='this.currentPower'/>
       <Cost :watts='this.currentPower' />
       <div ref="polar" @mousedown="allowUpdate(false)" />
     </div>
