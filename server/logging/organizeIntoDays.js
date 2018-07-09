@@ -68,6 +68,17 @@ var convertToDateObject = function (possibleDateObj) {
   }
 };
 
+var extractDateData = function (momentObject) {
+  if (momentObject.constructor.name !== 'Moment') {
+    throw new Error ('Must be a Moment Object');
+  }
+  return {
+    year: momentObject.year(),
+    month: momentObject.month(),
+    day: momentObject.day(),
+    hour: momentObject.hour(),
+  };
+};
 
 var processAndSumData = function(database, equipmentName, date1, date2) {
   getBetweenTimes(database, equipmentName, date1, date2)
@@ -76,15 +87,18 @@ var processAndSumData = function(database, equipmentName, date1, date2) {
       if (warning) { console.log ('warning', warning); }
       var data = {};
       docs.forEach((doc, index) => {
-        var closeDate, farDate, difference, current, year, month, day, prevDate, powerAmount;
+        var closeDate, farDate, difference, current, prevDate, powerAmount;
         if (doc.rpm === 0) { return; }
+
         closeDate = new Moment(doc._id);
         // var nextDocDate = docs[index + 1] ? docs[index + 1].startTime : closeDate;
 
         // console.log('---');
         // console.log('rpm:', doc.rpm);
 
-        current = prevDate = farDate = new Moment(doc.startTime);
+        prevDate = farDate = new Moment(doc.startTime);
+
+        current = date1 > farDate ? date1 : farDate; // sets the fardate to the search
         difference = (closeDate - farDate);
 
         // difference = difference || new Moment(nextDocDate) - current;
@@ -95,10 +109,7 @@ var processAndSumData = function(database, equipmentName, date1, date2) {
         var setData = function (current) {
           difference = (current - prevDate);
 
-          year = current.year();
-          month = current.month();
-          day = current.day();
-          hour = current.hour();
+          let {year, month, day, hour} = extractDateData(current);
 
           let dataPosition = `${year}.${month}.${day}.${hour}`;
 
@@ -139,7 +150,7 @@ var deepSum = function (object) {
 
 
 var title = function (equipmentName) {
-  return equipmentName;
+  return 'powerSum-' + equipmentName;
 };
 
 
