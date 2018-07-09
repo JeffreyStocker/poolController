@@ -5,6 +5,7 @@
   import Cost from './Cost.vue';
   import {asyncBinarySearch} from '../binarySearch.js';
   // import {debounce} from 'lodash';
+  // import get from 'lodash/get.js';
   import timer from '../../../server/TimeTracker.js';
 
   var errorCheckParam = function ($route) {
@@ -26,7 +27,7 @@
   export default {
     asyncComputed: {
       currentPower: async function () {
-        var time = new timer('start');
+        var time = new timer('currentPower');
         var total = 0;
         if (!this.currentPowerDateRangeEarlier || !this.currentPowerDateRangeLater ) { return 0; };
         if (this.currentPowerDateRangeEarlier === 'Invalid Date' || !this.currentPowerDateRangeLater === 'Invalid Date') { return 0; };
