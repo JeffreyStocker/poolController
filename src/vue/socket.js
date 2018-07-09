@@ -1,4 +1,5 @@
 import moment from 'moment/min/moment.min';
+import Timer from '../../server/TimeTracker.js';
 
 var sendDataToServer, pumpData;
 var socket = io.connect();
@@ -159,10 +160,18 @@ var updatePumpData = function (powerData) {
 };
 
 var updatePumpDataFromBetweenTimes = function (time1, time2, pumpName, callback = () => {}) {
+  var timer = new Timer('updatePumpDataFromBetweenTimes');
+
   getPumpDataBetweenTime(time1, time2, pumpName)
-    .then(updatePumpData)
+    .then((data) => {
+      timer.mark('xxx');
+      updatePumpData(data);
+    })
     .catch(err => console.error(err))
-    .then (() => { callback (); });
+    .then (() => {
+      timer.end();
+      callback ();
+    });
 };
 
 
