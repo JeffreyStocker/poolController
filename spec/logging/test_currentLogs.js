@@ -15,7 +15,7 @@ fs.existsSync(dbCurrent) || fs.mkdirSync(dbCurrent);
 
 
 
-const currentLogs = require(__dirname + '/../../server/logging/currentLogs.js');
+const currentLogs = require(__dirname + '/../../server/logging/currentLogs.js').init();
 
 
 const standardDatabaseEntryTests = function (databaseEntry) {
