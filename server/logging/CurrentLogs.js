@@ -5,6 +5,7 @@ const path = require('path');
 const StandardDeviation = require (path.resolve(__dirname + '/../math/StandardDeviation.js'));
 const Timer = require(path.resolve(__dirname + '/../Classes/Timer.js'));
 const WeightedAverage = require(path.resolve(__dirname + '/../math/WeightedAverage.js'));
+const {getBetweenTimes} = require(__dirname + '/databaseHelpers.js');
 
 var log;
 try {
@@ -416,10 +417,10 @@ var CurrentLogs = class CurrentLogs {
   }
 
 
-
-  findBetweenTime (earlierTime = new Date(), laterTime = new Date(), pumpName) {
+  //FindBetweenCurrentAndPowerDatabase
+  findBetweenCurrentAndPowerDatabase (earlierTime = new Date(), laterTime = new Date(), pumpName) {
     if (!pumpName) {
-      return Promise.reject(new Error('findBetweenTime should have a pumpName'));
+      return Promise.reject(new Error('FindBetweenCurrentAndPowerDatabase should have a pumpName'));
     }
 
     return new Promise ((resolve, revoke) => {
@@ -433,21 +434,23 @@ var CurrentLogs = class CurrentLogs {
       }
 
       Promise.all([
-        new Promise ((resolve, revoke) => {
-          this.db.find({
-            selector: {
-              _id: { $lte: earlierTime, $gte: laterTime },
-              equipment: { $eq: pumpName }
-            }
-          })
-            .then(results => {
-              resolve(results.docs);
-            })
-            .catch (err => {
-              console.log ('this.db', err);
-              resolve ([]);
-            });
-        }), new Promise ((resolve) => {
+        getPumpDataBetweenTimes(this.db, earlierTime, laterTime, pumpName),
+        // new Promise ((resolve, revoke) => {
+        // this.db.find({
+        //   selector: {
+        //     _id: { $lte: earlierTime, $gte: laterTime },
+        //     equipment: { $eq: pumpName }
+        //   }
+        // })
+        //   .then(results => {
+        //     resolve(results.docs);
+        //   })
+        //   .catch (err => {
+        //     console.log ('this.db', err);
+        //     resolve ([]);
+        //   });
+        // }),
+        new Promise ((resolve) => {
           this._getDocFromCurrentDB(pumpName)
             .then(doc => {
               try {
@@ -478,7 +481,7 @@ var CurrentLogs = class CurrentLogs {
           resolve(pumpData);
         })
         .catch (err => {
-          console.log('findBetweenTime');
+          console.log('FindBetweenCurrentAndPowerDatabase');
           console.table(err);
           revoke(err);
         });
