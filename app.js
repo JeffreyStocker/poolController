@@ -23,7 +23,7 @@ var socketServer = require (process.env.NODE_PATH + '/server/server');
 const PentairQueue = requireGlob('PentairQueue');
 const SerialPort = requireGlob('serialPort');
 var incomingSockets = require (process.env.NODE_PATH + '/server/communications/incomingSocketIO');
-var currentLogs = require (process.env.NODE_PATH + '/server/logging/CurrentLogs.js');
+var currentLogs = require (process.env.NODE_PATH + '/server/logging/CurrentLogs.js').init();
 
 
 SerialPort.initPromise(configureFile.config.system.communications, logger)

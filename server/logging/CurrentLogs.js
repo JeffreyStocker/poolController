@@ -530,4 +530,9 @@ var CurrentLogs = class CurrentLogs {
   }
 };
 
-module.exports = new CurrentLogs();
+module.exports = {
+  CurrentLogs,
+  init() {
+    module.exports = new CurrentLogs();
+  }
+};
