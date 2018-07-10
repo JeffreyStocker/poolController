@@ -534,5 +534,6 @@ module.exports = {
   CurrentLogs,
   init() {
     module.exports = new CurrentLogs();
+    return module.exports;
   }
 };
