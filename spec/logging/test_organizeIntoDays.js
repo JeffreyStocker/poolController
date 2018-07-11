@@ -16,11 +16,11 @@ PouchDB.plugin(require('pouchdb-find'));
 describe ('organizeIntoDays', function () {
   var oldDB = organizeIntoDay.__get__('db');
   before ( function (done) {
-    oldDB.close()
-      .then (function () {
-        organizeIntoDay.__set__('db', PouchDB('./testCurrentDB'));
-        done();
-      });
+    oldDB.close(function (err) {
+      err && console.log (err);
+      organizeIntoDay.__set__('db', PouchDB('./testCurrentDB'));
+      done();
+    });
   });
 
   after (function () {
