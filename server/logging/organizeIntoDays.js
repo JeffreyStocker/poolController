@@ -126,6 +126,7 @@ var title = function (equipmentName) {
 
 
 var updateDatabase = function (database, equipmentName, dataToUpdateWith) {
+  var yearsUpdated;
   database.get(title(equipmentName))
     .catch(err => {
       if (err.status === 404) { //missing record error
@@ -136,11 +137,15 @@ var updateDatabase = function (database, equipmentName, dataToUpdateWith) {
     })
     .then(doc => {
       console.log('doc:', doc);
-      _.merge(doc.data, dataToUpdateWith);
+      yearsUpdated = Object.keys(dataToUpdateWith);
+      _.merge(doc, dataToUpdateWith);
       return doc;
     })
     .then (doc => {
-      return deepSum(doc);
+      for (let key in yearsUpdated) {
+        deepSum(doc[key]);
+      }
+      return doc;
     })
     .then(data => {
       return db.put(doc);
