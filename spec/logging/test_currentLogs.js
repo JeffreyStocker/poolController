@@ -49,9 +49,12 @@ const reset = function (done) {
 };
 
 describe ('CurrentLogs', function () {
-  before (() => {
+  before ((done) => {
     currentLogs.db = new PouchDB(dbDir);
     currentLogs.currentDB = new PouchDB(dbCurrent);
+    setTimeout(() => {
+      done();
+    }, 100);
   });
 
   after ((done) => {
