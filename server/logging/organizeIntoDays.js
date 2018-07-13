@@ -24,29 +24,6 @@ try {
 
 var db = PouchDB(__dirname + '/../../database/power');
 
-var increaseByOneHour = function (input) {
-  return Moment(input).add(1, 'hour');
-};
-
-var decreaseByOneHour = function (input) {
-  return Moment(input).subtract(1, 'hour');
-};
-
-var toNextHour = function (input) {
-  return Moment(input).endOf('hour').add(1, 'millisecond');
-};
-
-var extractDateData = function (momentObject) {
-  if (momentObject.constructor.name !== 'Moment') {
-    throw new Error ('Must be a Moment Object');
-  }
-  return {
-    year: momentObject.year(),
-    month: momentObject.month(),
-    day: momentObject.day(),
-    hour: momentObject.hour(),
-  };
-};
 
 var combineIntoHours = function combineIntoHours(docs) {
   var data = {};
@@ -94,6 +71,7 @@ var combineIntoHours = function combineIntoHours(docs) {
     setData(closeDate);
   });
 };
+
 
 var getAndCombineDataIntoHours = function combineDataIntoHours (database, equipmentName, date1, date2) {
   return new Promise ((resolve) => {

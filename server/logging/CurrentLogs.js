@@ -5,7 +5,8 @@ const path = require('path');
 const StandardDeviation = require (path.resolve(__dirname + '/../math/StandardDeviation.js'));
 const Timer = require(path.resolve(__dirname + '/../Classes/Timer.js'));
 const WeightedAverage = require(path.resolve(__dirname + '/../math/WeightedAverage.js'));
-const {getBetweenTimes} = require(__dirname + '/databaseHelpers.js');
+const {getPumpDataBetweenTimes} = require(__dirname + '/databaseHelpers.js');
+const {returnEarlierDateFirst} = require(__dirname + '/../dateHelpers.js');
 
 var log;
 try {
@@ -429,9 +430,8 @@ var CurrentLogs = class CurrentLogs {
       if (earlierTime.constructor.name !== 'Date' || laterTime.constructor.name !== 'Date') {
         return revoke(new Error('earlierTime and laterTime must be Date Objects'));
       }
-      if (earlierTime < laterTime) {
-        [earlierTime, laterTime] = [laterTime, earlierTime];
-      }
+
+      [earlierTime, laterTime] = returnEarlierDateFirst(earlierTime, laterTime);
 
       Promise.all([
         getPumpDataBetweenTimes(this.db, earlierTime, laterTime, pumpName),
