@@ -2,6 +2,7 @@
 const path = require('path');
 const Moment = require('moment');
 const {getPumpDataBetweenTimes} = require(__dirname + '/databaseHelpers.js');
+const {increaseByOneHour, toNextHour, extractDateData} = require (__dirname + '../dateHelpers');
 // const Timer = require(path.resolve(__dirname + '/../Classes/Timer.js'));
 
 const PouchDB = require('pouchdb');
