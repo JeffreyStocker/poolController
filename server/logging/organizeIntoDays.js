@@ -48,57 +48,59 @@ var extractDateData = function (momentObject) {
   };
 };
 
-var combineDataIntoHours = function(database, equipmentName, date1, date2) {
+var combineIntoHours = function combineIntoHours(docs) {
+  var data = {};
+  docs.forEach((doc, index) => {
+    var closeDate, farDate, difference, current, prevDate, powerAmount;
+    if (doc.rpm === 0) { return; }
+
+    closeDate = new Moment(doc._id);
+    // var nextDocDate = docs[index + 1] ? docs[index + 1].startTime : closeDate;
+
+    // console.log('---');
+    // console.log('rpm:', doc.rpm);
+
+    prevDate = farDate = new Moment(doc.startTime);
+
+    current = date1 > farDate ? date1 : farDate; // sets the fardate to the search
+    difference = (closeDate - farDate);
+
+    // difference = difference || new Moment(nextDocDate) - current;
+    if (difference === 0) { return; }
+    powerAmount = doc.powerUsed / difference;
+    // console.log('difference:', difference);
+
+    var setData = function (current) {
+      difference = (current - prevDate);
+
+      let {year, month, day, hour} = extractDateData(current);
+
+      let dataPosition = `${year}.${month}.${day}.${hour}`;
+
+      let currentPower = _.get(data, dataPosition);
+      let power = difference * powerAmount + (currentPower || 0);
+      if (isNaN(power)) { debugger; }
+      // console.log('power', (currentPower || 0), power);
+      _.setWith(data, dataPosition, power, Object);
+    };
+
+    current = toNextHour(farDate);
+
+    while (current < closeDate) {
+      setData (current);
+      prevDate = current;
+      current = increaseByOneHour(current);
+    }
+    setData(closeDate);
+  });
+};
+
+var getAndCombineDataIntoHours = function combineDataIntoHours (database, equipmentName, date1, date2) {
   return new Promise ((resolve) => {
 
     getPumpDataBetweenTimes(database, equipmentName, date1, date2)
-      .then((results) => {
-        var {docs, warning} = results;
-        if (warning) { console.log ('warning', warning); }
-        var data = {};
-        docs.forEach((doc, index) => {
-          var closeDate, farDate, difference, current, prevDate, powerAmount;
-          if (doc.rpm === 0) { return; }
-
-          closeDate = new Moment(doc._id);
-          // var nextDocDate = docs[index + 1] ? docs[index + 1].startTime : closeDate;
-
-          // console.log('---');
-          // console.log('rpm:', doc.rpm);
-
-          prevDate = farDate = new Moment(doc.startTime);
-
-          current = date1 > farDate ? date1 : farDate; // sets the fardate to the search
-          difference = (closeDate - farDate);
-
-          // difference = difference || new Moment(nextDocDate) - current;
-          if (difference === 0) { return; }
-          powerAmount = doc.powerUsed / difference;
-          // console.log('difference:', difference);
-
-          var setData = function (current) {
-            difference = (current - prevDate);
-
-            let {year, month, day, hour} = extractDateData(current);
-
-            let dataPosition = `${year}.${month}.${day}.${hour}`;
-
-            let currentPower = _.get(data, dataPosition);
-            let power = difference * powerAmount + (currentPower || 0);
-            if (isNaN(power)) { debugger; }
-            // console.log('power', (currentPower || 0), power);
-            _.setWith(data, dataPosition, power, Object);
-          };
-
-          current = toNextHour(farDate);
-
-          while (current < closeDate) {
-            setData (current);
-            prevDate = current;
-            current = increaseByOneHour(current);
-          }
-          setData(closeDate);
-        });
+      .then((docs) => {
+        combineIntoHours(docs);
         resolve (data);
         console.log('2018', data[2018]);
       });
@@ -158,20 +160,15 @@ var updateDatabase = function (database, equipmentName, dataToUpdateWith) {
     });
 };
 
-
-combineDataIntoHours(db, 'Pump1', new Moment(), new Moment().subtract(5, 'years'));
-
-// updateDatabase(db, 'Pump1');
-setTimeout(() => {}, 2000);
-
 module.exports = {
   updateDatabase,
-  combineDataIntoHours,
-
+  combineIntoHours,
+  getAndCombineDataIntoHours,
 };
 
 if (process.env.NODE_ENV !== 'PRODUCTION') {
   Object.assign(module.exports, {
     deepSum,
+    combineIntoHours
   });
 }
