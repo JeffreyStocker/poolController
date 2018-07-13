@@ -182,16 +182,29 @@ var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName,
     .then (() => { callback (); });
 };
 
+var getBarChartData = async function (date1, date2) {
+  return new Promise ((resolve, revoke) => {
+    socket.emit('summaryaPumpData', date1, date2, (err, data) => {
+      if (err) {
+        revoke (err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+};
+
 
 export default pumpData;
 export {
-  socket,
+  alerts,
+  getBarChartData,
+  getPumpDataBetweenTime,
   pumpData,
   setPumpData,
-  alerts,
   serverConnected,
   savedPumpData,
-  getPumpDataBetweenTime,
+  socket,
   updatePumpDataFromBetweenTimes,
   updatePumpDataFromStartOfTime
 };
