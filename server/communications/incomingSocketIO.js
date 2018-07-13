@@ -4,8 +4,9 @@ const logger = require (process.env.NODE_PATH + '/server/logging/winston').sendT
 const socketServer = require (process.env.NODE_PATH + '/server/server').socketServer;
 const { /* pumpData, */ port } = require (process.env.NODE_PATH + '/server/communications/serialPort');
 const Message = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages');
-const pumpLogger = require (process.env.NODE_PATH + '/server/logging/pentairPumpStatusLog.js');
+// const pumpLogger = require (process.env.NODE_PATH + '/server/logging/pentairPumpStatusLog.js');
 const statusLogs = require(path.resolve(__dirname + '/../logging/CurrentLogs.js'));
+const {convertToDateObject, returnEarlierDateFirst} = require ( __dirname + '/../../server/logging/databaseHelpers.js');
 
 const {
   manualPumpControl,
@@ -146,6 +147,15 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
       });
   });
 
+  socket.on ('summaryaPumpData', function (date1, date2, callback = () => {}) {
+    var date1 = convertToDateObject(date1);
+    var date2 = convertToDateObject(date2);
+    if (date1 === null || date2 === null) { callback ('Date1 and Date2 must be Dates'); }
+
+    [date1, date2] = returnEarlierDateFirst(date1, date2);
+
+    callback (null, data);
+  });
 
 
   socket.on ('toggleStatusUpdate', function (state, queueName, callback = () => {}) {
