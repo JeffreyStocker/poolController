@@ -33,7 +33,10 @@ var getPumpDataBetweenTimes = function (database, equipmentName, date1, date2) {
       }
     };
     database.find(searchParameters)
-      .then (({docs}) => { resolve(docs); })
+      .then (({docs, warning}) => {
+        if (warning) { console.log ('warning', warning); }
+        resolve(docs);
+      })
       .catch (err => {
         if (err.status = 404) {
           resolve([]);
