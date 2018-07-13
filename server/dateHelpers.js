@@ -1,3 +1,5 @@
+const Moment = require('moment');
+
 module.exports.convertToDateObject = function convertToDateObject (possibleDateObj) {
   var dateFromString;
   var type = typeof possibleDateObj;
