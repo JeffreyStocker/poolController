@@ -42,10 +42,27 @@ module.exports.toNextHour = function (input) {
 };
 
 
-module.exports.extractDateData = function (momentObject) {
-  if (momentObject.constructor.name !== 'Moment') {
-    throw new Error ('Must be a Moment Object');
+_returnMomentObject = function (momentObject) {
+  var type = typeof momentObject;
+  if (momentObject.constructor.name === 'Moment') {
+  } else if ( momentObject.constructor.name === 'Date') {
+    momentObject = Moment(momentObject);
+  } else if (type === 'string' || type === 'number') {
+    momentObject = Moment(momentObject);
+  } else {
+    momentObject = Moment(momentObject);
   }
+
+  if (!momentObject.isValid()) {
+    throw new Error ('Must be able to be converted to a Moment Object');
+  }
+  return momentObject;
+};
+
+
+module.exports.extractDateData = function (momentObject) {
+  momentObject = _returnMomentObject(momentObject);
+
   return {
     year: momentObject.year(),
     month: momentObject.month(),
