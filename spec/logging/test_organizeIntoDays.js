@@ -14,7 +14,7 @@ PouchDB.plugin(require('pouchdb-find'));
 // myModule.__get__("path"); // = '/dev/null'
 var sampleData = PouchDB(__dirname + '/../SampleDatabase/power');
 
-describe.only ('organizeIntoDays', function () {
+describe ('organizeIntoDays', function () {
   var oldDB, db;
   before ( function (done) {
     oldDB = organizeIntoDay.__get__('db');
