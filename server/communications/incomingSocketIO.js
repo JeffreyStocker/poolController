@@ -6,7 +6,7 @@ const { /* pumpData, */ port } = require (process.env.NODE_PATH + '/server/commu
 const Message = require (process.env.NODE_PATH + '/server/equipment/pentair/PentairMessages');
 // const pumpLogger = require (process.env.NODE_PATH + '/server/logging/pentairPumpStatusLog.js');
 const statusLogs = require(path.resolve(__dirname + '/../logging/CurrentLogs.js'));
-const {convertToDateObject, returnEarlierDateFirst} = require ( __dirname + '/../../server/logging/databaseHelpers.js');
+const getSummaryPumpData = require(path.resolve(__dirname + '/../logging/organizeIntoDays.js')).getSummaryPumpData;
 
 const {
   manualPumpControl,
@@ -147,19 +147,19 @@ socketServer.on('connection', function (socket) { // WebSocket Connection
       });
   });
 
-  socket.on ('summaryaPumpData', function (date1, date2, callback = () => {}) {
-    var date1 = convertToDateObject(date1);
-    var date2 = convertToDateObject(date2);
-    if (date1 === null || date2 === null) { callback ('Date1 and Date2 must be Dates'); }
 
-    [date1, date2] = returnEarlierDateFirst(date1, date2);
-
-    callback (null, data);
+  socket.on ('summaryPumpData', function (equipmentName, date1, date2, level, callback = () => {}) {
+    getSummaryPumpData(equipmentName, date1, date2, level)
+      .then(data => {
+        callback (null, data);
+      })
+      .catch(err => {
+        callback (err, null);
+      });
   });
 
 
   socket.on ('toggleStatusUpdate', function (state, queueName, callback = () => {}) {
-
     if (!state || typeof state !== 'string') {
       return callback ('toggleStatusUpdate requires a state and must be a string', null);
     } else if (!queueName || typeof queueName !== 'string') {
