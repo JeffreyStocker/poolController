@@ -3,37 +3,56 @@ const organizeIntoDay = rewire (__dirname + '/../../server/logging/organizeIntoD
 const currentLogs = rewire(__dirname + '/../../server/logging/CurrentLogs.js');
 const chai = require('chai');
 const expect = chai.expect;
+const fs = require('fs');
+const path = require('path');
+
 const PouchDB = require('pouchdb');
 PouchDB.plugin(require('pouchdb-find'));
 
-// const fs = require('fs');
-// const sinon = require ('sinon');
-// const moment = require('moment');
+var sampleDataLocation = __dirname + '/../SampleDatabase/power';
 
-// myModule.__set__("path", "/dev/null");
-// myModule.__get__("path"); // = '/dev/null'
-var sampleData = PouchDB(__dirname + '/../SampleDatabase/power');
+var copyAllFilesInDir = function (src, target, callback) {
+  var promiseArray = [];
+  fs.readdir(src, (err, files) => {
+    if (err) { return console.log (err); }
+    files.forEach(file => {
+      promiseArray.push(new Promise(resolve => {
+        fs.readFile(path.join(src, file), (err, data) => {
+          if (err) {
+            console.log ('readFile', file, err);
+          } else {
+            fs.writeFile(path.join(target, file), data, (err) => {
+              if (err) { console.log ('write', file, err); }
+              resolve();
+            });
+          }
+        });
+      }));
+    });
+  });
+  return Promise.all(promiseArray);
+};
 
-describe ('organizeIntoDays', function () {
+describe.only ('organizeIntoDays', function () {
   var oldDB, db;
   before ( function (done) {
     oldDB = organizeIntoDay.__get__('db');
-    db = PouchDB(__dirname + '/testCurrentDB');
-
-    PouchDB.replicate(sampleData, db)
-      .then(results => {
-        // db.info().then(console.log);
-        // console.log('results:', results);
+    copyAllFilesInDir(sampleDataLocation, __dirname + '/testCurrentDB')
+      .then((results) => {
+        db = PouchDB(__dirname + '/testCurrentDB');
         organizeIntoDay.__set__('db', db);
-        // oldDB.close(function (err) {
-        //   err && console.log ('close', err);
-        // });
         done();
       });
+
+    // PouchDB.replicate(sampleDataLocation, db)
+    //   .then(() => {
+    //     done();
+    //   })
+    //   .catch(err => done('err', err));
   });
 
   after (function () {
-    currentLogs.__with__('db', oldDB);
+    currentLogs.__set__('db', oldDB);
     db.destroy();
   });
 

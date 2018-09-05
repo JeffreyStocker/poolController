@@ -1,8 +1,8 @@
 'use strict';
 const path = require('path');
 const Moment = require('moment');
-const {getPumpDataBetweenTimes} = require(__dirname + '/databaseHelpers.js');
-const {increaseByOneHour, toNextHour, extractDateData} = require (__dirname + '../dateHelpers');
+const {getPumpDataBetweenTimes } = require(__dirname + '/databaseHelpers.js');
+const {increaseByOneHour, toNextHour, extractDateData, convertToDateObject} = require (__dirname + '/../dateHelpers');
 // const Timer = require(path.resolve(__dirname + '/../Classes/Timer.js'));
 
 const PouchDB = require('pouchdb');
@@ -10,7 +10,9 @@ PouchDB.plugin(require('pouchdb-find'));
 
 const _ = require ('lodash');
 
-var log;
+var log, db;
+// var db = PouchDB(__dirname + '/../../database/power');
+
 try {
   const internalWinston = require(path.resolve(__dirname + '/winston.js'));
   log = internalWinston.sendToLogs;
@@ -23,12 +25,11 @@ try {
   })();
 }
 
-var db = PouchDB(__dirname + '/../../database/power');
 
 
-var combineIntoHours = function combineIntoHours(docs) {
+var combineIntoHours = function combineIntoHours(docs, startDate) {
   var data = {};
-  docs.forEach((doc, index) => {
+  docs.forEach((doc) => {
     var closeDate, farDate, difference, current, prevDate, powerAmount;
     if (doc.rpm === 0) { return; }
 
@@ -40,7 +41,7 @@ var combineIntoHours = function combineIntoHours(docs) {
 
     prevDate = farDate = new Moment(doc.startTime);
 
-    current = date1 > farDate ? date1 : farDate; // sets the fardate to the search
+    current = startDate > farDate ? startDate : farDate; // sets the fardate to the search
     difference = (closeDate - farDate);
 
     // difference = difference || new Moment(nextDocDate) - current;
@@ -71,17 +72,17 @@ var combineIntoHours = function combineIntoHours(docs) {
     }
     setData(closeDate);
   });
+  return data;
 };
 
 
 var getAndCombineDataIntoHours = function combineDataIntoHours (database, equipmentName, date1, date2) {
   return new Promise ((resolve) => {
-
     getPumpDataBetweenTimes(database, equipmentName, date1, date2)
       .then((docs) => {
-        combineIntoHours(docs);
+        // console.log (docs);
+        var data = combineIntoHours(docs, date1);
         resolve (data);
-        console.log('2018', data[2018]);
       });
   });
 };
@@ -100,6 +101,36 @@ var deepSum = function (object) {
   return object.sum;
 };
 
+var deepSumArray = function (object) {
+
+  var recursive = function (object, currentDate) {
+    var type = typeof object;
+    if (type !== 'object') {
+      return type === 'number' ? object : 0;
+    }
+
+    Object.keys(object).forEach(element => {
+      if (element < 35) {
+        if (!object.sumArray) {
+          object.sumArray = [];
+        }
+        object.sumArray[element] = deepSumArray(object[element]);
+      }
+      deepSumArray(object[element]);
+    });
+
+    if (object.sumArray) {
+      object.sumArray.forEach ((element, index) => {
+        if (element === undefined) {
+          object.sumArray[index] = 0;
+        }
+      });
+    }
+    return object;
+  };
+  return recursive(object);
+};
+
 
 var title = function (equipmentName) {
   return 'powerSum-' + equipmentName;
@@ -107,7 +138,7 @@ var title = function (equipmentName) {
 
 
 var updateDatabase = function (database, equipmentName, dataToUpdateWith) {
-  var yearsUpdated;
+  var yearsUpdated, deepSumResults;
   database.get(title(equipmentName))
     .catch(err => {
       if (err.status === 404) { //missing record error
@@ -117,14 +148,14 @@ var updateDatabase = function (database, equipmentName, dataToUpdateWith) {
       }
     })
     .then(doc => {
-      console.log('doc:', doc);
+      // console.log('doc:', doc);
       yearsUpdated = Object.keys(dataToUpdateWith);
       _.merge(doc, dataToUpdateWith);
       return doc;
     })
     .then (doc => {
       for (let key in yearsUpdated) {
-        deepSum(doc[key]);
+        deepSumResults = deepSumArray(doc[key]);
       }
       return doc;
     })
@@ -139,15 +170,57 @@ var updateDatabase = function (database, equipmentName, dataToUpdateWith) {
     });
 };
 
+var dateLevel = {'year': 1, 'month': 2, 'day': 3, 'hour': 4};
+
+var getDateDiff = function getDateDiff (date1, date2, type) {
+  [date1, date2] = returnEarlierDateFirst(date1, date2);
+  if (!dateLevel[type]) { return null; }
+  return date1[type] - date2[type];
+};
+
+var getSummaryPumpData = function getSummaryPumpData(equipmentName, date1, date2, level) {
+  return new Promise((resolve, revoke) => {
+    var date1 = convertToDateObject(date1);
+    var date2 = convertToDateObject(date2);
+    if (!dateLevel[level]) { return revoke('Level should be on of ' + Object.keys(dateLevel)); }
+    if (date1 === null || date2 === null) { return revoke ('Date1 and Date2 must be Dates'); }
+
+    [date1, date2] = returnEarlierDateFirst(date1, date2);
+
+    db.get(title(equipmentName))
+      .catch(err => {
+        if (err.status === 404) {
+          return {};
+        } else {
+          return revoke ('Database Error: ' + err);
+        }
+      })
+      .then(doc => {
+        var yearDiff = getDateDiff(date1, date2, 'year');
+        var monthDiff = getDateDiff(date1, date2, 'month');
+        var dayDiff = getDateDiff(date1, date2, 'day');
+        var hourDiff = getDateDiff(date1, date2, 'hour');
+        for (let i = date1.year(); i <= date2.year(); date1++) {
+
+        }
+
+
+      });
+
+  });
+};
+
 module.exports = {
-  updateDatabase,
   combineIntoHours,
   getAndCombineDataIntoHours,
+  getSummaryPumpData,
+  updateDatabase,
 };
 
 if (process.env.NODE_ENV !== 'PRODUCTION') {
   Object.assign(module.exports, {
+    combineIntoHours,
     deepSum,
-    combineIntoHours
+    deepSumArray
   });
 }

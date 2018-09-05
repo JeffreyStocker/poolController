@@ -8,7 +8,7 @@ const MockBinding = SerialPort.Binding;
 describe ('SerialPort', function () {
   const portPath = 'COM_ANYTHING';
   before (function () {
-    MockBinding.createPort(portPath, { echo: false, record: false });
+    // MockBinding.createPort(portPath, { echo: false, record: false });
     const port = new SerialPort(portPath);
   });
   describe ('', function () {

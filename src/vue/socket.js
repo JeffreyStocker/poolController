@@ -182,7 +182,7 @@ var updatePumpDataFromStartOfTime = function (startDateIntervalString, pumpName,
     .then (() => { callback (); });
 };
 
-var getBarChartData = async function (date1, date2) {
+var getBarChartData = async function (equipmentName, date1, date2) {
   return new Promise ((resolve, revoke) => {
     socket.emit('summaryaPumpData', date1, date2, (err, data) => {
       if (err) {

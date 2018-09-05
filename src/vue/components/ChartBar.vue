@@ -1,6 +1,7 @@
 <script>
   import {savedPumpData, getPumpDataBetweenTime} from '../socket.js'
   import Moment from 'moment/min/moment.min';
+  import socket from ''
 
   export default {
     beforeDestroy: function () {
